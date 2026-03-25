@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Cataloghi — ZAC{% endblock %}
+
+{% block content %}
+<div class="d-flex" style="height:calc(100vh - 140px)">
+
+  <aside class="zac-sidebar">
+    {% include "partials/_sidebar_catalogo.html" %}
+  </aside>
+
+  <main class="zac-content">
+
+    {% set has_filters = f_year_from or f_year_to or f_titolo or f_autori or f_coautori or f_lingua or f_illustrazioni %}
+    {% if has_filters %}
+    <div class="active-filters mb-2">
+      {% if f_year_from != year_min or f_year_to != year_max %}
+        <span class="filter-pill">Anno: {{ f_year_from or year_min }} — {{ f_year_to or year_max }}</span>
+      {% endif %}
+      {% if f_titolo %}<span class="filter-pill">Titolo: {{ f_titolo }}</span>{% endif %}
+      {% if f_illustrazioni == 'true'  %}<span class="filter-pill">Con illustrazioni</span>{% endif %}
+      {% if f_illustrazioni == 'false' %}<span class="filter-pill">Senza illustrazioni</span>{% endif %}
+      {% for v in f_autori   %}<span class="filter-pill">Autore: {{ v }}</span>{% endfor %}
+      {% for v in f_coautori %}<span class="filter-pill">Coautore: {{ v }}</span>{% endfor %}
+      {% for v in f_lingua   %}<span class="filter-pill">Lingua: {{ v }}</span>{% endfor %}
+      <a href="/cataloghi" class="filter-pill" style="color:var(--zac-red);border-color:var(--zac-red)">x Reset</a>
+    </div>
+    {% endif %}
+
+    <div class="action-bar">
+      <span class="result-count">
+        <i class="bi bi-journal-text me-1"></i>
+        <strong>{{ total }}</strong> cataloghi
+      </span>
+    </div>
+
+    {% if items %}
+      {% for item in items %}
+      <a href="/cataloghi/{{ item.doc_id }}" class="result-card d-block text-decoration-none">
+        <div class="card-title">{{ item.title }}</div>
+        <div class="card-meta">
+          {% if item.year %}<span class="meta-item"><i class="bi bi-calendar3"></i>{{ item.year }}</span>{% endif %}
+          {% if item.house %}<span class="meta-item"><i class="bi bi-building"></i>{{ item.house }}</span>{% endif %}
+          {% if item.language %}<span class="meta-item"><i class="bi bi-translate"></i>{{ item.language }}</span>{% endif %}
+          {% if item.doc_id %}<span class="meta-item"><i class="bi bi-file-text"></i>{{ item.doc_id }}</span>{% endif %}
+        </div>
+      </a>
+      {% endfor %}
+
+      {% set qs = request.url.query | replace("&page=" ~ page, "") | replace("page=" ~ page, "") %}
+      {% include "partials/_pagination.html" %}
+
+    {% else %}
+      <div class="empty-state">
+        <i class="bi bi-journal-text"></i>
+        <p>Nessun catalogo trovato.</p>
+        <a href="/cataloghi" class="btn-reset">Rimuovi i filtri</a>
+      </div>
+    {% endif %}
+
+  </main>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/facet_slider.js"></script>
+{% endblock %}

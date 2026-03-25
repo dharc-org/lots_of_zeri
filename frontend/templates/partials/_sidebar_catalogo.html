@@ -1,0 +1,104 @@
+{#
+  _sidebar.html — Generic sidebar for all tabs.
+  Variables from the router:
+    - tab_route:       "/eventi" | "/cataloghi"
+    - facet_defs:      list of dicts: {id, label_it, type, ui_widget, options, range}
+    - active_filters:  dict {facet_id → active value}
+#}
+
+<form method="GET" action="{{ tab_route }}" class="h-100" id="facet-form">
+  
+  {% for facet in facet_defs %}
+
+    {# ── RANGE SLIDER ─────────────────────────────────────── #}
+    {% if facet.ui_widget == "range_slider" %}
+    <div class="facet-section">
+      <div class="facet-label">{{ facet.label_it }}</div>
+      {% set key_from = facet.id ~ '_from' %}
+      {% set key_to   = facet.id ~ '_to' %}
+      {% set yf = active_filters[key_from] if key_from in active_filters else facet.range.min %}
+      {% set yt = active_filters[key_to]   if key_to   in active_filters else facet.range.max %}
+      <input type="hidden" name="{{ key_from }}" id="inp_{{ key_from }}" value="{{ yf }}">
+      <input type="hidden" name="{{ key_to }}"   id="inp_{{ key_to }}"   value="{{ yt }}">
+      <div id="slider_{{ facet.id }}" class="mt-2 mb-1"
+           data-min="{{ facet.range.min }}"
+           data-max="{{ facet.range.max }}"
+           data-from="{{ yf }}"
+           data-to="{{ yt }}">
+      </div>
+      <div class="range-display">
+        <span id="disp_{{ key_from }}">{{ yf }}</span>
+         —
+        <span id="disp_{{ key_to }}">{{ yt }}</span>
+      </div>
+    </div>
+
+    {# ── TEXT INPUT ───────────────────────────────────────── #}
+    {% elif facet.ui_widget == "text_input" %}
+    <div class="facet-section">
+      <div class="facet-label">{{ facet.label_it }}</div>
+      {% set val = active_filters[facet.id] if facet.id in active_filters else '' %}
+      <input type="text" name="{{ facet.id }}" class="facet-text-input"
+             placeholder="Cerca…" value="{{ val }}">
+    </div>
+
+    {# ── TOGGLE / RADIO (boolean) ─────────────────────────── #}
+    {% elif facet.ui_widget == "toggle" %}
+    <div class="facet-section">
+      <div class="facet-label">{{ facet.label_it }}</div>
+      {% set cur = active_filters[facet.id] if facet.id in active_filters else '' %}
+      <div class="d-flex flex-column gap-1">
+        <label class="facet-check-item">
+          <input type="radio" name="{{ facet.id }}" value=""
+                 {% if not cur %}checked{% endif %}>
+          <span>Tutti</span>
+        </label>
+        {% for opt in facet.options %}
+        <label class="facet-check-item">
+          <input type="radio" name="{{ facet.id }}" value="{{ opt.value }}"
+                 {% if cur == opt.value %}checked{% endif %}>
+          <span>{{ opt.label }}</span>
+        </label>
+        {% endfor %}
+      </div>
+    </div>
+
+    {# ── CHECKBOX LIST (multiselect) ──────────────────────── #}
+    {% elif facet.ui_widget == "checkbox_list" %}
+    {% if facet.options %}
+    <div class="facet-section">
+      <div class="facet-label">
+        {{ facet.label_it }}
+        {% if facet.options | length > 8 %}
+        <span class="facet-count-badge">{{ facet.options | length }}</span>
+        {% endif %}
+      </div>
+      <div class="facet-values-list {% if facet.options | length > 8 %}facet-scrollable{% endif %}">
+        {% set active_vals = active_filters[facet.id] if facet.id in active_filters else [] %}
+        {% for item in facet.options %}
+          {% set is_checked = item.value in active_vals %}
+          <label class="facet-check-item {% if is_checked %}facet-checked{% endif %}">
+            <input type="checkbox" name="{{ facet.id }}" value="{{ item.value }}"
+                   {% if is_checked %}checked{% endif %}>
+            <span class="facet-value-label">{{ item.value }}</span>
+            <span class="facet-count {% if item.count == 0 %}facet-count-zero{% endif %}">
+              {{ item.count }}
+            </span>
+          </label>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% endif %}
+  {% endfor %}
+
+  {# ── Buttons ─────────────────────────────────────────────── #}
+  <div class="mt-auto pt-3 d-flex gap-2">
+    <button type="submit" class="btn-search flex-grow-1">
+      <i class="bi bi-search me-1"></i>Cerca
+    </button>
+    <a href="{{ tab_route }}" class="btn-reset">Reset</a>
+  </div>
+
+</form>

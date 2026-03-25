@@ -1,0 +1,34 @@
+# ZAC Platform — QLever Configuration
+# Qleverfile for the qlever-control tool (https://github.com/ad-freiburg/qlever-control)
+#
+# Usage with qlever-control:
+#   qlever index    # build index from data files
+#   qlever start    # start server
+#   qlever stop     # stop server
+#   qlever status   # check status
+
+[data]
+NAME                     = zac
+DESCRIPTION              = Zeri Auction Catalogues
+FORMAT                   = trig
+CAT_INPUT_FILES          = cat /data/zac_catalogues_16_10_2025.ttl
+BASE_URI                 = http://w3id.org/zac/
+
+[index]
+INDEX_DESCRIPTION        = ZAC auction catalogues 1860-1940
+INDEX_PREFIX             = /index/zac
+STXXL_MEMORY             = 2G
+SETTINGS_JSON            = { "languages-internal": [], "ascii-prefixes-only": false, "num-triples-per-batch": 500000 }
+
+[server]
+PORT                     = 7001
+ACCESS_TOKEN             = zac_dev
+MEMORY_FOR_QUERIES       = 2G
+CACHE_MAX_SIZE           = 1G
+NUM_SIMULTANEOUS_QUERIES = 4
+TIMEOUT                  = 30s
+
+[runtime]
+SYSTEM                   = docker
+IMAGE                    = adfreiburg/qlever:latest
+CONTAINER_NAME           = zac-qlever

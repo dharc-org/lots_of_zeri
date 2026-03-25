@@ -1,0 +1,90 @@
+version: "3.9"
+
+services:
+
+  # ─── 1. Costruzione indice (eseguito una sola volta) ─────
+  qlever-indexer:
+      image: adfreiburg/qlever:latest
+      container_name: zac-qlever-indexer
+      user: root
+      entrypoint: ["bash", "-c"]
+      command:
+        - |
+          if [ -f /index/zac.index.pos-1 ]; then
+            echo 'Indice già presente, skip.';
+          else
+            echo 'Costruzione indice...' &&
+            qlever-index \
+              -f /data/zac_catalogues_metadata_5_3_2026.ttl \
+              -F ttl \
+              -i /index/zac \
+            echo 'Indice costruito.';
+          fi
+      volumes:
+        - ./data:/data:ro
+        - qlever-index:/index
+      networks:
+        - zac-net
+
+  # ─── 2. QLever Server ────────────────────────────────────
+  qlever:
+    image: adfreiburg/qlever:latest
+    container_name: zac-qlever
+    restart: unless-stopped
+    user: root
+    entrypoint: ["bash", "-c"]
+    command:
+      - |
+        qlever-server \
+          -i /index/zac \
+          -p 7001 \
+          -m "2 GB" \
+          -c "1 GB" \
+          -e "256 MB" \
+          -j 4
+    volumes:
+      - qlever-index:/index:ro
+    ports:
+      - "7001:7001"
+    depends_on:
+      qlever-indexer:
+        condition: service_completed_successfully
+    networks:
+      - zac-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7001/api?query=ASK+%7B%7D"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # ─── 3. FastAPI ──────────────────────────────────────────
+  zac-api:
+      build:
+        context: .
+        dockerfile: docker/Dockerfile
+      container_name: zac-api
+      restart: unless-stopped
+      depends_on:
+        qlever:
+          condition: service_healthy
+      ports:
+        - "8000:8000"
+      volumes:
+        - ./config:/app/config:ro
+        - .:/app
+      environment:
+        - QLEVER_HOST=qlever
+        - QLEVER_PORT=7001
+        - PYTHONUNBUFFERED=1
+      networks:
+        - zac-net
+      command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+volumes:
+  qlever-index:
+    driver: local
+
+networks:
+  zac-net:
+    driver: bridge

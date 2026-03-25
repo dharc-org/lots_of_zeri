@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}{{ r0.label or slug }} — ZAC{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width:800px;padding:2rem 1rem">
+  <a href="/eventi" class="btn-reset mb-3 d-inline-flex align-items-center gap-2">
+    <i class="bi bi-arrow-left"></i> Torna alle aste
+  </a>
+
+  <div class="result-card" style="cursor:default">
+    <h2 style="font-family:var(--ff-head);font-size:1.5rem;margin-bottom:1rem">
+      {{ r0.label or slug }}
+    </h2>
+    <dl class="row">
+      {% if r0.houseLabel %}
+        <dt class="col-sm-3 text-muted" style="font-size:.78rem;text-transform:uppercase">Casa d'aste</dt>
+        <dd class="col-sm-9">{{ r0.houseLabel }}</dd>
+      {% endif %}
+      {% if r0.timeLabel %}
+        <dt class="col-sm-3 text-muted" style="font-size:.78rem;text-transform:uppercase">Periodo</dt>
+        <dd class="col-sm-9">{{ r0.timeLabel }}</dd>
+      {% endif %}
+      {% if r0.placeLabel %}
+        <dt class="col-sm-3 text-muted" style="font-size:.78rem;text-transform:uppercase">Luogo</dt>
+        <dd class="col-sm-9">{{ r0.placeLabel }}</dd>
+      {% endif %}
+      {% set types = uniq("typeLabel") %}
+      {% if types %}
+        <dt class="col-sm-3 text-muted" style="font-size:.78rem;text-transform:uppercase">Tipologie</dt>
+        <dd class="col-sm-9">
+          {% for t in types %}<span class="filter-pill">{{ t }}</span>{% endfor %}
+        </dd>
+      {% endif %}
+      {% if r0.docId %}
+        <dt class="col-sm-3 text-muted" style="font-size:.78rem;text-transform:uppercase">Catalogo</dt>
+        <dd class="col-sm-9">
+          <a href="/cataloghi/{{ r0.docId }}" style="color:var(--zac-red)">{{ r0.docId }}</a>
+        </dd>
+      {% endif %}
+      <dt class="col-sm-3 text-muted" style="font-size:.78rem;text-transform:uppercase">URI</dt>
+      <dd class="col-sm-9"><code style="font-size:.8rem">{{ uri }}</code></dd>
+    </dl>
+  </div>
+</div>
+{% endblock %}

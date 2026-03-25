@@ -1,0 +1,29 @@
+{# Paginazione via link GET — niente JS.
+   Variabili attese: page, total_pages, qs (query string senza &page=...) #}
+{% if total_pages > 1 %}
+<nav class="zac-pagination mt-3">
+
+  {% if page > 1 %}
+    <a class="page-btn" href="?{{ qs }}&page={{ page - 1 }}">← Prec</a>
+  {% else %}
+    <span class="page-btn" style="opacity:.4">← Prec</span>
+  {% endif %}
+
+  {% for p in range(1, total_pages + 1) %}
+    {% if p == 1 or p == total_pages or (p >= page - 2 and p <= page + 2) %}
+      <a class="page-btn {% if p == page %}active{% endif %}"
+         href="?{{ qs }}&page={{ p }}">{{ p }}</a>
+    {% elif p == page - 3 or p == page + 3 %}
+      <span class="page-btn" style="border:none;cursor:default">…</span>
+    {% endif %}
+  {% endfor %}
+
+  {% if page < total_pages %}
+    <a class="page-btn" href="?{{ qs }}&page={{ page + 1 }}">Succ →</a>
+  {% else %}
+    <span class="page-btn" style="opacity:.4">Succ →</span>
+  {% endif %}
+
+  <span class="page-info">pag. {{ page }} / {{ total_pages }}</span>
+</nav>
+{% endif %}

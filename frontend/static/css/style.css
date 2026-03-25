@@ -1,0 +1,97 @@
+:root {
+  /* Colori */
+  --zac-red:        #8b2635;
+  --zac-accent:     #c8a96e;
+  --zac-bg:         #faf7f0;
+  --zac-ink:        #1a1a1a;
+
+  /* Font */
+  --ff-head:  'Playfair Display', Georgia, serif;
+  --ff-body:  'Segoe UI', system-ui, sans-serif;
+  --ff-mono:  'JetBrains Mono', monospace;
+}
+
+body {
+   background-color: var(--zac-bg); 
+   font-family: var(--ff-body);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--ff-head);
+}
+
+a {color: var(--zac-red) !important}
+
+.card {
+  margin-bottom: 2rem;
+  text-decoration: none; 
+  border: 0px 
+}
+
+/* NAVBAR (HEADER) */
+.navbar {
+  background-color: var(--zac-red);
+  font-family: var(--ff-head);
+}
+
+.nav-link.active {
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.dropdown-item.active {
+  background-color: var(--zac-red);
+  color: #fff !important;
+}
+
+.nav-link, .navbar-brand {
+  color: var(--zac-bg) !important;
+}
+
+/* FOOTER */
+footer {
+  background-color: var(--zac-ink);
+  color: var(--zac-bg)
+}
+
+/* CATALOGUE TABS */
+.nav-tabs  .nav-link {
+  color: var(--zac-accent) !important;
+}
+
+.nav-tabs .nav-link.active {
+  color: var(--zac-ink) !important;
+  text-decoration: none;
+}
+
+/* CATALOGUES FACETS */
+.zac-catalogue-sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.facet-title {
+  font-weight:    bold;
+  text-transform: uppercase;
+  font-family: var(--ff-head);
+}
+
+/* CATALOGUE RESULTS */
+.zac-catalogue-result-title {
+  font-family: var(--ff-head);
+  font-weight: bold;
+}
+
+/* BADGES */
+.text-bg-primary {
+  background-color: var(--zac-accent) !important;
+}
+
+/* Buttons in general, e.g., "Scheda" in results */
+.btn-primary {
+  background-color: var(--zac-accent) !important;
+  border: #c8a96e 0px solid;
+}
+

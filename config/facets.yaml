@@ -1,0 +1,201 @@
+# ZAC Platform — Faceted Search Configuration
+# Maps filter identifiers → SPARQL paths + UI labels
+# Data model: CIDOC-CRM + Linked Art application profile
+# Namespace: http://w3id.org/zac/ | CIDOC: http://www.cidoc-crm.org/cidoc-crm/
+
+namespaces:
+  zac:   "http://w3id.org/zac/"
+  crm:   "http://www.cidoc-crm.org/cidoc-crm/"
+  rdfs:  "http://www.w3.org/2000/01/rdf-schema#"
+  xsd:   "http://www.w3.org/2001/XMLSchema#"
+  aat:   "http://vocab.getty.edu/aat/"
+
+# ─────────────────────────────────────────
+# TAB 1 — EVENTI ASTA
+# ─────────────────────────────────────────
+eventi_asta:
+  label_it: "Aste"
+  label_en: "Auctions"
+  description_it: "Analisi delle aste come eventi storici del mercato"
+  description_en: "Analysis of auction events as historical market events"
+  enabled: true
+  primary_class: "crm:E7_Activity"
+
+  # Route config — used by the generic browse router
+  route:
+    path: "/aste"
+    active_tab: "aste"
+    template: "eventi.html"
+    detail_template: "evento_detail.html"
+    detail_query: "evento_item"
+    results_query: "eventi_asta"
+    count_query: "eventi_asta_count"
+    icon: "bi-hammer"
+    entity_label: "aste"
+    # How to extract items from SPARQL result rows
+    uri_var: "auction"
+    slug_from_uri: true
+    result_fields:
+      label:  "auctionLabel"
+      house:  "houseLabel"
+      year:   "yearLabel"
+      place:  "placeLabel"
+
+  facets:
+    periodo:
+      label_it: "Periodo (data asta)"
+      label_en: "Period (auction year)"
+      type: "range"
+      ui_widget: "range_slider"
+      range:
+        min: 1860
+        max: 1940
+        step: 1
+
+    organizzatore:
+      label_it: "Organizzatori"
+      label_en: "Organisers"
+      type: "multiselect"
+      ui_widget: "checkbox_list"
+
+    luogo:
+      label_it: "Luogo di vendita"
+      label_en: "Place"
+      type: "multiselect"
+      ui_widget: "checkbox_list"
+
+    tipologia_oggetti:
+      label_it: "Tipologia Oggetti Venduti"
+      label_en: "Object Types Sold"
+      type: "multiselect"
+      ui_widget: "checkbox_list"
+
+    cronologia_oggetti:
+      label_it: "Cronologia Oggetti Venduti"
+      label_en: "Object Chronology Sold"
+      type: "multiselect"
+      ui_widget: "checkbox_list"
+
+    banditore:
+      label_it: "Banditori"
+      label_en: "Auctioneer"
+      type: "multiselect"
+      ui_widget: "checkbox_list"
+
+# ─────────────────────────────────────────
+# TAB 2 — CATALOGHI
+# ─────────────────────────────────────────
+cataloghi:
+  label_it: "Cataloghi"
+  label_en: "Catalogues"
+  description_it: "Panoramica della storia del mercato attraverso i cataloghi d'asta"
+  description_en: "Overview of market history through auction catalogues"
+  enabled: true
+  primary_class: "crm:E31_Document"
+
+  route:
+    path: "/cataloghi"
+    active_tab: "catalogo"
+    template: "catalogo.html"
+    detail_template: "catalogo_detail.html"
+    detail_query: "catalogo_item"
+    results_query: "catalogo"
+    count_query: "catalogo_count"
+    icon: "bi-journal-text"
+    entity_label: "cataloghi"
+    uri_var: "doc"
+    slug_var: "docId"
+    result_fields:
+      doc_id:     "docId"
+      title:      "title"
+      year:       "year"
+      house:      "houseLabel"
+      language:   "langLabel"
+
+  facets:
+    autori:
+      label_it: "Autore/Casa d'asta"
+      label_en: "Authors/Auction House"
+      type: "multiselect"
+      ui_widget: "checkbox_list"
+
+    anno_pubblicazione:
+      label_it: "Anno di pubblicazione"
+      label_en: "Publication Year"
+      type: "range"
+      ui_widget: "range_slider"
+      range:
+        min: 1860
+        max: 1940
+        step: 1
+
+    luogo:
+      label_it: "Luogo dell'asta"
+      label_en: "Aucton Location"
+      type: "multiselect"
+      ui_widget: "checkbox_list"
+
+    collezione:
+      label_it: "Collezione"
+      label_en: "Collection"
+      type: "multiselect"
+      ui_widget: "checkbox_list"
+
+    lingua:
+      label_it: "Lingua"
+      label_en: "Language"
+      type: "multiselect"
+      ui_widget: "checkbox_list"
+
+    # titolo:
+    #   label_it: "Titolo"
+    #   label_en: "Title"
+    #   type: "text_search"
+    #   ui_widget: "text_input"
+
+    illustrazioni:
+      label_it: "Illustrato"
+      label_en: "Illustrated"
+      type: "boolean"
+      ui_widget: "toggle"
+      values:
+        "true": "Con illustrazioni"
+        "false" : "Senza illustrazioni"
+
+# ─────────────────────────────────────────
+# TAB 3 — LOTTI (disabled)
+# ─────────────────────────────────────────
+lotti:
+  label_it: "Lotti"
+  label_en: "Lots"
+  description_it: "Ricerca per lotto d'asta (funzionalità in sviluppo)"
+  description_en: "Search by auction lot (feature in development)"
+  enabled: false
+
+  facets:
+    descrizione_lotto:
+      label_it: "Descrizione Lotto"
+      label_en: "Lot Description"
+      type: "text_search"
+      ui_widget: "text_input"
+
+    autore_lotto:
+      label_it: "Autore"
+      label_en: "Author / Artist"
+      type: "multiselect"
+      ui_widget: "checkbox_list"
+
+# ─────────────────────────────────────────
+# UI Configuration
+# ─────────────────────────────────────────
+ui:
+  results_per_page: 50
+  max_facet_values: 50
+  debounce_ms: 300
+  theme:
+    primary_color: "#8b2635"
+    secondary_color: "#c8a96e"
+    background: "#faf7f0"
+    font_heading: "Playfair Display"
+    font_body: "Crimson Pro"
+    font_mono: "JetBrains Mono"

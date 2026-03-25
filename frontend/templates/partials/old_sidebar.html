@@ -1,0 +1,132 @@
+{#
+  _sidebar.html — Template generico per la sidebar dei filtri.
+  Variabili attese dal router:
+    - tab_route:       "/eventi" | "/catalogo"
+    - facet_defs:      lista di dict costruiti dal router da facets.yaml
+                       Ogni dict ha: id, label_it, type, ui_widget, values, range (opz.)
+    - active_filters:  dict { facet_id → valore attivo }
+    - year_min, year_max: range globale per lo slider
+#}
+
+<form method="GET" action="{{ tab_route }}" class="h-100 d-flex flex-column" id="facet-form">
+
+  {% for facet in facet_defs %}
+
+    {# ── RANGE SLIDER ─────────────────────────────────────── #}
+    {% if facet.ui_widget == "range_slider" %}
+    <div class="facet-section">
+      <div class="facet-label">{{ facet.label_it }}</div>
+      {% set yf = active_filters.get(facet.id + "_from") or facet.range.min %}
+      {% set yt = active_filters.get(facet.id + "_to")   or facet.range.max %}
+      <input type="hidden" name="{{ facet.id }}_from" id="inp_{{ facet.id }}_from" value="{{ yf }}">
+      <input type="hidden" name="{{ facet.id }}_to"   id="inp_{{ facet.id }}_to"   value="{{ yt }}">
+      <div id="slider_{{ facet.id }}" class="mt-2 mb-1"
+           data-min="{{ facet.range.min }}"
+           data-max="{{ facet.range.max }}"
+           data-from="{{ yf }}"
+           data-to="{{ yt }}">
+      </div>
+      <div class="range-display">
+        <span id="disp_{{ facet.id }}_from">{{ yf }}</span>
+         — 
+        <span id="disp_{{ facet.id }}_to">{{ yt }}</span>
+      </div>
+    </div>
+
+    {# ── TEXT INPUT ───────────────────────────────────────── #}
+    {% elif facet.ui_widget == "text_input" %}
+    <div class="facet-section">
+      <div class="facet-label">{{ facet.label_it }}</div>
+      <input type="text" name="{{ facet.id }}" class="facet-text-input"
+             placeholder="Cerca…"
+             value="{{ active_filters.get(facet.id, '') }}">
+    </div>
+
+    {# ── TOGGLE / RADIO (boolean) ─────────────────────────── #}
+    {% elif facet.ui_widget == "toggle" %}
+    <div class="facet-section">
+      <div class="facet-label">{{ facet.label_it }}</div>
+      <div class="d-flex flex-column gap-1">
+        <label class="facet-check-item">
+          <input type="radio" name="{{ facet.id }}" value=""
+                 {% if not active_filters.get(facet.id) %}checked{% endif %}>
+          <span>Tutti</span>
+        </label>
+        {% for opt in facet.values %}
+        <label class="facet-check-item">
+          <input type="radio" name="{{ facet.id }}" value="{{ opt.value }}"
+                 {% if active_filters.get(facet.id) == opt.value %}checked{% endif %}>
+          <span>{{ opt.label }}</span>
+        </label>
+        {% endfor %}
+      </div>
+    </div>
+
+    {# ── CHECKBOX LIST (multiselect) ──────────────────────── #}
+    {% elif facet.ui_widget == "checkbox_list" %}
+    {% if facet.values %}
+    <div class="facet-section">
+      <div class="facet-label">
+        {{ facet.label_it }}
+        {% if facet.values | length > 8 %}
+        <span class="facet-count-badge">{{ facet.values | length }}</span>
+        {% endif %}
+      </div>
+      <div class="facet-values-list {% if facet.values | length > 8 %}facet-scrollable{% endif %}">
+        {% set active_vals = active_filters.get(facet.id, []) %}
+        {# Mostra prima i valori selezionati, poi gli altri #}
+        {% for item in facet.values %}
+          {% set is_checked = item.value in active_vals %}
+          <label class="facet-check-item {% if is_checked %}facet-checked{% endif %}">
+            <input type="checkbox" name="{{ facet.id }}" value="{{ item.value }}"
+                   {% if is_checked %}checked{% endif %}>
+            <span class="facet-value-label">{{ item.value }}</span>
+            <span class="facet-count {% if item.count == 0 %}facet-count-zero{% endif %}">
+              {{ item.count }}
+            </span>
+          </label>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% endif %}
+  {% endfor %}
+
+  {# ── Bottoni ──────────────────────────────────────────────── #}
+  <div class="mt-auto pt-3 d-flex gap-2">
+    <button type="submit" class="btn-search flex-grow-1">
+      <i class="bi bi-search me-1"></i>Cerca
+    </button>
+    <a href="{{ tab_route }}" class="btn-reset">Reset</a>
+  </div>
+
+</form>
+
+{# ── Init noUiSlider per tutti i range slider presenti ──────── #}
+<script>
+(function() {
+  document.querySelectorAll('[id^="slider_"]').forEach(function(el) {
+    if (typeof noUiSlider === 'undefined') return;
+    const facetId = el.id.replace('slider_', '');
+    const minV  = parseInt(el.dataset.min,  10);
+    const maxV  = parseInt(el.dataset.max,  10);
+    const fromV = parseInt(el.dataset.from, 10);
+    const toV   = parseInt(el.dataset.to,   10);
+
+    noUiSlider.create(el, {
+      start: [fromV, toV],
+      connect: true,
+      step: 1,
+      range: { min: minV, max: maxV }
+    });
+    el.noUiSlider.on('update', function([a, b]) {
+      const f = Math.round(a), t = Math.round(b);
+      document.getElementById('inp_' + facetId + '_from').value = f;
+      document.getElementById('inp_' + facetId + '_to').value   = t;
+      document.getElementById('disp_' + facetId + '_from').textContent = f;
+      document.getElementById('disp_' + facetId + '_to').textContent   = t;
+    });
+  });
+})();
+</script>

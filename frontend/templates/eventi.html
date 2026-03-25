@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Aste — ZAC{% endblock %}
+
+{% block content %}
+<div class="d-flex" style="height:calc(100vh - 140px)">
+
+  {# Sidebar #}
+  <aside class="zac-sidebar">
+    {% include "partials/_sidebar_eventi.html" %}
+  </aside>
+
+  {# Risultati #}
+  <main class="zac-content">
+
+    {# Filtri attivi #}
+    {% set has_filters = f_year_from or f_year_to or f_organizzatore or f_luogo or f_tipologia_oggetti or f_cronologia_oggetti or f_banditore %}
+    {% if has_filters %}
+    <div class="active-filters mb-2">
+      {% if f_year_from or f_year_to %}
+        <span class="filter-pill">Periodo: {{ f_year_from or year_min }} — {{ f_year_to or year_max }}</span>
+      {% endif %}
+      {% for v in f_organizzatore %}<span class="filter-pill">Casa: {{ v }}</span>{% endfor %}
+      {% for v in f_luogo %}<span class="filter-pill">Luogo: {{ v }}</span>{% endfor %}
+      {% for v in f_tipologia_oggetti %}<span class="filter-pill">Tipo: {{ v }}</span>{% endfor %}
+      {% for v in f_banditore %}<span class="filter-pill">Banditore: {{ v }}</span>{% endfor %}
+      <a href="/eventi" class="filter-pill" style="color:var(--zac-red);border-color:var(--zac-red)">x Reset</a>
+    </div>
+    {% endif %}
+
+    <div class="action-bar">
+      <span class="result-count">
+        <i class="bi bi-hammer me-1"></i>
+        <strong>{{ total }}</strong> aste trovate
+      </span>
+    </div>
+
+    {% if items %}
+      {% for item in items %}
+      <a href="/eventi/{{ item.slug }}" class="result-card d-block text-decoration-none">
+        <div class="card-title">{{ item.label }}</div>
+        <div class="card-meta">
+          {% if item.year %}<span class="meta-item"><i class="bi bi-calendar3"></i>{{ item.year }}</span>{% endif %}
+          {% if item.house %}<span class="meta-item"><i class="bi bi-building"></i>{{ item.house }}</span>{% endif %}
+          {% if item.place %}<span class="meta-item"><i class="bi bi-geo-alt"></i>{{ item.place }}</span>{% endif %}
+        </div>
+      </a>
+      {% endfor %}
+
+      {% set qs = request.url.query | replace("&page=" ~ page, "") | replace("page=" ~ page, "") %}
+      {% include "partials/_pagination.html" %}
+
+    {% else %}
+      <div class="empty-state">
+        <i class="bi bi-hammer"></i>
+        <p>Nessuna asta trovata.</p>
+        <a href="/eventi" class="btn-reset">Rimuovi i filtri</a>
+      </div>
+    {% endif %}
+
+  </main>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const slider = document.getElementById('slider_periodo');
+  if (slider && typeof noUiSlider !== 'undefined') {
+    noUiSlider.create(slider, {
+      start: [{{ f_year_from or year_min }}, {{ f_year_to or year_max }}],
+      connect: true, step: 1,
+      range: { min: {{ year_min }}, max: {{ year_max }} }
+    });
+    slider.noUiSlider.on('update', ([a, b]) => {
+      const f = Math.round(a), t = Math.round(b);
+      document.getElementById('inp_year_from').value = f;
+      document.getElementById('inp_year_to').value = t;
+      document.getElementById('disp_from').textContent = f;
+      document.getElementById('disp_to').textContent = t;
+    });
+  }
+</script>
+{% endblock %}
