@@ -1,1 +1,14 @@
 __pycache__/main.cpython-311.pyc
+__pycache__/main.cpython-311.pyc
+backend/__pycache__/__init__.cpython-311.pyc
+backend/routers/__pycache__/__init__.cpython-311.pyc
+backend/routers/__pycache__/browse.cpython-311.pyc
+backend/services/__pycache__/__init__.cpython-311.pyc
+__pycache__/main.cpython-311.pyc
+backend/__pycache__/__init__.cpython-311.pyc
+backend/routers/__pycache__/__init__.cpython-311.pyc
+backend/routers/__pycache__/browse.cpython-311.pyc
+backend/services/__pycache__/__init__.cpython-311.pyc
+backend/services/__pycache__/cache.cpython-311.pyc
+backend/services/__pycache__/config.cpython-311.pyc
+backend/services/__pycache__/sparql.cpython-311.pyc
