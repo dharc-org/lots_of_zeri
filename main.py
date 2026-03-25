@@ -61,3 +61,17 @@ async def home(request: Request):
         "active_tab": None,
         "active_page": "home"
     })
+
+@app.get("/progetto", response_class=HTMLResponse)
+async def progetto(request: Request):
+    return templates.TemplateResponse("progetto.html", {
+        "request": request,
+        "active_tab": None,
+    })
+
+@app.get("/esplora", response_class=HTMLResponse)
+async def progetto(request: Request):
+    return templates.TemplateResponse("esplora.html", {
+        "request": request,
+        "active_tab": None,
+    })
