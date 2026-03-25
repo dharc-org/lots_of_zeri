@@ -75,3 +75,10 @@ async def progetto(request: Request):
         "request": request,
         "active_tab": None,
     })
+
+@app.get("/giuda_alla_ricerca", response_class=HTMLResponse)
+async def progetto(request: Request):
+    return templates.TemplateResponse("guida_alla_ricerca.html", {
+        "request": request,
+        "active_tab": None,
+    })
