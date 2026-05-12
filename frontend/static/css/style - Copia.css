@@ -1,0 +1,120 @@
+:root {
+  /* Palette terracotta */
+  --paper-light:  #FDF6E4;   /* sfondo alternato */
+  --paper:        #F5EDD6;   /* sfondo principale */
+  --paper-dark:   #E8D9BC;   /* hover, card bg */
+  --gray-1:       #C0AF98;   /* bordi, separatori */
+  --gray-2:       #9E8B74;   /* placeholder, icone */
+  --gray-3:       #6B5C48;   /* testo secondario */
+  --gray-4:       #453626;   /* testo terziario */
+  --ink-light:    #352C24;   /* testo corpo */
+  --ink:          #1A1410;   /* titoli, nav */
+  --terra:        #D94010;   /* accento primario */
+  --terra-dark:   #B03008;   /* hover, pressed */
+  --terra-light:  #E86040;   /* focus, selected */
+  --terra-muted:  #EB7055;   /* sfondi leggeri */
+
+  /* Compatibilità template Vale */
+  --zac-red:      var(--terra);
+  --zac-accent:   var(--terra-light);
+  --zac-bg:       var(--paper);
+  --zac-ink:      var(--ink);
+
+  /*
+  --zac-red:        #8b2635;
+  --zac-accent:     #c8a96e;
+  --zac-bg:         #faf7f0;
+  --zac-ink:        #1a1a1a; */
+
+  /* Font */
+  --ff-head:  'Playfair Display', Georgia, serif;
+  --ff-body:  'DM Sans', system-ui, sans-serif;
+  --ff-mono:  'IBM Plex Mono', monospace;
+}
+
+/* ── BASE ──────────────────────────────────────────────── */
+body {
+  background-color: var(--paper);
+  font-family: var(--ff-body);
+  color: var(--ink);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--ff-head);
+}
+
+a { color: var(--terra) !important; }
+
+.card {
+  margin-bottom: 2rem;
+  text-decoration: none;
+  border: 0px;
+}
+
+/* NAVBAR (HEADER) */
+.navbar {
+  background-color: var(--zac-red);
+  font-family: var(--ff-head);
+}
+
+.nav-link.active {
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.dropdown-item.active {
+  background-color: var(--zac-red);
+  color: #fff !important;
+}
+
+.nav-link, .navbar-brand {
+  color: var(--zac-bg) !important;
+}
+
+/* FOOTER */
+footer {
+  background-color: var(--ink);
+  color: var(--paper);
+}
+
+/* CATALOGUE TABS */
+.nav-tabs  .nav-link {
+  color: var(--zac-accent) !important;
+}
+
+.nav-tabs .nav-link.active {
+  color: var(--zac-ink) !important;
+  text-decoration: none;
+}
+
+/* CATALOGUES FACETS */
+.zac-catalogue-sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.facet-title {
+  font-weight:    bold;
+  text-transform: uppercase;
+  font-family: var(--ff-head);
+}
+
+/* CATALOGUE RESULTS */
+.zac-catalogue-result-title {
+  font-family: var(--ff-head);
+  font-weight: bold;
+}
+
+/* BADGES */
+.text-bg-primary {
+  background-color: var(--zac-accent) !important;
+}
+
+/* Buttons in general, e.g., "Scheda" in results */
+.btn-primary {
+  background-color: var(--zac-accent) !important;
+  border: #c8a96e 0px solid;
+}
+
