@@ -381,3 +381,205 @@ footer {
 @media (max-width: 576px) {
   .zac-footer-inner { grid-template-columns: 1fr; }
 }
+
+/* ═══════════════════════════════════════════════════════
+   GUIDA ALLA RICERCA
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Header ────────────────────────────────────────────── */
+.guida-header {
+  background: var(--paper);
+  padding-top: 3rem !important;
+}
+
+.guida-title {
+  font-family: var(--ff-head);
+  font-size: 2.5rem;
+  font-weight: 400;
+  color: var(--ink);
+  text-align: center;
+}
+
+.guida-title-rule {
+  border: none;
+  border-top: 1px solid var(--gray-1);
+  margin-top: 1rem;
+}
+
+.guida-intro {
+  font-family: var(--ff-body);
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--ink-light);
+}
+
+/* ── Le 3 entità ───────────────────────────────────────── */
+.guida-entita {
+  background: var(--paper);
+}
+
+.guida-section-title {
+  font-family: var(--ff-body);
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--ink-light);
+}
+
+.guida-section-rule {
+  border: none;
+  border-top: 1px solid var(--gray-1);
+  margin-top: 0.5rem;
+}
+
+/* Card entità */
+.guida-card {
+  background: var(--paper-light);
+  border: 1px solid var(--gray-1);
+  border-top: 3px solid var(--terra-muted);
+  padding: 1.75rem 1.25rem 1.25rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.guida-card-icon {
+  font-size: 1.5rem;
+  color: var(--terra-muted);
+  text-align: center;
+  margin-bottom: 0.75rem;
+}
+
+.guida-card-title {
+  font-family: var(--ff-head);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--ink);
+  text-align: center;
+  margin-bottom: 0.75rem;
+}
+
+.guida-card-desc {
+  font-family: var(--ff-body);
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--ink-light);
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+/* Box esempio */
+.guida-card-example {
+  background: var(--paper);
+  border: 1px solid var(--gray-1);
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  flex: 1;
+}
+
+.guida-example-label {
+  font-family: var(--ff-head);
+  font-style: italic;
+  font-size: 0.82rem;
+  color: var(--ink-light);
+  margin-bottom: 0.4rem;
+}
+
+.guida-example-text {
+  font-family: var(--ff-body);
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: var(--ink-light);
+}
+
+.guida-card-link {
+  font-family: var(--ff-body);
+  font-size: 0.85rem;
+  color: var(--terra) !important;
+  text-decoration: none !important;
+  margin-top: auto;
+}
+
+.guida-card-link:hover {
+  text-decoration: underline !important;
+}
+
+.guida-card-link.disabled {
+  color: var(--gray-2) !important;
+  pointer-events: none;
+}
+
+/* ── Da dove vuoi iniziare? ────────────────────────────── */
+.guida-start {
+  background: var(--paper-dark);
+}
+
+.guida-start-title {
+  font-family: var(--ff-head);
+  font-size: 2.25rem;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--terra);
+  line-height: 1.2;
+}
+
+.guida-start-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.guida-start-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 0;
+  border-bottom: 1px solid var(--gray-1);
+}
+
+.guida-start-item:first-child {
+  border-top: 1px solid var(--gray-1);
+}
+
+.guida-start-question {
+  font-family: var(--ff-head);
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--ink);
+  margin-bottom: 0.25rem;
+}
+
+.guida-start-action {
+  font-family: var(--ff-body);
+  font-size: 0.85rem;
+  color: var(--ink-light);
+}
+
+.guida-start-action a {
+  color: var(--terra) !important;
+  text-decoration: none !important;
+  font-weight: 600;
+}
+
+.guida-start-action a:hover {
+  text-decoration: underline !important;
+}
+
+.guida-start-num {
+  font-family: var(--ff-mono);
+  font-size: 0.85rem;
+  color: var(--gray-2);
+  min-width: 2rem;
+  text-align: right;
+}
+
+/* ── BREADCRUMBS ───────────────────────────────────────── */
+.zac-breadcrumbs {
+  padding: 1rem 2rem 0.25rem;
+  font-family: var(--ff-body);
+  font-size: 0.85rem;
+  color: var(--gray-3);
+  background: var(--paper-light);
+}
+.zac-breadcrumbs a { color: var(--gray-3) !important; text-decoration: none; }
+.zac-breadcrumbs a:hover { color: var(--terra) !important; }
+.zac-breadcrumbs .sep { margin: 0 0.4rem; color: var(--gray-2); }
+.zac-breadcrumbs .current { color: var(--terra); font-style: italic; }

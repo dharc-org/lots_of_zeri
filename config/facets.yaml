@@ -114,8 +114,8 @@ cataloghi:
 
   facets:
     autori:
-      label_it: "Autore/Casa d'asta"
-      label_en: "Authors/Auction House"
+      label_it: "Autore / Casa d'asta"
+      label_en: "Authors / Auction House"
       type: "multiselect"
       ui_widget: "checkbox_list"
 

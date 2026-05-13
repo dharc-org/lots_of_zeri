@@ -220,6 +220,9 @@
     </div>{# /zac-catalogue-content #}
 
 </div>{# /zac-catalogue-container #}
+<button class="btn-back-top" id="btn-back-top" aria-label="Torna su">
+  <span class="back-top-icon"><i class="bi bi-chevron-up"></i></span>
+</button>
 {% endblock %}
 
 
@@ -227,36 +230,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
-  /* ── noUiSlider init ─────────────────────────────────── */
-  document.querySelectorAll('[id^="slider_"]').forEach(function (el) {
-    if (typeof noUiSlider === 'undefined' || el.noUiSlider) return;
-    var facetId = el.id.replace('slider_', '');
-    var minV  = parseInt(el.dataset.min,  10);
-    var maxV  = parseInt(el.dataset.max,  10);
-    var fromV = parseInt(el.dataset.from, 10) || minV;
-    var toV   = parseInt(el.dataset.to,   10) || maxV;
-    var dispFrom = document.getElementById('disp_' + facetId + '_from');
-    var dispTo   = document.getElementById('disp_' + facetId + '_to');
-    var inpFrom  = document.getElementById('inp_' + facetId + '_from');
-    var inpTo    = document.getElementById('inp_' + facetId + '_to');
-    if (dispFrom) dispFrom.textContent = fromV;
-    if (dispTo)   dispTo.textContent   = toV;
-    if (inpFrom)  inpFrom.value = fromV;
-    if (inpTo)    inpTo.value   = toV;
-    noUiSlider.create(el, {
-      start:   [fromV, toV], connect: true, step: 1,
-      range:   { min: minV, max: maxV }
-    });
-    el.noUiSlider.on('update', function (values) {
-      var f = Math.round(parseFloat(values[0]));
-      var t = Math.round(parseFloat(values[1]));
-      if (dispFrom) dispFrom.textContent = f;
-      if (dispTo)   dispTo.textContent   = t;
-      if (inpFrom)  inpFrom.value = f;
-      if (inpTo)    inpTo.value   = t;
-    });
-  });
-
+  
   /* ── Toggle vista lista/griglia ─────────────────────── */
   var container = document.getElementById('zac-catalogue-results-list');
   document.querySelectorAll('.view-btn').forEach(function (btn) {

@@ -27,11 +27,12 @@
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       var h = document.querySelector('.navbar').offsetHeight;
-      document.querySelector('.zac-catalogue-tabs').style.top = h + 'px';
+      var tabs = document.querySelector('.zac-catalogue-tabs');
+      if (tabs) tabs.style.top = h + 'px';
     });
   </script>
 
   {% block scripts %}{% endblock %}
-
+<script src="/static/js/sidebar.js"></script>
 </body>
 </html>

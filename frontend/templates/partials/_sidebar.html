@@ -5,15 +5,28 @@
     - facet_defs:      list of dicts: {id, label_it, type, ui_widget, options, range}
     - active_filters:  dict {facet_id → active value}
 #}
-
-<form method="GET" action="{{ tab_route }}" class="h-100 p-3" id="facet-form">
+<div class="sidebar-header">Filtra</div>
+<form method="GET" action="{{ tab_route }}" class="h-100 pt-1 p-3" id="facet-form">
 
   {% for facet in facet_defs %}
 
     {# ── RANGE SLIDER ─────────────────────────────────────── #}
     {% if facet.ui_widget == "range_slider" %}
-    <div class="facet p-3">
+    <div class="facet">
       <label class="facet-title mb-2">{{ facet.label_it }}</label>
+
+      {# Istogramma — dati reali se disponibili, altrimenti fittizi #}
+      {% set dist = facet.distribution if facet.distribution else [
+        2,5,8,12,18,25,32,40,55,70,85,95,105,112,108,102,98,90,82,75,
+        68,60,52,45,38,32,26,20,15,11,8,6,4,3,2,1,1,1,1,1
+      ] %}
+      <div class="facet-histogram">
+        {% set max_val = dist | max %}
+        {% for val in dist %}
+        <div class="histogram-bar" style="height: calc({{ val }} / {{ max_val }} * 60px)"></div>
+        {% endfor %}
+      </div>
+
       {% set key_from = facet.id ~ '_from' %}
       {% set key_to   = facet.id ~ '_to' %}
       {% set yf = active_filters[key_from] if key_from in active_filters else facet.range.min %}
@@ -35,7 +48,7 @@
 
     {# ── TEXT INPUT ───────────────────────────────────────── #}
     {% elif facet.ui_widget == "text_input" %}
-    <div class="facet p-3">
+    <div class="facet">
       <label class="facet-title">{{ facet.label_it }}</label>
       {% set val = active_filters[facet.id] if facet.id in active_filters else '' %}
       <input type="text" name="{{ facet.id }}" class="form-control form-control-sm"
@@ -44,17 +57,14 @@
 
     {# ── TOGGLE / RADIO (boolean) ─────────────────────────── #}
     {% elif facet.ui_widget == "toggle" %}
-    <div class="facet p-3">
+    <div class="facet">
       <label class="facet-title mb-2">{{ facet.label_it }}</label>
       {% set cur = active_filters[facet.id] if facet.id in active_filters else '' %}
-      
       <div class="form-check form-check-sm">
         <input class="form-check-input" type="radio" name="{{ facet.id }}" value=""
               id="radio_{{ facet.id }}_all"
               {% if not cur %}checked{% endif %}>
-        <label class="form-check-label" for="radio_{{ facet.id }}_all">
-          Tutti
-        </label>
+        <label class="form-check-label" for="radio_{{ facet.id }}_all">Tutti</label>
       </div>
       {% for opt in facet.options %}
       <div class="form-check form-check-sm">
@@ -72,11 +82,12 @@
     {# ── CHECKBOX LIST (multiselect) ──────────────────────── #}
     {% elif facet.ui_widget == "checkbox_list" %}
     {% if facet.options %}
-    <div class="facet p-3">
-      <label class="facet-title mb-2">
-        {{ facet.label_it }}
-      </label>
-      <div class="overflow-auto" {% if facet.options | length > 8 %}style="max-height:200px"{% endif %}>
+    <div class="facet">
+      <label class="facet-title mb-2">{{ facet.label_it }}</label>
+      {% if facet.options | length > 8 %}
+      <input type="text" class="facet-search" placeholder="Cerca…" data-facet="{{ facet.id }}">
+      {% endif %}
+      <div style="max-height:200px; overflow-y:auto; overflow-x:hidden; width:100%;">
         {% set active_vals = active_filters[facet.id] if facet.id in active_filters else [] %}
         {% for item in facet.options %}
           {% set is_checked = item.uri in active_vals %}
@@ -98,7 +109,7 @@
     {% endif %}
   {% endfor %}
 
-  {# ── Facets Buttons ─────────────────────────────────────────────── #}
+  {# ── Bottoni ────────────────────────────────────────────── #}
   <div class="mt-auto pt-3 d-flex gap-2 pb-5">
     <button type="submit" class="btn btn-dark btn-sm flex-grow-1">
       <i class="bi bi-search me-1"></i>Cerca
