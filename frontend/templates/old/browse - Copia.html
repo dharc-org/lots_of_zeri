@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+{% block title %}{{ tab_label }} — ZAC{% endblock %}
+
+{% block content %}
+<div class="zac-catalogue-container">
+  {# ── Sidebar ────────────────────────────────────── #}
+  
+  <div class="row">
+    <div class="col-md-3">
+
+      <aside class="zac-catalogue-sidebar">
+        {% include "partials/_sidebar.html" %}
+      </aside>
+    </div>
+
+
+  {# ── Results ────────────────────────────────────── #}
+    <div class="col-md-9 p-3 zac-catalogue-content">
+
+      {% if has_any_filter %}
+        {% for facet in facet_defs %}
+          {% if facet.type == 'range' %}
+            {% set key_from = facet.id ~ '_from' %}
+            {% set key_to   = facet.id ~ '_to' %}
+            {% if key_from in active_filters and key_to in active_filters %}
+              {% if active_filters[key_from] != facet.range.min or active_filters[key_to] != facet.range.max %}
+                <span class="badge rounded-pill bg-secondary bg-opacity-25 text-dark border">
+                  {{ facet.label_it }}: {{ active_filters[key_from] }} — {{ active_filters[key_to] }}
+                </span>
+              {% endif %}
+            {% endif %}
+          {% elif facet.type == 'text_search' %}
+            {% if facet.id in active_filters and active_filters[facet.id] %}
+              <span class="badge rounded-pill bg-secondary bg-opacity-25 text-dark border">
+                {{ facet.label_it }}: {{ active_filters[facet.id] }}
+              </span>
+            {% endif %}
+          {% elif facet.type == 'boolean' %}
+            {% if facet.id in active_filters and active_filters[facet.id] == 'true' %}
+              <span class="badge rounded-pill bg-secondary bg-opacity-25 text-dark border">
+                {{ facet.label_it }}: Sì
+              </span>
+            {% elif facet.id in active_filters and active_filters[facet.id] == 'false' %}
+              <span class="badge rounded-pill bg-secondary bg-opacity-25 text-dark border">
+                {{ facet.label_it }}: No
+              </span>
+            {% endif %}
+          {% elif facet.type == 'multiselect' %}
+            {% if facet.id in active_filters %}
+              {% for v in active_filters[facet.id] %}
+                <span class="badge rounded-pill bg-secondary bg-opacity-25 text-dark border">
+                  {{ facet.label_it }}: {{ v }}
+                </span>
+              {% endfor %}
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+        <a href="{{ tab_route }}" class="badge rounded-pill text-decoration-none border">
+          <i class="bi bi-x-lg me-1"></i>Reset
+        </a>
+      {% endif %}
+
+      {# ── Result count ─────────────────────────────── #}
+      <div class="w-100 mb-3">
+        <span class="float-end">
+          <i class="{{ icon }} me-1"></i>
+          <strong>{{ total }}</strong> {{ entity_label }}
+        </span>
+        <div class="clearfix"></div>
+      </div>
+
+        {# ── Result cards ────────────────────────────────── #}
+        {# class zac-catalogue-results-list is used in the JS please do not rename it #}
+        <div id="zac-catalogue-results-list">
+          {% for item in items %}
+          <div class="card mb-2 zac-catalogue-result-card">
+            <div class="card-body py-2 px-3">
+              <div class="row align-items-center">
+
+                <div class="col-10">
+                  <div class="zac-catalogue-result">
+                    <h6>{{ item.title or item.label or item.doc_id or item.slug }}</h6>
+                  </div>
+                  <div class="d-flex flex-wrap gap-3 mt-1">
+                    {% if item.year %}
+                      <span class="badge rounded-pill text-bg-primary"><i class="bi bi-calendar3 me-1"></i>{{ item.year }}</span>
+                    {% endif %}
+                    {% if item.house %}
+                      <span class="badge rounded-pill text-bg-primary"><i class="bi bi-building me-1"></i>{{ item.house }}</span>
+                    {% endif %}
+                    {% if item.place %}
+                      <span class="badge rounded-pill text-bg-primary"><i class="bi bi-geo-alt me-1"></i>{{ item.place }}</span>
+                    {% endif %}
+                    {% if item.language %}
+                      <span class="badge rounded-pill text-bg-primary"><i class="bi bi-translate me-1"></i>{{ item.language }}</span>
+                    {% endif %}
+                    {% if item.doc_id %}
+                      <span class="badge rounded-pill text-bg-primary"><i class="bi bi-file-text me-1"></i>{{ item.doc_id }}</span>
+                    {% endif %}
+                  </div>
+                </div>
+
+                <div class="col-2 text-end">
+                  <a href="{{ tab_route }}/{{ item.slug or item.doc_id or item.uri.split('/')[-1] }}"
+                    class="btn btn-primary">
+                    Scheda
+                  </a>
+                </div>
+
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+    {# ── Load more / invisible (sentinel to toggle infinite scrolling) ────────────────────── #}
+    {% if loaded < total %}
+      <div id="scroll-sentinel" class="text-center py-3"
+          data-api="/api{{ tab_route }}/results"
+          data-offset="{{ loaded }}"
+          data-limit="{{ page_size }}"
+          data-total="{{ total }}"
+          data-route="{{ tab_route }}">
+      </div>
+      {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+  /* ── noUiSlider init ──────────────────────────────────── */
+  document.querySelectorAll('[id^="slider_"]').forEach(function (el) {
+    if (typeof noUiSlider === 'undefined') return;
+
+    var facetId = el.id.replace('slider_', '');
+    var minV  = parseInt(el.dataset.min,  10);
+    var maxV  = parseInt(el.dataset.max,  10);
+    var fromV = parseInt(el.dataset.from, 10) || minV;
+    var toV   = parseInt(el.dataset.to,   10) || maxV;
+
+    var dispFrom = document.getElementById('disp_' + facetId + '_from');
+    var dispTo   = document.getElementById('disp_' + facetId + '_to');
+    var inpFrom  = document.getElementById('inp_' + facetId + '_from');
+    var inpTo    = document.getElementById('inp_' + facetId + '_to');
+
+    if (dispFrom) dispFrom.textContent = fromV;
+    if (dispTo)   dispTo.textContent   = toV;
+    if (inpFrom)  inpFrom.value = fromV;
+    if (inpTo)    inpTo.value   = toV;
+
+    noUiSlider.create(el, {
+      start:   [fromV, toV],
+      connect: true,
+      step:    1,
+      range:   { min: minV, max: maxV }
+    });
+
+    el.noUiSlider.on('update', function (values) {
+      var f = Math.round(parseFloat(values[0]));
+      var t = Math.round(parseFloat(values[1]));
+      if (dispFrom) dispFrom.textContent = f;
+      if (dispTo)   dispTo.textContent   = t;
+      if (inpFrom)  inpFrom.value = f;
+      if (inpTo)    inpTo.value   = t;
+    });
+  });
+
+ /* ── Infinite scroll con IntersectionObserver ── */
+  var sentinel    = document.getElementById('scroll-sentinel');
+  if (!sentinel) return;
+
+  var resultsList = document.getElementById('zac-catalogue-results-list');
+  var apiBase     = sentinel.dataset.api;
+  var tabRoute    = sentinel.dataset.route;
+  var offset      = parseInt(sentinel.dataset.offset, 10);
+  var limit       = parseInt(sentinel.dataset.limit,  10);
+  var total       = parseInt(sentinel.dataset.total,  10);
+  var loading     = false;
+
+  var observer = new IntersectionObserver(function(entries) {
+    if (entries[0].isIntersecting && !loading && offset < total) {
+      loadMore();
+    }
+  });
+  observer.observe(sentinel);
+
+  function loadMore() {
+    loading = true;
+    sentinel.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
+    var url = apiBase + window.location.search + (window.location.search ? '&' : '?') 
+              + 'offset=' + offset + '&limit=' + limit;
+
+    fetch(url)
+      .then(r => r.json())
+      .then(function(data) {
+        (data.items || []).forEach(function(item) {
+          var slug  = item.slug || item.doc_id || item.uri.split('/').pop();
+          var title = item.title || item.label || item.doc_id || slug;
+          var meta  = [
+            item.year     && '<span><i class="bi bi-calendar3 me-1"></i>'  + item.year     + '</span>',
+            item.house    && '<span><i class="bi bi-building me-1"></i>'   + item.house    + '</span>',
+            item.place    && '<span><i class="bi bi-geo-alt me-1"></i>'    + item.place    + '</span>',
+            item.language && '<span><i class="bi bi-translate me-1"></i>'  + item.language + '</span>',
+            item.doc_id   && '<span><i class="bi bi-file-text me-1"></i>'  + item.doc_id   + '</span>',
+          ].filter(Boolean).join('');
+
+          var a = document.createElement('a');
+          a.href      = tabRoute + '/' + slug;
+          a.className = 'card mb-2 text-decoration-none border-0 shadow-sm result-card';
+          a.innerHTML = '<div class="card-body py-2 px-3">'
+            + '<div class="fw-semibold text-dark" style="font-family:var(--ff-head)">' + title + '</div>'
+            + '<div class="d-flex flex-wrap gap-3 mt-1 small text-muted">' + meta + '</div>'
+            + '</div>';
+          resultsList.appendChild(a);
+        });
+
+        offset += (data.items || []).length;
+        if (offset >= total) observer.disconnect();
+        sentinel.innerHTML = '';
+        loading = false;
+      })
+      .catch(function() {
+        sentinel.innerHTML = '<span class="text-muted small">Errore caricamento.</span>';
+        loading = false;
+      });
+  }
+});
+</script>
+{% endblock %}
