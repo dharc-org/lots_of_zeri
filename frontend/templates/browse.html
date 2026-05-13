@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% block title %}{{ tab_label }} — ZAC{% endblock %}
 
+{% block styles %}
+<link href="/static/css/browse.css" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
 
 {# ── Breadcrumbs ─────────────────────────────────────────── #}
@@ -26,11 +30,13 @@
   <div class="search-bar-wrap">
     <div class="search-bar">
       <input type="text" placeholder="Parola chiave…" disabled>
-      <button type="button" class="search-btn" aria-label="Cerca" disabled>
+      <button type="button" class="search-btn" aria-label="Cerca">
         <i class="bi bi-search"></i>
       </button>
     </div>
-    <a href="/guida-alla-ricerca" class="search-help">Guida alla ricerca →</a>
+    <a href="/guida-alla-ricerca" class="search-help">
+      Guida alla ricerca <i class="bi bi-arrow-right"></i>
+    </a>
   </div>
 </div>
 
@@ -130,17 +136,22 @@
 
 {# ── Layout sidebar + risultati ──────────────────────────── #}
 <div class="zac-catalogue-container">
-  <div class="row g-0">
 
-    {# Sidebar filtri #}
-    <div class="col-md-3">
-      <aside class="zac-catalogue-sidebar">
-        {% include "partials/_sidebar.html" %}
-      </aside>
+    {# Sidebar filtri collassabile #}
+<aside class="zac-catalogue-sidebar" id="zac-sidebar">
+  <div class="zac-sidebar-card">
+    <div class="zac-sidebar-panel">
+      {% include "partials/_sidebar.html" %}
     </div>
+  </div>
+  <button class="zac-sidebar-toggle" id="zac-sidebar-toggle" aria-label="Nascondi filtri">
+    <span class="toggle-icon">‹</span>
+    <span class="toggle-text">Nascondi filtri</span>
+  </button>
+</aside>
 
     {# Risultati #}
-    <div class="col-md-9 zac-catalogue-content">
+    <div class="zac-catalogue-content">
 
       {% if items %}
       <div id="zac-catalogue-results-list" data-view="list">
@@ -220,9 +231,9 @@
       </div>
       {% endif %}
 
-    </div>
-  </div>
-</div>
+    </div>{# /zac-catalogue-content #}
+
+</div>{# /zac-catalogue-container #}
 {% endblock %}
 
 
@@ -373,6 +384,7 @@ document.addEventListener('DOMContentLoaded', function () {
         loading = false;
       });
   }
+
 });
 </script>
 {% endblock %}
