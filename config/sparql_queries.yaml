@@ -325,29 +325,34 @@ results:
       {FILTERS}
     }
 
+  results:
   catalogo: |
-    SELECT DISTINCT ?doc ?docId ?title ?year ?houseLabel ?langLabel
+    SELECT DISTINCT ?doc ?docId ?title ?year ?houseLabel ?langLabel ?illustrated
     WHERE {
-      ?doc a crm:E31_Document ;
-           crm:P2_has_type aat:300026068 .
-      OPTIONAL { ?doc crm:P48_has_preferred_identifier ?docId }
-      OPTIONAL {
-        ?doc crm:P102_has_title ?tn .
-        ?tn crm:P2_has_type zac:primary_title ; rdfs:label ?title .
-      }
-      OPTIONAL {
-        ?doc crm:P94i_was_created_by ?creation .
-        ?creation crm:P82_at_some_time_within ?year .
-      }
-      OPTIONAL {
-        ?doc crm:P72_has_language ?lang .
-        ?lang rdfs:label ?langLabel .
-      }
-      OPTIONAL {
-        ?doc crm:P14_carried_out_by ?house .
-        ?house rdfs:label ?houseLabel .
-      }
-      {FILTERS}
+        ?doc a crm:E31_Document ;
+             crm:P2_has_type aat:300026068 .
+        OPTIONAL { ?doc crm:P48_has_preferred_identifier ?docId }
+        OPTIONAL {
+          ?doc crm:P102_has_title ?tn .
+          ?tn crm:P2_has_type zac:primary_title ; rdfs:label ?title .
+        }
+        OPTIONAL {
+          ?doc crm:P94i_was_created_by ?creation .
+          ?creation crm:P82_at_some_time_within ?year .
+        }
+        OPTIONAL {
+          ?doc crm:P72_has_language ?lang .
+          ?lang rdfs:label ?langLabel .
+        }
+        OPTIONAL {
+          ?doc crm:P14_carried_out_by ?house .
+          ?house rdfs:label ?houseLabel .
+        }
+        OPTIONAL {
+          ?doc crm:P2_has_type zac:illustrated .
+          BIND("true" AS ?illustrated)
+        }
+        {FILTERS}
     }
     ORDER BY ?year ?docId
     LIMIT {limit}

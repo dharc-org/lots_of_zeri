@@ -196,3 +196,76 @@
   display: inline-block; margin-top: 1rem;
   color: var(--terra) !important; text-decoration: underline;
 }
+
+/* ════════════════════════════════════════════════════════════
+   BADGES nelle card risultati
+   ──────────────────────────────────────────────────────────── */
+
+/* ── Container ── */
+.row-badges,
+.card-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.6rem;
+}
+
+/* ── Badge base ── */
+.badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.7rem;
+  font-family: var(--ff-body);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--ink-light);
+  background: transparent;
+  border: 1px solid var(--gray-1);
+  border-radius: 999px;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+/* ── Variante accent (terra/rosso) — es. "Illustrato" ── */
+.badge-pill-accent {
+  color: var(--terra);
+  border-color: var(--terra);
+}
+
+/* ── Variante riempita (opzionale, per evidenziarne uno) ── */
+.badge-pill-filled {
+  background: var(--terra-muted);
+  color: var(--ink);
+  border-color: transparent;
+}
+
+/* ── Variante neutra (es. lingue) ── */
+.badge-pill-neutral {
+  color: var(--gray-3);
+  border-color: var(--gray-1);
+  background: var(--paper-light);
+}
+
+/* ── Hover (solo dentro card linkate) ── */
+.result-row:hover .badge-pill,
+.result-card-grid:hover .badge-pill {
+  border-color: var(--gray-2);
+}
+.result-row:hover .badge-pill-accent,
+.result-card-grid:hover .badge-pill-accent {
+  border-color: var(--terra-dark);
+  color: var(--terra-dark);
+}
+
+/* ── Specifico per la vista griglia: badges più compatti ── */
+.card-badges {
+  margin-top: 0.4rem;
+  gap: 0.3rem;
+}
+.card-badges .badge-pill {
+  font-size: 0.68rem;
+  padding: 0.15rem 0.55rem;
+}

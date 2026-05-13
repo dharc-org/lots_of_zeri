@@ -149,17 +149,23 @@
         <div class="results-list">
           {% for item in items %}
           <a href="{{ tab_route }}/{{ item.slug or item.doc_id or item.uri.split('/')[-1] }}"
-             class="result-row">
+            class="result-row">
             <div class="row-thumb"><div class="thumb-placeholder"></div></div>
             <div class="row-body">
-              <div class="row-title">{{ item.title or item.label or item.doc_id or item.slug }}</div>
+              <div class="row-title">{{ item.title or item.label or item.slug }}</div>
               <div class="row-meta">
                 {% if item.house %}{{ item.house }}{% endif %}
                 {% if item.place %} · {{ item.place }}{% endif %}
                 {% if item.year  %} · {{ item.year }}{% endif %}
-                {% if item.language %} · {{ item.language }}{% endif %}
               </div>
-              {% if item.doc_id %}<div class="row-sub">{{ item.doc_id }}</div>{% endif %}
+              <div class="row-badges">
+                {% if item.language %}
+                  <span class="badge-pill">{{ item.language }}</span>
+                {% endif %}
+                {% if item.illustrated %}
+                  <span class="badge-pill badge-pill-accent">Illustrato</span>
+                {% endif %}
+              </div>
             </div>
             <div class="row-actions">
               <span class="btn-apri">Apri →</span>
@@ -172,12 +178,20 @@
         <div class="results-grid">
           {% for item in items %}
           <a href="{{ tab_route }}/{{ item.slug or item.doc_id or item.uri.split('/')[-1] }}"
-             class="result-card-grid">
+            class="result-card-grid">
             <div class="card-cover"><div class="thumb-placeholder"></div></div>
             <div class="card-body">
-              <div class="card-title">{{ item.title or item.label or item.doc_id or item.slug }}</div>
+              <div class="card-title">{{ item.title or item.label or item.slug }}</div>
               <div class="card-meta">
-                {% if item.house %}{{ item.house }}{% endif %}{% if item.place %}, {{ item.place }}{% endif %}
+                {% if item.house %}{{ item.house }}{% endif %}{% if item.year %}, {{ item.year }}{% endif %}
+              </div>
+              <div class="card-badges">
+                {% if item.language %}
+                  <span class="badge-pill">{{ item.language }}</span>
+                {% endif %}
+                {% if item.illustrated %}
+                  <span class="badge-pill badge-pill-accent">Illustrato</span>
+                {% endif %}
               </div>
               <span class="btn-apri-mini">Apri →</span>
             </div>
