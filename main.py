@@ -67,18 +67,29 @@ async def progetto(request: Request):
     return templates.TemplateResponse("progetto.html", {
         "request": request,
         "active_tab": None,
+        "active_page": "progetto",
     })
 
 @app.get("/esplora", response_class=HTMLResponse)
-async def progetto(request: Request):
+async def esplora(request: Request):
     return templates.TemplateResponse("esplora.html", {
         "request": request,
         "active_tab": None,
+        "active_page": "esplora",
     })
 
-@app.get("/giuda_alla_ricerca", response_class=HTMLResponse)
-async def progetto(request: Request):
+@app.get("/approfondisci", response_class=HTMLResponse)
+async def approfondisci(request: Request):
+    return templates.TemplateResponse("approfondisci.html", {
+        "request": request,
+        "active_tab": None,
+        "active_page": "approfondisci",
+    })
+
+@app.get("/guida-alla-ricerca", response_class=HTMLResponse)
+async def guida_alla_ricerca(request: Request):
     return templates.TemplateResponse("guida_alla_ricerca.html", {
         "request": request,
         "active_tab": None,
+        "active_page": "guida",
     })

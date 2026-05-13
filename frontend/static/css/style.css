@@ -329,152 +329,194 @@ footer {
 }
 
 /* ═══════════════════════════════════════════════════════
-   BROWSE: cataloghi, aste, lotti
+   FOOTER
    ═══════════════════════════════════════════════════════ */
 
-/* ── CATALOGUE TABS (Cataloghi / Aste / Lotti) ─────────── */
-
-.zac-catalogue-tabs {
-  background-color: var(--paper) !important;
+.zac-footer {
+  background: var(--paper);
+  border-top: 3px solid var(--terra);
+  margin-top: 4rem;
 }
 
-.zac-catalogue-tabs .bi {
-  display: none;
+.zac-footer-inner {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  gap: 3rem;
+  padding: 3.5rem 4rem;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
-.zac-catalogue-tabs .nav-tabs {
-  --bs-nav-tabs-link-active-bg: transparent;
-  --bs-nav-tabs-link-active-border-color: transparent;
+/* ── Colonna brand ── */
+.zac-footer-brand .footer-logo {
+  font-family: var(--ff-head);
+  font-size: 1.75rem;
+  color: var(--ink);
+  margin-bottom: 1rem;
+}
+.zac-footer-brand .footer-logo em { font-style: italic; font-weight: 700; }
+.zac-footer-brand .footer-logo .of {
+  font-style: italic;
+  font-weight: 400;
+  color: var(--terra);
+  font-size: 1.25rem;
+}
+
+.footer-desc {
+  font-family: var(--ff-body);
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--ink-light);
+  margin-bottom: 1.5rem;
+  max-width: 22rem;
+}
+.footer-desc a {
+  color: var(--ink-light) !important;
+  text-decoration: underline;
+  text-decoration-color: var(--gray-1);
+  text-underline-offset: 2px;
+}
+.footer-desc a:hover {
+  color: var(--terra) !important;
+  text-decoration-color: var(--terra);
+}
+
+.footer-meta {
+  font-family: var(--ff-body);
+  font-size: 0.8rem;
+  line-height: 1.6;
+  color: var(--ink-light);
+}
+.footer-meta a {
+  color: var(--ink-light) !important;
+  text-decoration: underline;
+}
+.footer-meta a:hover { color: var(--terra) !important; }
+
+/* ── Colonne link ── */
+.footer-col-title {
+  font-family: var(--ff-body);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--terra);
+  display: inline-block;
+}
+
+.footer-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.footer-list li {
   border-bottom: 1px solid var(--gray-1);
 }
-
-.zac-catalogue-tabs .nav-tabs .nav-link {
-  font-family: var(--ff-head);
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--ink) !important;
-  background-color: transparent !important;
-  border: none !important;
-  border-bottom: 2px solid transparent !important;
-  border-radius: 0 !important;
-  padding: 0.6rem 1.25rem 0.65rem;
-  margin-bottom: -2px;
-  text-decoration: none !important;
+.footer-list li:last-child {
+  border-bottom: none;
 }
-
-/* Disabilita l'animazione ::after della navbar sui tab */
-.zac-catalogue-tabs .nav-tabs .nav-link::after {
-  display: none !important;
-}
-
-.zac-catalogue-tabs .nav-tabs .nav-link.active {
-  color: var(--terra) !important;
-  font-weight: 700;
-  background-color: var(--terra-muted-12) !important;  /* background leggero */
-  border-bottom: 2px solid var(--terra) !important;
-  text-decoration: none !important;
-}
-
-.zac-catalogue-tabs .nav-tabs .nav-link.disabled {
-  color: var(--gray-1) !important;
-}
-
-/* colora bordo */
-.zac-catalogue-tabs {
-  background-color: var(--paper) !important;
-  --bs-border-color: var(--gray-1);  /* ← colora il border-bottom Bootstrap */
-}
-
-/* ── SIDEBAR COLLASSABILE ──────────────────────────────── */
-.zac-catalogue-container {
-  display: flex;
-  align-items: flex-start;
-  padding: 1.5rem;
-  gap: 1.5rem;
-  min-height: calc(100vh - 120px);
-}
-
-.zac-catalogue-sidebar {
-  flex-shrink: 0;
-}
-
-/* Il card contenitore dei filtri */
-.zac-sidebar-card {
-  display: flex;
-  flex-direction: row;
-  border: 1px solid var(--gray-1);
-  border-radius: 6px;
-  overflow: hidden;
-  position: sticky;
-  top: 80px;
-  max-height: calc(100vh - 100px);
-}
-
-/* Pannello scrollabile con i filtri */
-.zac-sidebar-panel {
-  width: 260px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  background: var(--paper-dark);
-  padding: 1.25rem 1rem;
-  transition: width 0.3s ease, padding 0.3s ease, opacity 0.2s ease;
-  scrollbar-width: thin;
-  scrollbar-color: var(--gray-1) transparent;
-}
-
-/* Tab verticale "Nascondi filtri" */
-.zac-sidebar-toggle {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  padding-top: 1rem;
-  gap: 0.6rem;
-  width: 28px;
-  min-width: 28px;
-  background: var(--ink);
-  border: none;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.zac-sidebar-toggle:hover {
-  background: var(--ink-light);
-}
-
-.toggle-icon {
-  font-size: 0.85rem;
-  color: var(--paper);
-  transition: transform 0.3s ease;
-  line-height: 1;
-}
-
-.toggle-text {
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-  transform: rotate(180deg);
+.footer-list a {
+  display: block;
+  padding: 0.6rem 0;
   font-family: var(--ff-body);
-  font-size: 0.62rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-size: 0.9rem;
+  color: var(--ink-light) !important;
+  text-decoration: none !important;
+  transition: padding-left 0.2s ease, color 0.2s ease;
+}
+.footer-list a:hover {
+  padding-left: 0.4rem;
+  color: var(--terra) !important;
+}
+.footer-list a.disabled {
+  color: var(--gray-2) !important;
+  pointer-events: none;
+}
+
+/* ── Sostenitori (dark bar) ── */
+.zac-footer-sponsors {
+  background: var(--ink);
   color: var(--paper);
 }
 
-/* Stato chiuso */
-.zac-catalogue-sidebar.is-collapsed .zac-sidebar-panel {
-  width: 0;
-  padding: 0;
-  opacity: 0;
-  overflow: hidden;
+.zac-footer-sponsors-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem 4rem;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2rem;
+  align-items: center;
 }
 
-.zac-catalogue-sidebar.is-collapsed .toggle-icon {
-  transform: rotate(180deg);
+.sponsors-text strong {
+  font-family: var(--ff-body);
+  font-weight: 600;
+  font-size: 0.95rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+.sponsors-text p {
+  font-family: var(--ff-body);
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: var(--paper-dark);
+  max-width: 38rem;
+  margin: 0;
 }
 
-/* Area risultati */
-.zac-catalogue-content {
-  flex: 1;
-  min-width: 0;
+.sponsors-logos {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+.sponsor-logo {
+  font-family: var(--ff-body);
+  font-size: 0.7rem;
+  color: var(--paper-dark);
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--gray-3);
+  border-radius: 2px;
+  letter-spacing: 0.05em;
+}
+
+.sponsors-links {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 2rem;
+  justify-content: flex-end;
+  padding-top: 1.25rem;
+  margin-top: 0.5rem;
+  border-top: 1px solid var(--gray-4);
+}
+.sponsors-links a {
+  font-family: var(--ff-body);
+  font-size: 0.8rem;
+  color: var(--paper-dark) !important;
+  text-decoration: none;
+}
+.sponsors-links a:hover {
+  color: var(--terra-light) !important;
+}
+
+/* ── Responsive ── */
+@media (max-width: 992px) {
+  .zac-footer-inner {
+    grid-template-columns: 1fr 1fr;
+    padding: 2.5rem 2rem;
+    gap: 2rem;
+  }
+  .zac-footer-brand { grid-column: 1 / -1; }
+  .zac-footer-sponsors-inner {
+    grid-template-columns: 1fr;
+    padding: 2rem;
+  }
+  .sponsors-logos { flex-wrap: wrap; }
+}
+
+@media (max-width: 576px) {
+  .zac-footer-inner {
+    grid-template-columns: 1fr;
+  }
 }

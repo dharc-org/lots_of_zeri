@@ -10,34 +10,12 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/nouislider@15.8.1/dist/nouislider.min.css" rel="stylesheet">
   <link href="/static/css/style.css" rel="stylesheet">
+  <link href="/static/css/catalogue_style.css" rel="stylesheet">
 </head>
 <body class="d-flex flex-column min-vh-100">
 
 
   {% include "partials/_nav.html" %}
-
-  <div class="zac-catalogue-tabs border-bottom bg-white sticky-top pt-3">
-    <div class="container-fluid">
-      <ul class="nav nav-tabs border-0">
-        <li class="nav-item">
-          <a href="/cataloghi" class="nav-link {% if '/cataloghi' in request.url.path %}active{% endif %}">
-            <i class="bi bi-journal-text me-1"></i>Cataloghi
-          </a>
-        </li>
-        <li class="nav-item">
-          <a href="/aste" class="nav-link {% if '/aste' in request.url.path %}active{% endif %}">
-            <i class="bi bi-hammer me-1"></i>Aste
-          </a>
-        </li>
-        <li class="nav-item">
-          <span class="nav-link disabled">
-            <i class="bi bi-tag me-1"></i>Lotti
-            <span class="badge bg-secondary bg-opacity-50 ms-1">Soon</span>
-          </span>
-        </li>
-      </ul>
-    </div>
-  </div>
 
   {% block content %}{% endblock %}
 
