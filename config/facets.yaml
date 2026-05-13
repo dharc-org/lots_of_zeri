@@ -42,8 +42,20 @@ eventi_asta:
       place:  "placeLabel"
 
   facets:
+    organizzatore:
+      label_it: "Organizzatore/Casa d'Asta"
+      label_en: "Organisers/Auction House"
+      type: "multiselect"
+      ui_widget: "checkbox_list"
+
+    banditore:
+      label_it: "Banditore"
+      label_en: "Auctioneer"
+      type: "multiselect"
+      ui_widget: "checkbox_list"
+    
     periodo:
-      label_it: "Periodo (data asta)"
+      label_it: "Data dell'asta"
       label_en: "Period (auction year)"
       type: "range"
       ui_widget: "range_slider"
@@ -52,33 +64,21 @@ eventi_asta:
         max: 1940
         step: 1
 
-    organizzatore:
-      label_it: "Organizzatori"
-      label_en: "Organisers"
-      type: "multiselect"
-      ui_widget: "checkbox_list"
-
     luogo:
-      label_it: "Luogo di vendita"
+      label_it: "Luogo dell'asta"
       label_en: "Place"
       type: "multiselect"
       ui_widget: "checkbox_list"
 
     tipologia_oggetti:
-      label_it: "Tipologia Oggetti Venduti"
+      label_it: "Tipologia degli oggetti"
       label_en: "Object Types Sold"
       type: "multiselect"
       ui_widget: "checkbox_list"
 
     cronologia_oggetti:
-      label_it: "Cronologia Oggetti Venduti"
+      label_it: "Cronologia degli oggetti"
       label_en: "Object Chronology Sold"
-      type: "multiselect"
-      ui_widget: "checkbox_list"
-
-    banditore:
-      label_it: "Banditori"
-      label_en: "Auctioneer"
       type: "multiselect"
       ui_widget: "checkbox_list"
 
@@ -111,6 +111,7 @@ cataloghi:
       year:       "year"
       house:      "houseLabel"
       language:   "langLabel"
+      illustrated: "illustrated"   
 
   facets:
     autori:
@@ -129,14 +130,8 @@ cataloghi:
         max: 1940
         step: 1
 
-    luogo:
-      label_it: "Luogo dell'asta"
-      label_en: "Aucton Location"
-      type: "multiselect"
-      ui_widget: "checkbox_list"
-
     collezione:
-      label_it: "Collezione"
+      label_it: "Collezione in vendita"
       label_en: "Collection"
       type: "multiselect"
       ui_widget: "checkbox_list"
