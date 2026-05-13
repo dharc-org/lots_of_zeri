@@ -90,21 +90,20 @@ async def _facet_values(sparql, cfg, tab_id: str, facet_id: str,
     body = cfg.get_facet_query_by_key(key)
     if not body:
         return []
-    
+
     if "{FILTERS}" in body:
         body = body.replace("{FILTERS}", filter_block.strip())
     elif filter_block.strip():
         body = _inject_filters(body, filter_block)
-    
+
     full_query = cfg.get_prefixes() + body
-    
+
     try:
-        rows = await sparql.select(full_query)
-        rows = await sparql.select(cfg.get_prefixes() + body)
+        rows = await sparql.select(full_query)          
         return [
             {
-                "uri":   r["facetURI"],     # URI (valore)
-                "value": r["facetValue"],   # label solo per display
+                "uri":   r.get("facetURI") or r.get("facetValue"),   
+                "value": r["facetValue"],
                 "count": int(float(r.get("count", 0)))
             }
             for r in rows if r.get("facetValue") not in (None, "", "NaN")
