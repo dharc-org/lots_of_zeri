@@ -1,11 +1,110 @@
 {% extends "base.html" %}
 {% block title %}{{ tab_label }} — ZAC{% endblock %}
 
-{% block styles %}
-<link href="/static/css/browse.css" rel="stylesheet">
-{% endblock %}
-
 {% block content %}
+<<<<<<< HEAD
+<div class="zac-catalogue-container">
+
+  {# ── Sidebar collassabile ────────────────────────────── #}
+<aside class="zac-catalogue-sidebar" id="zac-sidebar">
+  <div class="zac-sidebar-card">
+
+    <div class="zac-sidebar-panel">
+      {% include "partials/_sidebar.html" %}
+    </div>
+
+    <button class="zac-sidebar-toggle" id="zac-sidebar-toggle" aria-label="Nascondi filtri">
+      <span class="toggle-icon">‹</span>
+      <span class="toggle-text">Nascondi filtri</span>
+    </button>
+
+  </div>
+</aside>
+
+  {# ── Results ────────────────────────────────────────── #}
+  <div class="zac-catalogue-content">
+
+    {% if has_any_filter %}
+      {% for facet in facet_defs %}
+        {% if facet.type == 'range' %}
+          {% set key_from = facet.id ~ '_from' %}
+          {% set key_to   = facet.id ~ '_to' %}
+          {% if key_from in active_filters and key_to in active_filters %}
+            {% if active_filters[key_from] != facet.range.min or active_filters[key_to] != facet.range.max %}
+              <span class="badge rounded-pill bg-secondary bg-opacity-25 text-dark border">
+                {{ facet.label_it }}: {{ active_filters[key_from] }} — {{ active_filters[key_to] }}
+              </span>
+            {% endif %}
+          {% endif %}
+        {% elif facet.type == 'text_search' %}
+          {% if facet.id in active_filters and active_filters[facet.id] %}
+            <span class="badge rounded-pill bg-secondary bg-opacity-25 text-dark border">
+              {{ facet.label_it }}: {{ active_filters[facet.id] }}
+            </span>
+          {% endif %}
+        {% elif facet.type == 'boolean' %}
+          {% if facet.id in active_filters and active_filters[facet.id] == 'true' %}
+            <span class="badge rounded-pill bg-secondary bg-opacity-25 text-dark border">
+              {{ facet.label_it }}: Sì
+            </span>
+          {% elif facet.id in active_filters and active_filters[facet.id] == 'false' %}
+            <span class="badge rounded-pill bg-secondary bg-opacity-25 text-dark border">
+              {{ facet.label_it }}: No
+            </span>
+          {% endif %}
+        {% elif facet.type == 'multiselect' %}
+          {% if facet.id in active_filters %}
+            {% for v in active_filters[facet.id] %}
+              <span class="badge rounded-pill bg-secondary bg-opacity-25 text-dark border">
+                {{ facet.label_it }}: {{ v }}
+              </span>
+            {% endfor %}
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+      <a href="{{ tab_route }}" class="badge rounded-pill text-decoration-none border">
+        <i class="bi bi-x-lg me-1"></i>Reset
+      </a>
+    {% endif %}
+
+    {# ── Result count ─────────────────────────────── #}
+    <div class="w-100 mb-3">
+      <span class="float-end">
+        <i class="{{ icon }} me-1"></i>
+        <strong>{{ total }}</strong> {{ entity_label }}
+      </span>
+      <div class="clearfix"></div>
+    </div>
+
+    {# ── Result cards ─────────────────────────────── #}
+    {# class zac-catalogue-results-list is used in the JS please do not rename it #}
+    <div id="zac-catalogue-results-list">
+      {% for item in items %}
+      <div class="card mb-2 zac-catalogue-result-card">
+        <div class="card-body py-2 px-3">
+          <div class="row align-items-center">
+
+            <div class="col-10">
+              <div class="zac-catalogue-result">
+                <h6>{{ item.title or item.label or item.doc_id or item.slug }}</h6>
+              </div>
+              <div class="d-flex flex-wrap gap-3 mt-1">
+                {% if item.year %}
+                  <span class="badge rounded-pill text-bg-primary"><i class="bi bi-calendar3 me-1"></i>{{ item.year }}</span>
+                {% endif %}
+                {% if item.house %}
+                  <span class="badge rounded-pill text-bg-primary"><i class="bi bi-building me-1"></i>{{ item.house }}</span>
+                {% endif %}
+                {% if item.place %}
+                  <span class="badge rounded-pill text-bg-primary"><i class="bi bi-geo-alt me-1"></i>{{ item.place }}</span>
+                {% endif %}
+                {% if item.language %}
+                  <span class="badge rounded-pill text-bg-primary"><i class="bi bi-translate me-1"></i>{{ item.language }}</span>
+                {% endif %}
+                {% if item.doc_id %}
+                  <span class="badge rounded-pill text-bg-primary"><i class="bi bi-file-text me-1"></i>{{ item.doc_id }}</span>
+                {% endif %}
+=======
 
 {# ── Breadcrumbs ─────────────────────────────────────────── #}
 <nav class="zac-breadcrumbs">
@@ -30,13 +129,11 @@
   <div class="search-bar-wrap">
     <div class="search-bar">
       <input type="text" placeholder="Parola chiave…" disabled>
-      <button type="button" class="search-btn" aria-label="Cerca">
+      <button type="button" class="search-btn" aria-label="Cerca" disabled>
         <i class="bi bi-search"></i>
       </button>
     </div>
-    <a href="/guida-alla-ricerca" class="search-help">
-      Guida alla ricerca <i class="bi bi-arrow-right"></i>
-    </a>
+    <a href="/guida-alla-ricerca" class="search-help">Guida alla ricerca →</a>
   </div>
 </div>
 
@@ -136,22 +233,17 @@
 
 {# ── Layout sidebar + risultati ──────────────────────────── #}
 <div class="zac-catalogue-container">
+  <div class="row g-0">
 
-    {# Sidebar filtri collassabile #}
-<aside class="zac-catalogue-sidebar" id="zac-sidebar">
-  <div class="zac-sidebar-card">
-    <div class="zac-sidebar-panel">
-      {% include "partials/_sidebar.html" %}
+    {# Sidebar filtri #}
+    <div class="col-md-3">
+      <aside class="zac-catalogue-sidebar">
+        {% include "partials/_sidebar.html" %}
+      </aside>
     </div>
-  </div>
-  <button class="zac-sidebar-toggle" id="zac-sidebar-toggle" aria-label="Nascondi filtri">
-    <span class="toggle-icon">‹</span>
-    <span class="toggle-text">Nascondi filtri</span>
-  </button>
-</aside>
 
     {# Risultati #}
-    <div class="zac-catalogue-content">
+    <div class="col-md-9 zac-catalogue-content">
 
       {% if items %}
       <div id="zac-catalogue-results-list" data-view="list">
@@ -169,14 +261,27 @@
                 {% if item.place %} · {{ item.place }}{% endif %}
                 {% if item.year  %} · {{ item.year }}{% endif %}
                 {% if item.language %} · {{ item.language }}{% endif %}
+>>>>>>> 3989c1b486d9a8a7c693c322fb0df358ae446677
               </div>
               {% if item.doc_id %}<div class="row-sub">{{ item.doc_id }}</div>{% endif %}
             </div>
+<<<<<<< HEAD
+
+            <div class="col-2 text-end">
+              <a href="{{ tab_route }}/{{ item.slug or item.doc_id or item.uri.split('/')[-1] }}"
+                class="btn btn-primary">
+                Scheda
+              </a>
+            </div>
+
+          </div>
+=======
             <div class="row-actions">
               <span class="btn-apri">Apri →</span>
             </div>
           </a>
           {% endfor %}
+>>>>>>> 3989c1b486d9a8a7c693c322fb0df358ae446677
         </div>
 
         {# ── GRIGLIA ── #}
@@ -197,6 +302,25 @@
         </div>
 
       </div>
+<<<<<<< HEAD
+      {% endfor %}
+    </div>
+
+    {# ── Infinite scroll sentinel ──────────────────── #}
+    {% if loaded < total %}
+    <div id="scroll-sentinel" class="text-center py-3"
+        data-api="/api{{ tab_route }}/results"
+        data-offset="{{ loaded }}"
+        data-limit="{{ page_size }}"
+        data-total="{{ total }}"
+        data-route="{{ tab_route }}">
+    </div>
+    {% endif %}
+
+  </div>{# /zac-catalogue-content #}
+
+</div>{# /zac-catalogue-container #}
+=======
 
       {# Sentinel infinite scroll #}
       {% if loaded < total %}
@@ -217,9 +341,10 @@
       </div>
       {% endif %}
 
-    </div>{# /zac-catalogue-content #}
-
-</div>{# /zac-catalogue-container #}
+    </div>
+  </div>
+</div>
+>>>>>>> 3989c1b486d9a8a7c693c322fb0df358ae446677
 {% endblock %}
 
 
@@ -227,7 +352,21 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
+<<<<<<< HEAD
+  /* ── Toggle sidebar ─────────────────────────────────── */
+  var sidebar   = document.getElementById('zac-sidebar');
+  var toggleBtn = document.getElementById('zac-sidebar-toggle');
+  var toggleText = toggleBtn.querySelector('.toggle-text');
+
+  toggleBtn.addEventListener('click', function () {
+    var isCollapsed = sidebar.classList.toggle('is-collapsed');
+    toggleText.textContent = isCollapsed ? 'Mostra filtri' : 'Nascondi filtri';
+  });
+
+  /* ── noUiSlider init ────────────────────────────────── */
+=======
   /* ── noUiSlider init ─────────────────────────────────── */
+>>>>>>> 3989c1b486d9a8a7c693c322fb0df358ae446677
   document.querySelectorAll('[id^="slider_"]').forEach(function (el) {
     if (typeof noUiSlider === 'undefined' || el.noUiSlider) return;
     var facetId = el.id.replace('slider_', '');
@@ -257,6 +396,10 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
+<<<<<<< HEAD
+  /* ── Infinite scroll con IntersectionObserver ───────── */
+  var sentinel    = document.getElementById('scroll-sentinel');
+=======
   /* ── Toggle vista lista/griglia ─────────────────────── */
   var container = document.getElementById('zac-catalogue-results-list');
   document.querySelectorAll('.view-btn').forEach(function (btn) {
@@ -298,6 +441,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   /* ── Infinite scroll ────────────────────────────────── */
   var sentinel = document.getElementById('scroll-sentinel');
+>>>>>>> 3989c1b486d9a8a7c693c322fb0df358ae446677
   if (!sentinel) return;
   var resultsList = document.getElementById('zac-catalogue-results-list');
   var listEl = resultsList.querySelector('.results-list');
@@ -317,8 +461,13 @@ document.addEventListener('DOMContentLoaded', function () {
   function loadMore() {
     loading = true;
     sentinel.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+<<<<<<< HEAD
+
+    var url = apiBase + window.location.search + (window.location.search ? '&' : '?')
+=======
     var url = apiBase + window.location.search
               + (window.location.search ? '&' : '?')
+>>>>>>> 3989c1b486d9a8a7c693c322fb0df358ae446677
               + 'offset=' + offset + '&limit=' + limit;
     fetch(url)
       .then(function (r) { return r.json(); })
