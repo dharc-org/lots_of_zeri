@@ -583,3 +583,249 @@ footer {
 .zac-breadcrumbs a:hover { color: var(--terra) !important; }
 .zac-breadcrumbs .sep { margin: 0 0.4rem; color: var(--gray-2); }
 .zac-breadcrumbs .current { color: var(--terra); font-style: italic; }
+
+/* ════════════════════════════════════════════════════════════════
+   DETAIL VIEW — schede di dettaglio (catalogo, evento, lotto)
+   Appendi in coda a frontend/static/css/style.css
+   Usa le variabili ZAC già definite (--zac-red, --ff-head, ecc.).
+   ════════════════════════════════════════════════════════════════ */
+
+.detail-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 2.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+/* ── Indice di navigazione laterale ───────────────────────────── */
+.detail-nav {
+  position: sticky;
+  top: 2rem;
+  align-self: start;
+  height: fit-content;
+}
+.detail-nav-item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: .5rem;
+  padding: .55rem 0;
+  border-bottom: 1px solid var(--zac-border, #e4ddd0);
+  text-decoration: none;
+  color: var(--zac-ink2, #6b6256);
+  font-size: .85rem;
+  transition: color .15s ease, border-color .15s ease;
+}
+.detail-nav-item:hover { color: var(--zac-red, #8b2635); }
+.detail-nav-item.active {
+  color: var(--zac-red, #8b2635);
+  border-color: var(--zac-red, #8b2635);
+}
+.detail-nav-num {
+  font-family: var(--ff-mono, "JetBrains Mono", monospace);
+  font-size: .72rem;
+  opacity: .6;
+}
+
+/* ── Topbar: back + switch ────────────────────────────────────── */
+.detail-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+.detail-back {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  color: var(--zac-ink2, #6b6256);
+  text-decoration: none;
+  font-size: .85rem;
+}
+.detail-back:hover { color: var(--zac-red, #8b2635); }
+.detail-switch { display: flex; align-items: center; gap: .5rem; }
+.detail-switch-label { font-size: .78rem; color: var(--zac-ink2, #6b6256); }
+.detail-switch-btn {
+  font-size: .8rem;
+  padding: .3rem .8rem;
+  border: 1px solid var(--zac-border, #e4ddd0);
+  border-radius: 4px;
+  text-decoration: none;
+  color: var(--zac-ink, #2c2419);
+  background: #fff;
+  transition: all .15s ease;
+}
+.detail-switch-btn:not(.disabled):hover {
+  background: var(--zac-red, #8b2635);
+  border-color: var(--zac-red, #8b2635);
+  color: #fff;
+}
+.detail-switch-btn.disabled { opacity: .4; cursor: default; }
+
+/* ── Titolo ───────────────────────────────────────────────────── */
+.detail-head { margin-bottom: 1.5rem; text-align: right; }
+.detail-title {
+  font-family: var(--ff-head, "Playfair Display", serif);
+  font-size: 1.9rem;
+  line-height: 1.2;
+  color: var(--zac-ink, #2c2419);
+  margin: 0;
+}
+.detail-subtitle {
+  font-style: italic;
+  color: var(--zac-ink2, #6b6256);
+  margin-top: .4rem;
+}
+
+.detail-section { margin-bottom: 2.5rem; scroll-margin-top: 2rem; }
+
+/* ── Visore IIIF (placeholder) ────────────────────────────────── */
+.iiif-placeholder {
+  aspect-ratio: 16 / 10;
+  background:
+    repeating-linear-gradient(45deg,
+      rgba(0,0,0,.02) 0 12px, transparent 12px 24px),
+    var(--zac-bg, #faf7f0);
+  border: 1px dashed var(--zac-border, #cdc4b4);
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+}
+.iiif-placeholder-inner {
+  text-align: center;
+  color: var(--zac-ink2, #6b6256);
+}
+.iiif-placeholder-inner i { font-size: 2.5rem; opacity: .5; }
+.iiif-placeholder-inner p {
+  font-family: var(--ff-head, "Playfair Display", serif);
+  font-size: 1.1rem;
+  margin: .5rem 0 .2rem;
+}
+.iiif-placeholder-note { font-size: .78rem; opacity: .7; }
+
+/* ── Scheda metadati (<dl>) ───────────────────────────────────── */
+.detail-card {
+  background: #fff;
+  border: 1px solid var(--zac-border, #e4ddd0);
+  border-radius: 8px;
+  padding: .5rem 1.5rem;
+  margin: 0;
+}
+.detail-row {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 1.5rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--zac-border, #f0ebe0);
+}
+.detail-row:last-child { border-bottom: none; }
+.detail-dt {
+  font-size: .78rem;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+  color: var(--zac-ink2, #8a8174);
+  margin: 0;
+}
+.detail-dd { margin: 0; color: var(--zac-ink, #2c2419); line-height: 1.5; }
+.detail-link {
+  color: var(--zac-red, #8b2635);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.detail-contrib { margin-bottom: .25rem; }
+.detail-role { color: var(--zac-ink2, #8a8174); font-size: .9em; }
+
+/* ── Caroselli correlati ──────────────────────────────────────── */
+.detail-related-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding-bottom: .5rem;
+  border-bottom: 2px solid var(--zac-border, #e4ddd0);
+}
+.detail-related-title {
+  font-family: var(--ff-head, "Playfair Display", serif);
+  font-size: 1.3rem;
+  margin: 0;
+}
+.detail-related-count {
+  font-size: .8rem;
+  color: var(--zac-red, #8b2635);
+}
+.detail-carousel {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  padding-bottom: .75rem;
+  scroll-snap-type: x mandatory;
+}
+.carousel-card {
+  flex: 0 0 260px;
+  scroll-snap-align: start;
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  background: #fff;
+  border: 1px solid var(--zac-border, #e4ddd0);
+  border-radius: 8px;
+  padding: .85rem;
+  text-decoration: none;
+  color: var(--zac-ink, #2c2419);
+  transition: box-shadow .15s ease, transform .15s ease;
+}
+.carousel-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,.08);
+  transform: translateY(-2px);
+}
+.carousel-thumb {
+  flex: 0 0 48px;
+  height: 60px;
+  background: var(--zac-bg, #faf7f0);
+  border-radius: 4px;
+  display: grid;
+  place-items: center;
+  color: var(--zac-gold, #c8a96e);
+  font-size: 1.3rem;
+}
+.carousel-body { flex: 1; min-width: 0; }
+.carousel-title {
+  font-weight: 600;
+  font-size: .9rem;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.carousel-meta { font-size: .78rem; color: var(--zac-ink2, #8a8174); margin-top: .2rem; }
+.carousel-cta {
+  flex: 0 0 auto;
+  font-size: .78rem;
+  color: var(--zac-red, #8b2635);
+  white-space: nowrap;
+}
+
+/* Placeholder carosello (Lotti, o nessun correlato) */
+.carousel-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .6rem;
+  padding: 2rem;
+  background: var(--zac-bg, #faf7f0);
+  border: 1px dashed var(--zac-border, #cdc4b4);
+  border-radius: 8px;
+  color: var(--zac-ink2, #8a8174);
+  font-size: .85rem;
+}
+
+/* ── Responsive ───────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .detail-layout { grid-template-columns: 1fr; }
+  .detail-nav { display: none; }
+  .detail-row { grid-template-columns: 1fr; gap: .3rem; }
+  .detail-head { text-align: left; }
+}

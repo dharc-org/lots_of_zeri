@@ -251,9 +251,6 @@
 }
 .zac-catalogue-sidebar.is-collapsed .toggle-icon { transform: rotate(180deg); }
 
-
-/* ── FACETS (contenuto sidebar) ────────────────────────── */
-
 .sidebar-header {
   font-family: var(--ff-body);
   font-size: 0.90rem;
@@ -293,6 +290,11 @@
 .form-check-input {
   background-color: var(--paper-light) !important;
   border: 2px solid var(--gray-1) !important;
+}
+
+.form-check-input:checked {
+  background-color: var(--terra) !important;
+  border-color: var(--terra) !important;
 }
 
 .form-check-label span:first-child {
