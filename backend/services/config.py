@@ -14,6 +14,8 @@ class ConfigService:
         self._settings = config.get("settings", {})
         self._facets   = config.get("facets", {})
         self._queries  = config.get("sparql_queries", {})
+        self._detail_views = config.get("detail_views", {})
+
 
     # ─── Triplestore ────────────────────────────────────────
     @property
@@ -68,6 +70,9 @@ class ConfigService:
 
     def get_detail_query(self, name: str) -> Optional[str]:
         return self._queries.get("detail", {}).get(name)
+
+    def get_detail_view(self, kind: str) -> Optional[dict]:
+        return self._detail_views.get(kind)
 
     # ─── Pagination ─────────────────────────────────────────
     @property

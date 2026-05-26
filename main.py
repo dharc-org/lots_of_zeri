@@ -23,8 +23,10 @@ BASE = Path(__file__).parent
 def _load_config() -> ConfigService:
     with open(BASE / "config" / "settings.yaml")       as f: settings = yaml.safe_load(f)
     with open(BASE / "config" / "facets.yaml")          as f: facets   = yaml.safe_load(f)
-    with open(BASE / "config" / "sparql_queries.yaml")  as f: queries  = yaml.safe_load(f)
-    return ConfigService({"settings": settings, "facets": facets, "sparql_queries": queries})
+    with open(BASE  / "config" / "sparql_queries.yaml") as f: queries  = yaml.safe_load(f)
+    with open(BASE  / "config" / "detail_views.yaml")   as f: detail   = yaml.safe_load(f)
+    return ConfigService({"settings": settings, "facets": facets,
+                          "sparql_queries": queries, "detail_views": detail})
 
 
 # ── Load config and register routes at import time (before app starts) ──

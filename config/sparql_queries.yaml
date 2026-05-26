@@ -325,13 +325,17 @@ results:
       {FILTERS}
     }
 
-  results:
   catalogo: |
     SELECT DISTINCT ?doc ?docId ?title ?year ?houseLabel ?langLabel ?illustrated
     WHERE {
         ?doc a crm:E31_Document ;
              crm:P2_has_type aat:300026068 .
-        OPTIONAL { ?doc crm:P48_has_preferred_identifier ?docId }
+        
+        OPTIONAL { 
+          ?doc crm:P48_has_preferred_identifier ?idNode . 
+          ?idNode rdfs:label ?docId 
+          }
+
         OPTIONAL {
           ?doc crm:P102_has_title ?tn .
           ?tn crm:P2_has_type zac:primary_title ; rdfs:label ?title .
@@ -372,61 +376,145 @@ results:
 # ─────────────────────────────────────────
 detail:
 
-  catalogo_item: |
-    SELECT DISTINCT ?title ?secTitle ?year ?houseLabel ?langLabel ?auctionLabel ?collLabel ?contribLabel ?roleLabel ?docId
+  # ── CATALOGO ───────────────────────────────────────────────────
+
+  # Campi scalari + chiavi per i link interni (auctionSlug, docId)
+  catalogo_scalars: |
+    SELECT DISTINCT ?title ?secTitle ?year ?house ?houseLabel ?docId ?auction ?auctionSlug ?auctionLabel
     WHERE {
-      <{uri}> a crm:E31_Document .
-      OPTIONAL { <{uri}> crm:P48_has_preferred_identifier ?docId }
-      OPTIONAL {
-        <{uri}> crm:P102_has_title ?tn .
-        ?tn crm:P2_has_type zac:primary_title ; rdfs:label ?title .
-      }
-      OPTIONAL {
-        <{uri}> crm:P102_has_title ?tn2 .
-        ?tn2 crm:P2_has_type zac:secondary_title ; rdfs:label ?secTitle .
-      }
-      OPTIONAL {
-        <{uri}> crm:P94i_was_created_by ?cr .
-        ?cr crm:P82_at_some_time_within ?year .
-      }
-      OPTIONAL {
-        <{uri}> crm:P9_consists_of ?organisation .
-        ?organisation crm:P2_has_type zac:auction_organisation ;
-          crm:P14_carried_out_by ?house .
-        ?house rdfs:label ?houseLabel .
-      }
-      OPTIONAL { <{uri}> crm:P72_has_language ?lang . ?lang rdfs:label ?langLabel . }
-      OPTIONAL { <{uri}> crm:P70_documents ?auction . ?auction rdfs:label ?auctionLabel . }
-      OPTIONAL {
-        <{uri}> crm:P70_documents ?auc2 .
-        ?auc2 crm:P46_is_composed_of ?coll . ?coll rdfs:label ?collLabel .
-      }
-      OPTIONAL {
+        <{uri}> a crm:E31_Document .
+        OPTIONAL { <{uri}> crm:P48_has_preferred_identifier ?idNode . ?idNode rdfs:label ?docId }
+        OPTIONAL {
+          <{uri}> crm:P102_has_title ?tn .
+          ?tn crm:P2_has_type zac:primary_title ; rdfs:label ?title .
+        }
+        OPTIONAL {
+          <{uri}> crm:P102_has_title ?tn2 .
+          ?tn2 crm:P2_has_type zac:secondary_title ; rdfs:label ?secTitle .
+        }
+        OPTIONAL {
+          <{uri}> crm:P94i_was_created_by ?cr .
+          ?cr crm:P82_at_some_time_within ?year .
+        }
+
+        OPTIONAL {
+          <{uri}> crm:P70_documents ?auction .
+          ?auction rdfs:label ?auctionLabel .
+          BIND(REPLACE(STR(?auction), "^.*/", "") AS ?auctionSlug)
+        }
+    }
+    LIMIT 1
+
+  # Contributori e ruolo (un record per coppia contributore/ruolo)
+  catalogo_contributors: |
+    SELECT DISTINCT ?name ?role
+    WHERE {
         <{uri}> crm:P94i_was_created_by ?cr2 .
         ?asgn a crm:E13_Attribute_Assignment ;
               crm:P140_assigned_attribute_to ?cr2 ;
               crm:P141_assigned ?contrib ;
-              crm:P2_has_type ?role .
-        ?contrib rdfs:label ?contribLabel .
-        OPTIONAL { ?role rdfs:label ?roleLabel }
-      }
+              crm:P2_has_type ?roleNode .
+        ?contrib rdfs:label ?name .
+        OPTIONAL { ?roleNode rdfs:label ?role }
     }
+    ORDER BY ?name
 
-  evento_item: |
-    SELECT DISTINCT ?label ?houseLabel ?timeLabel ?placeLabel ?collLabel ?typeLabel ?docId
+  catalogo_author: |
+    SELECT DISTINCT ?uri ?value
     WHERE {
-      <{uri}> a crm:E7_Activity .
-      OPTIONAL { <{uri}> rdfs:label ?label }
-      OPTIONAL {
-        ?doc crm:P70_documents <{uri}> .
-        ?doc crm:P48_has_preferred_identifier ?docId .
-        OPTIONAL { ?doc crm:P14_carried_out_by ?house . ?house rdfs:label ?houseLabel . }
-      }
-      OPTIONAL { <{uri}> crm:P4_has_time-span ?ts . ?ts rdfs:label ?timeLabel . }
-      OPTIONAL { <{uri}> crm:P7_took_place_at ?place . ?place rdfs:label ?placeLabel . }
-      OPTIONAL { <{uri}> crm:P46_is_composed_of ?coll . ?coll rdfs:label ?collLabel . }
-      OPTIONAL {
-        <{uri}> crm:P125_used_objects_of_type ?otype .
-        ?otype crm:P2_has_type zac:object_type ; rdfs:label ?typeLabel .
-      }
+        <{uri}> crm:P94i_was_created_by ?cr_c .
+        ?asg_f a crm:E13_Attribute_Assignment ;
+          crm:P140_assigned_attribute_to ?cr_c ;
+          crm:P141_assigned ?house ;
+          crm:P2_has_type aat:300025492 .
+        BIND(?house AS ?uri)
+        ?house rdfs:label ?value .
     }
+    ORDER BY ?value
+
+  # Lingue (multivalore)
+  catalogo_languages: |
+    SELECT DISTINCT ?uri ?value
+    WHERE {
+        <{uri}> crm:P72_has_language ?lang .
+        BIND(?lang AS ?uri)
+        ?lang rdfs:label ?value .
+    }
+    ORDER BY ?value
+
+  # Correlati: altri cataloghi dello stesso anno (escluso il corrente)
+  # {me} = URI corrente, {year} = anno (passato dal router dopo gli scalari)
+  catalogo_related_year: |
+    SELECT DISTINCT ?uri ?docId ?title ?year
+    WHERE {
+        ?uri a crm:E31_Document ;
+             crm:P2_has_type aat:300026068 ;
+             crm:P94i_was_created_by ?cr .
+        ?cr crm:P82_at_some_time_within ?year .
+        FILTER(YEAR(?year) = {year})
+        FILTER(?uri != <{me}>)
+        OPTIONAL { ?uri crm:P48_has_preferred_identifier ?docId }
+        OPTIONAL {
+          ?uri crm:P102_has_title ?tn .
+          ?tn crm:P2_has_type zac:primary_title ; rdfs:label ?title .
+        }
+    }
+    ORDER BY ?title
+    LIMIT 12
+
+  # ── EVENTO ─────────────────────────────────────────────────────
+
+  evento_scalars: |
+    SELECT DISTINCT ?label ?house ?auctioneer ?time_span ?place ?docId
+    WHERE {
+        <{uri}> a crm:E7_Activity .
+        OPTIONAL { <{uri}> rdfs:label ?label }
+        OPTIONAL {
+          <{uri}> crm:P9_consists_of ?org .
+          ?org crm:P2_has_type zac:auction_organisation ;
+            crm:P14_carried_out_by ?h .
+          ?h rdfs:label ?house .
+        }
+        OPTIONAL {
+          <{uri}> crm:P9_consists_of ?auc .
+          ?auc crm:P2_has_type zac:auctioneering ;
+            crm:P14_carried_out_by ?a .
+          ?a rdfs:label ?auctioneer .
+        }
+        OPTIONAL { <{uri}> crm:P4_has_time-span ?ts . ?ts rdfs:label ?time_span . }
+        OPTIONAL { <{uri}> crm:P7_took_place_at ?pl . ?pl rdfs:label ?place . }
+        OPTIONAL {
+          ?doc crm:P70_documents <{uri}> .
+          ?doc crm:P48_has_preferred_identifier ?docId .
+        }
+    }
+    LIMIT 1
+
+  # Tipologie oggetti (multivalore)
+  evento_object_types: |
+    SELECT DISTINCT ?value
+    WHERE {
+        <{uri}> crm:P125_used_objects_of_type ?otype .
+        ?otype crm:P2_has_type zac:object_type ; rdfs:label ?value .
+    }
+    ORDER BY ?value
+
+  # Correlati: altre aste della stessa casa d'asta (organizzatore), escluso il corrente
+  # {house} = label casa (passata dal router dopo gli scalari)
+  evento_related_house: |
+    SELECT DISTINCT ?uri ?label ?house ?yearLabel ?place
+    WHERE {
+        ?uri a crm:E7_Activity ;
+             crm:P2_has_type aat:300054751 ;
+             crm:P9_consists_of ?org .
+        ?org crm:P2_has_type zac:auction_organisation ;
+             crm:P14_carried_out_by ?h .
+        ?h rdfs:label ?house .
+        FILTER(STR(?house) = "{house}")
+        FILTER(?uri != <{me}>)
+        OPTIONAL { ?uri rdfs:label ?label }
+        OPTIONAL { ?uri crm:P4_has_time-span ?ts . ?ts rdfs:label ?yearLabel . }
+        OPTIONAL { ?uri crm:P7_took_place_at ?pl . ?pl rdfs:label ?place . }
+    }
+    ORDER BY ?yearLabel
+    LIMIT 12

@@ -1,0 +1,233 @@
+{# ────────────────────────────────────────────────────────────────
+   detail.html — Template generico per le schede di dettaglio.
+   Renderizza il dict `view` prodotto dal router dal merge
+   config (detail_views.yaml) + dati SPARQL (per blocco).
+
+   Struttura del dict `view` attesa:
+     view.title            : str
+     view.subtitle         : str | None
+     view.back             : {url, label}
+     view.has_viewer       : bool
+     view.switch           : [{label, url|None, disabled}]
+     view.sections         : [{anchor, label, active}]   (indice laterale)
+     view.fields           : [{label, kind, ...}]         (vedi macro sotto)
+     view.related          : [{title, count, count_label, card, items, placeholder}]
+
+   Nessun uso di .get() (Jinja2 non lo supporta sui dict Python come vorremmo):
+   si usa sempre 'key in dict' / accesso per attributo.
+──────────────────────────────────────────────────────────────── #}
+{% extends "base.html" %}
+{% block title %}{{ view.title }} — ZAC{% endblock %}
+
+{% block content %}
+<div class="detail-layout">
+
+  {# ── Indice di navigazione laterale (sticky) ───────────────────── #}
+  <aside class="detail-nav">
+    <nav>
+      {% for s in view.sections %}
+        {# il visore esiste solo se has_viewer; salto la sezione altrimenti #}
+        {% if s.anchor != "viewer" or view.has_viewer %}
+        <a href="#sec-{{ s.anchor }}"
+           class="detail-nav-item {% if 'active' in s and s.active %}active{% endif %}">
+          <span class="detail-nav-label">{{ s.label_it }}</span>
+          <span class="detail-nav-num">{{ "%02d"|format(loop.index) }}</span>
+        </a>
+        {% endif %}
+      {% endfor %}
+    </nav>
+  </aside>
+
+  {# ── Colonna principale ────────────────────────────────────────── #}
+  <main class="detail-main">
+
+    {# Breadcrumb + switch "Vai a:" #}
+    <div class="detail-topbar">
+      <a href="{{ view.back.url }}" class="detail-back">
+        <i class="bi bi-arrow-left"></i> {{ view.back.label_it }}
+      </a>
+      {% if view.switch %}
+      <div class="detail-switch">
+        <span class="detail-switch-label">Vai a:</span>
+        {% for b in view.switch %}
+          {% if 'url' in b and b.url %}
+            <a href="{{ b.url }}" class="detail-switch-btn">{{ b.label_it }}</a>
+          {% else %}
+            <span class="detail-switch-btn disabled">{{ b.label_it }}</span>
+          {% endif %}
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    {# Titolo #}
+    <header class="detail-head">
+      <h1 class="detail-title">{{ view.title }}</h1>
+      {% if view.subtitle %}
+        <p class="detail-subtitle">{{ view.subtitle }}</p>
+      {% endif %}
+    </header>
+
+    {# ── Sezione 1 — Visore IIIF (solo se has_viewer) — PLACEHOLDER ── #}
+    {% if view.has_viewer %}
+    <section id="sec-viewer" class="detail-section">
+      <div class="iiif-placeholder">
+        <div class="iiif-placeholder-inner">
+          <i class="bi bi-images"></i>
+          <p>Visore IIIF</p>
+          <span class="iiif-placeholder-note">
+            Riproduzione digitale — integrazione AMS Historica in arrivo
+          </span>
+        </div>
+      </div>
+    </section>
+    {% endif %}
+
+    {# ── Sezione 2 — Scheda catalografica (<dl>) ──────────────────── #}
+    <section id="sec-scheda" class="detail-section">
+      <dl class="detail-card">
+        {% for f in view.fields %}
+          {% if f.has_value %}
+          <div class="detail-row">
+            <dt class="detail-dt">{{ f.label_it }}</dt>
+            <dd class="detail-dd">
+
+              {# Contributori: nome + ruolo (nome linkabile a browse se url presente) #}
+              {% if 'kind' in f and f.kind == "contributors" %}
+                {% for c in f.vals %}
+                  <div class="detail-contrib">
+                    {% if c.url %}<a href="{{ c.url }}" class="detail-link"><strong>{{ c.name }}</strong></a>{% else %}<strong>{{ c.name }}</strong>{% endif %}{% if c.role %} · <span class="detail-role">{{ c.role }}</span>{% endif %}
+                  </div>
+                {% endfor %}
+
+              {# Multivalore linkabile → link a browse pre-filtrata (con/senza pill) #}
+              {% elif f.multi and f.linked %}
+                {% for v in f.vals %}
+                  {% if 'pill' in f and f.pill %}
+                    {% if v.url %}<a href="{{ v.url }}" class="filter-pill filter-pill-link">{{ v.label }}</a>{% else %}<span class="filter-pill">{{ v.label }}</span>{% endif %}
+                  {% else %}
+                    {% if v.url %}<a href="{{ v.url }}" class="detail-link">{{ v.label }}</a>{% else %}{{ v.label }}{% endif %}{% if not loop.last %}, {% endif %}
+                  {% endif %}
+                {% endfor %}
+
+              {# Multivalore come pill (non linkabile) #}
+              {% elif f.multi and 'pill' in f and f.pill %}
+                {% for v in f.vals %}<span class="filter-pill">{{ v }}</span>{% endfor %}
+
+              {# Multivalore come lista testuale #}
+              {% elif f.multi %}
+                {{ f.vals | join(', ') }}
+
+              {# Scalare con link interno #}
+              {% elif 'link' in f and f.link %}
+                <a href="{{ f.link }}" class="detail-link">{{ f.value }}</a>
+
+              {# Scalare testuale #}
+              {% else %}
+                {{ f.value }}
+              {% endif %}
+
+            </dd>
+          </div>
+          {% endif %}
+        {% endfor %}
+      </dl>
+    </section>
+
+    {# ── Sezioni correlati (caroselli) ─────────────────────────────── #}
+    {% for block in view.related %}
+    <section id="sec-{{ 'lotti' if block.card == 'lotto' else 'related' }}"
+             class="detail-section detail-related">
+      <div class="detail-related-head">
+        <h2 class="detail-related-title">{{ block.title_it }}</h2>
+        <span class="detail-related-count">
+          {{ block.count }} {{ block.count_label_it }}
+        </span>
+      </div>
+
+      {% if block.placeholder %}
+        {# Carosello placeholder (es. Lotti — dati non ancora presenti) #}
+        <div class="carousel-placeholder">
+          <i class="bi bi-hourglass-split"></i>
+          <span>Dati non ancora disponibili</span>
+        </div>
+
+      {% elif block.vals %}
+        <div class="detail-carousel">
+          {% for it in block.vals %}
+            {# Card secondo il tipo dichiarato in config #}
+            {% if block.card == "catalogo" %}
+              <a href="/cataloghi/{{ it.doc_id }}" class="carousel-card">
+                <div class="carousel-thumb"><i class="bi bi-journal-text"></i></div>
+                <div class="carousel-body">
+                  <div class="carousel-title">{{ it.title }}</div>
+                  {% if it.year %}<div class="carousel-meta">{{ it.year }}</div>{% endif %}
+                </div>
+                <span class="carousel-cta">Apri <i class="bi bi-arrow-right"></i></span>
+              </a>
+
+            {% elif block.card == "evento" %}
+              <a href="/aste/{{ it.slug }}" class="carousel-card">
+                <div class="carousel-thumb"><i class="bi bi-hammer"></i></div>
+                <div class="carousel-body">
+                  <div class="carousel-title">{{ it.label }}</div>
+                  <div class="carousel-meta">
+                    {% if it.house %}{{ it.house }}{% endif %}
+                    {% if it.place %} · {{ it.place }}{% endif %}
+                  </div>
+                </div>
+                <span class="carousel-cta">Apri <i class="bi bi-arrow-right"></i></span>
+              </a>
+
+            {% else %}{# lotto — non raggiungibile finché placeholder=true #}
+              <div class="carousel-card">
+                <div class="carousel-thumb"><i class="bi bi-tag"></i></div>
+                <div class="carousel-body">
+                  <div class="carousel-title">{{ it.title }}</div>
+                </div>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+
+      {% else %}
+        <div class="carousel-placeholder">
+          <i class="bi bi-inbox"></i>
+          <span>Nessun elemento correlato</span>
+        </div>
+      {% endif %}
+    </section>
+    {% endfor %}
+
+  </main>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Evidenzia la voce dell'indice in base alla sezione visibile.
+  (function () {
+    const items = document.querySelectorAll('.detail-nav-item');
+    const map = {};
+    items.forEach(a => {
+      const id = a.getAttribute('href').slice(1);
+      const sec = document.getElementById(id);
+      if (sec) map[id] = a;
+    });
+    if (!('IntersectionObserver' in window)) return;
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          items.forEach(i => i.classList.remove('active'));
+          const a = map[e.target.id];
+          if (a) a.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-40% 0px -55% 0px' });
+    Object.values(map).forEach((_, i) => {
+      const id = Object.keys(map)[i];
+      obs.observe(document.getElementById(id));
+    });
+  })();
+</script>
+{% endblock %}

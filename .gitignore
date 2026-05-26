@@ -20,3 +20,7 @@ backend/services/__pycache__/__init__.cpython-311.pyc
 backend/services/__pycache__/cache.cpython-311.pyc
 backend/services/__pycache__/config.cpython-311.pyc
 backend/services/__pycache__/sparql.cpython-311.pyc
+/backend/services/__pycache__
+/__pycache__
+/backend/__pycache__
+/backend/routers/__pycache__

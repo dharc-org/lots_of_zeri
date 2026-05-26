@@ -1,0 +1,136 @@
+# ZAC Platform — Detail View Configuration
+# Descrive le schede di dettaglio in modo config-driven.
+# Il router fa il merge fra i dati SPARQL (per blocco) e questa config,
+# producendo il dict `view` che detail.html renderizza genericamente.
+#
+# Aggiungere un nuovo tipo (es. "lotto") = aggiungere una voce qui
+# + le relative query in sparql_queries.yaml. Zero nuovo template.
+#
+# ── Anatomia di un tipo ──────────────────────────────────────────
+#   back:        link "torna a…" (url + label)
+#   has_viewer:  se true, mostra il blocco visore IIIF (placeholder per ora)
+#   sections:    voci dell'indice di navigazione laterale (anchor → label)
+#   fields:      righe della scheda <dl>
+#       key:        chiave restituita dalla query 'scalars' (o blocco dedicato)
+#       label_it:   etichetta mostrata
+#       multi:      true = lista di valori (blocco dedicato), false = scalare
+#       link_route: opz. — rotta interna; {slug}/{id} sostituiti col valore del campo *_link
+#       link_key:   opz. — chiave che contiene lo slug/id per il link
+#       pill:       opz. — render come "pill" invece che testo semplice
+#   related:     caroselli di entità correlate
+#       id:         identificatore del blocco (= query-key in sparql_queries.detail)
+#       title_it:   titolo del carosello
+#       card:       layout della card (catalogo | evento | lotto)
+#       count_label_it: testo accanto al conteggio ("lotti totali", "cataloghi correlati"…)
+#       placeholder: opz. — se true, blocco mostrato vuoto (dati non ancora presenti)
+
+# ZAC Platform — Detail View Configuration
+# Descrive le schede di dettaglio in modo config-driven.
+# Il router generico (browse.py → _register_detail_route) legge:
+#   - query_blocks : quali query SPARQL lanciare e come (scalars, multis, related)
+#   - back/switch/sections/fields/related : come costruire il dict `view`
+# detail.html renderizza `view` genericamente.
+#
+# Aggiungere un tipo nuovo (es. "lotto") = aggiungere una voce qui
+# + le query in sparql_queries.yaml + 'detail_kind: lotto' nel route di facets.yaml.
+
+# ════════════════════════════════════════════════════════════════
+catalogo:
+  back:
+    url: "/cataloghi"
+    label_it: "Torna ai cataloghi"
+  has_viewer: true
+  switch:
+    - { label_it: "Asta",        link_key: "auctionSlug", route: "/aste/{slug}" }
+    - { label_it: "lista Lotti", disabled: true }
+
+  sections:
+    - { anchor: "viewer",  label_it: "Sfoglia il catalogo" }
+    - { anchor: "scheda",  label_it: "Scheda catalografica" }
+    - { anchor: "lotti",   label_it: "Lotti correlati" }
+    - { anchor: "related", label_it: "Cataloghi correlati" }
+
+  fields:
+    - { key: "title",      label_it: "Titolo",                multi: false }
+    - { key: "secTitle",   label_it: "Titolo alternativo",    multi: false }
+    - { key: "houseLabel",      label_it: "Autore / Casa d'asta",  multi: false,
+        facet_link: { route: "/cataloghi", param: "autori" } }
+    - { key: "secondary_author_organisation",  label_it: "Autore secondario (ente)", multi: false}
+    - { key: "secondary_author_person",  label_it: "Autore secondario (persona)", multi: false}
+    - { key: "contributors", label_it: "Contributori",        multi: true, kind: "contributors" }
+    - { key: "year",       label_it: "Anno di pubblicazione", multi: false }
+    - { key: "languages", label_it: "Lingua", multi: true,
+        facet_link: { route: "/cataloghi", param: "lingua" } }
+    - { key: "docId",      label_it: "Numero di inventario",  multi: false }
+    - { key: "auction",    label_it: "Vendita all'asta",      multi: false,
+        link_route: "/aste/{slug}", link_key: "auctionSlug" }
+
+  related:
+    - id: "catalogo_lotti"
+      title_it: "Lotti nel catalogo"
+      card: "lotto"
+      count_label_it: "lotti nel catalogo"
+      placeholder: true
+    - id: "catalogo_related_year"
+      title_it: "Altri cataloghi dello stesso anno"
+      card: "catalogo"
+      count_label_it: "cataloghi dello stesso anno"
+
+  # Quali query lanciare e come (lette dal router generico)
+  query_blocks:
+    scalars: "catalogo_scalars"
+    multis:
+      author:       "catalogo_author"
+      contributors: "catalogo_contributors"
+      languages:    "catalogo_languages"
+    related:
+      catalogo_related_year:
+        query:      "catalogo_related_year"
+        depends_on: "year"           # chiave scalare da cui prendere il valore
+        transform:  "year4"          # estrai 4 cifre anno → {year}
+
+# ════════════════════════════════════════════════════════════════
+evento:
+  back:
+    url: "/aste"
+    label_it: "Torna alle aste"
+  has_viewer: false
+  switch:
+    - { label_it: "Catalogo",    link_key: "docId", route: "/cataloghi/{id}" }
+    - { label_it: "lista Lotti", disabled: true }
+
+  sections:
+    - { anchor: "scheda",  label_it: "Scheda catalografica" }
+    - { anchor: "lotti",   label_it: "Lotti in vendita" }
+    - { anchor: "related", label_it: "Aste correlate" }
+
+  fields:
+    - { key: "label",        label_it: "Titolo",            multi: false }
+    - { key: "house",        label_it: "Organizzatore",     multi: false }
+    - { key: "auctioneer",   label_it: "Banditore",         multi: false }
+    - { key: "time_span",    label_it: "Periodo",           multi: false }
+    - { key: "place",        label_it: "Luogo di vendita",  multi: false }
+    - { key: "object_types", label_it: "Tipologia oggetti", multi: true, pill: true }
+    - { key: "docId",        label_it: "Catalogo",          multi: false,
+        link_route: "/cataloghi/{id}", link_key: "docId" }
+
+  related:
+    - id: "evento_lotti"
+      title_it: "Lotti in vendita nell'asta"
+      card: "lotto"
+      count_label_it: "lotti in vendita"
+      placeholder: true
+    - id: "evento_related_house"
+      title_it: "Aste correlate"
+      card: "evento"
+      count_label_it: "aste della stessa casa d'asta"
+
+  query_blocks:
+    scalars: "evento_scalars"
+    multis:
+      object_types: "evento_object_types"
+    related:
+      evento_related_house:
+        query:      "evento_related_house"
+        depends_on: "house"          # label casa d'asta
+        transform:  "sparql_literal" # escape → {house}

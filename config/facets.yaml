@@ -30,6 +30,7 @@ eventi_asta:
     detail_query: "evento_item"
     results_query: "eventi_asta"
     count_query: "eventi_asta_count"
+    detail_kind: "evento"
     icon: "bi-hammer"
     entity_label: "aste"
     # How to extract items from SPARQL result rows
@@ -101,10 +102,11 @@ cataloghi:
     detail_query: "catalogo_item"
     results_query: "catalogo"
     count_query: "catalogo_count"
+    detail_kind: "catalogo"
     icon: "bi-journal-text"
     entity_label: "cataloghi"
     uri_var: "doc"
-    slug_var: "docId"
+    slug_from_uri: true
     result_fields:
       doc_id:     "docId"
       title:      "title"
