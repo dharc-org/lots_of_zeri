@@ -24,6 +24,13 @@ def _esc_sparql_literal(s: str) -> str:
     return s.replace("\\", "\\\\").replace('"', '\\"').replace("\n", " ")
 
 
+def _extract_year4(val: str) -> Optional[str]:
+    """Estrae le prime 4 cifre consecutive da una stringa (es. '1892-01-01' → '1892')."""
+    import re
+    m = re.search(r"\d{4}", str(val))
+    return m.group(0) if m else None
+
+
 def _scalar(rows: List[dict], key: str) -> Optional[str]:
     """Primo valore non vuoto per `key` fra le righe (gli scalars sono LIMIT 1)."""
     for r in rows:
@@ -154,15 +161,27 @@ def build_view(
                 out["vals"] = items
                 out["has_value"] = bool(items)
 
-        # Scalare (eventualmente con link interno)
+        # Scalare (eventualmente con link interno o link a faccetta range)
         else:
             val = _scalar(sc, key)
             out["value"] = val
             out["has_value"] = val not in (None, "", "NaN")
+
+            # Link interno classico (route + chiave slug/id)
             if out["has_value"] and "link_route" in f and "link_key" in f:
                 lv = link_vals.get(f["link_key"])
                 if lv:
                     out["link"] = f["link_route"].replace("{slug}", lv).replace("{id}", lv)
+
+            # Link a faccetta range (es. anno → ?param_from=YYYY&param_to=YYYY)
+            fl = f.get("facet_link")
+            if out["has_value"] and fl and fl.get("kind") == "range_year":
+                year4 = _extract_year4(val)
+                route = fl.get("route", "")
+                param = fl.get("param", "")
+                if year4 and route and param:
+                    out["link"] = (f"{route}?{param}_from={year4}"
+                                   f"&{param}_to={year4}")
 
         fields.append(out)
 

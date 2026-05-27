@@ -53,14 +53,18 @@ catalogo:
   fields:
     - { key: "title",      label_it: "Titolo",                multi: false }
     - { key: "secTitle",   label_it: "Titolo alternativo",    multi: false }
-    - { key: "houseLabel",      label_it: "Autore / Casa d'asta",  multi: false,
+    - { key: "author",      label_it: "Autore / Casa d'asta",  multi: true,
         facet_link: { route: "/cataloghi", param: "autori" } }
-    - { key: "secondary_author_organisation",  label_it: "Autore secondario (ente)", multi: false}
-    - { key: "secondary_author_person",  label_it: "Autore secondario (persona)", multi: false}
-    - { key: "contributors", label_it: "Contributori",        multi: true, kind: "contributors" }
-    - { key: "year",       label_it: "Anno di pubblicazione", multi: false }
-    - { key: "languages", label_it: "Lingua", multi: true,
-        facet_link: { route: "/cataloghi", param: "lingua" } }
+    - { key: "secondary_author_organisation",  label_it: "Autore secondario (ente)", multi: true,
+        facet_link: { route: "/cataloghi", param: "autori" } }
+    - { key: "secondary_author_person",  label_it: "Autore secondario (persona)", multi: true,
+        facet_link: { route: "/cataloghi", param: "autori" } }
+    - { key: "auctioneer", label_it: "Banditore",        multi: true, 
+        facet_link: { route: "/aste", param: "banditore" } }     
+    - { key: "year", label_it: "Anno di pubblicazione", multi: false,
+        facet_link: { route: "/cataloghi", param: "anno_pubblicazione", kind: "range_year" } }
+    - { key: "languages", label_it: "Lingua", multi: true }    
+    - { key: "illustrated", label_it: "Illustrato", multi: false }
     - { key: "docId",      label_it: "Numero di inventario",  multi: false }
     - { key: "auction",    label_it: "Vendita all'asta",      multi: false,
         link_route: "/aste/{slug}", link_key: "auctionSlug" }
@@ -81,7 +85,9 @@ catalogo:
     scalars: "catalogo_scalars"
     multis:
       author:       "catalogo_author"
-      contributors: "catalogo_contributors"
+      secondary_author_organisation: "catalogo_secondary_author_organisation"
+      secondary_author_person: "catalogo_secondary_author_person"
+      auctioneer: "catalogo_auctioneer"
       languages:    "catalogo_languages"
     related:
       catalogo_related_year:

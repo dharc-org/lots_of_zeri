@@ -380,7 +380,7 @@ detail:
 
   # Campi scalari + chiavi per i link interni (auctionSlug, docId)
   catalogo_scalars: |
-    SELECT DISTINCT ?title ?secTitle ?year ?house ?houseLabel ?docId ?auction ?auctionSlug ?auctionLabel
+    SELECT DISTINCT ?title ?secTitle ?year ?illustrated ?docId ?auction ?auctionSlug ?auctionLabel
     WHERE {
         <{uri}> a crm:E31_Document .
         OPTIONAL { <{uri}> crm:P48_has_preferred_identifier ?idNode . ?idNode rdfs:label ?docId }
@@ -397,6 +397,8 @@ detail:
           ?cr crm:P82_at_some_time_within ?year .
         }
 
+        BIND(IF(EXISTS { <{uri}> crm:P2_has_type zac:illustrated }, "Sì", "No") AS ?illustrated)
+
         OPTIONAL {
           <{uri}> crm:P70_documents ?auction .
           ?auction rdfs:label ?auctionLabel .
@@ -404,20 +406,6 @@ detail:
         }
     }
     LIMIT 1
-
-  # Contributori e ruolo (un record per coppia contributore/ruolo)
-  catalogo_contributors: |
-    SELECT DISTINCT ?name ?role
-    WHERE {
-        <{uri}> crm:P94i_was_created_by ?cr2 .
-        ?asgn a crm:E13_Attribute_Assignment ;
-              crm:P140_assigned_attribute_to ?cr2 ;
-              crm:P141_assigned ?contrib ;
-              crm:P2_has_type ?roleNode .
-        ?contrib rdfs:label ?name .
-        OPTIONAL { ?roleNode rdfs:label ?role }
-    }
-    ORDER BY ?name
 
   catalogo_author: |
     SELECT DISTINCT ?uri ?value
@@ -429,6 +417,46 @@ detail:
           crm:P2_has_type aat:300025492 .
         BIND(?house AS ?uri)
         ?house rdfs:label ?value .
+    }
+    ORDER BY ?value
+
+  catalogo_secondary_author_organisation: |
+    SELECT DISTINCT ?uri ?value
+    WHERE {
+        <{uri}> crm:P94i_was_created_by ?cr_c .
+        ?asg_f a crm:E13_Attribute_Assignment ;
+          crm:P140_assigned_attribute_to ?cr_c ;
+          crm:P141_assigned ?org ;
+          crm:P2_has_type zac:secondary_author .
+        ?org a crm:E74_Group.
+        BIND(?org AS ?uri)
+        ?org rdfs:label ?value .
+    }
+    ORDER BY ?value
+  
+  catalogo_secondary_author_person: |
+    SELECT DISTINCT ?uri ?value
+    WHERE {
+        <{uri}> crm:P94i_was_created_by ?cr_c .
+        ?asg_f a crm:E13_Attribute_Assignment ;
+          crm:P140_assigned_attribute_to ?cr_c ;
+          crm:P141_assigned ?prs ;
+          crm:P2_has_type zac:secondary_author .
+        ?prs a crm:E21_Person.
+        BIND(?prs AS ?uri)
+        ?prs rdfs:label ?value .
+    }
+    ORDER BY ?value
+    
+  catalogo_auctioneer: |
+    SELECT DISTINCT ?uri ?value
+    WHERE {
+        <{uri}> crm:P70_documents ?auction .
+        ?auction crm:P9_consists_of ?auctioneering .
+        ?auctioneering crm:P2_has_type zac:auctioneering ;
+          crm:P14_carried_out_by ?auct .
+        BIND(?auct AS ?uri)
+        ?auct rdfs:label ?value .
     }
     ORDER BY ?value
 
