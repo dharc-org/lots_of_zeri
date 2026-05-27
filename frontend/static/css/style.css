@@ -592,7 +592,7 @@ footer {
 
 .detail-layout {
   display: grid;
-  grid-template-columns: 220px 1fr;
+  grid-template-columns: 220px minmax(0, 1fr);
   gap: 2.5rem;
   max-width: 1200px;
   margin: 0 auto;
@@ -755,13 +755,18 @@ footer {
   font-size: .8rem;
   color: var(--zac-red, #8b2635);
 }
+
 .detail-carousel {
   display: flex;
   gap: 1rem;
   overflow-x: auto;
   padding-bottom: .75rem;
   scroll-snap-type: x mandatory;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;        /* impedisce al flex item di sforare il padre */
 }
+
 .carousel-card {
   flex: 0 0 260px;
   scroll-snap-align: start;
