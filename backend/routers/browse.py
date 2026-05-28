@@ -15,6 +15,7 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 
 from backend.services.sparql import FilterEngine
+from backend.services.detail_view import build_view, _esc_sparql_literal
 
 log    = logging.getLogger("zac.browse")
 router = APIRouter()
@@ -415,39 +416,94 @@ def _register_api_route(tab_id, tab_cfg, route_cfg, cfg):
 
 
 def _register_detail_route(tab_id, tab_cfg, route_cfg, cfg):
-    path            = route_cfg["path"] + "/{slug}"
-    detail_query    = route_cfg.get("detail_query")
-    detail_template = route_cfg.get("detail_template")
-    if not detail_query or not detail_template:
+    path        = route_cfg["path"] + "/{slug}"
+    detail_kind = route_cfg.get("detail_kind")      # "catalogo" | "evento" → chiave in detail_views.yaml
+    if not detail_kind:
         return
+    
+    async def _noop():
+        return []
 
     @router.get(path, response_class=HTMLResponse)
     async def tab_detail(request: Request, slug: str,
-                         _tab_id=tab_id, _route_cfg=route_cfg,
-                         _detail_query=detail_query, _detail_template=detail_template):
+                         _tab_id=tab_id, _route_cfg=route_cfg, _kind=detail_kind):
         cfg    = request.app.state.config
         sparql = request.app.state.sparql
+        pfx    = cfg.get_prefixes()
         uri    = f"http://w3id.org/zac/{slug}"
 
-        q    = cfg.get_prefixes() + cfg.get_detail_query(_detail_query).replace("{uri}", uri)
-        rows = []
-        try:
-            rows = await sparql.select(q)
-        except Exception as e:
-            log.error(e)
-
-        if not rows:
+        cfg_view = cfg.get_detail_view(_kind)
+        if not cfg_view:
+            log.error(f"detail_views.{_kind} mancante in config")
             return tmpl.TemplateResponse("404.html", {"request": request}, status_code=404)
 
-        def uniq(key):
-            return list({r[key] for r in rows if r.get(key) not in (None, "", "NaN")})
+        # blocchi query dichiarati nella config detail_views (vedi sotto)
+        blocks = cfg_view.get("query_blocks", {})
 
-        return tmpl.TemplateResponse(_detail_template, {
+        def q(key):
+            body = cfg.get_detail_query(key)
+            return (pfx + body.replace("{uri}", uri)) if body else None
+
+        # ── Fase 1: scalari + multivalore in parallelo ──────────────
+        scal_key  = blocks.get("scalars")
+        multi_map = blocks.get("multis", {})   # { field_key → query_key }
+
+        task_keys = [scal_key] + list(multi_map.values())
+        tasks = [sparql.select(q(k)) if q(k) else _noop() for k in task_keys]
+        res   = await asyncio.gather(*tasks, return_exceptions=True)
+
+        def safe(i):
+            return res[i] if not isinstance(res[i], Exception) else []
+
+        scalars = safe(0)
+        if not scalars:
+            return tmpl.TemplateResponse("404.html", {"request": request}, status_code=404)
+
+        multis = {}
+        for j, field_key in enumerate(multi_map.keys(), start=1):
+            multis[field_key] = safe(j)
+
+        # ── Fase 2: correlati (dipendono dai valori di fase 1) ──────
+        related_rows = {}
+        for block in cfg_view.get("related", []):
+            related_rows[block["id"]] = []        # default vuoto (placeholder inclusi)
+
+        rel_cfg = blocks.get("related", {})       # { block_id → {query, depends_on, transform} }
+        for block_id, rc in rel_cfg.items():
+            body = cfg.get_detail_query(rc["query"])
+            if not body:
+                continue
+            dep_key = rc["depends_on"]            # chiave scalare da cui prendere il valore
+            dep_val = None
+            for r in scalars:
+                if r.get(dep_key):
+                    dep_val = r[dep_key]; break
+            if not dep_val:
+                continue
+
+            rq = body.replace("{me}", uri)
+            transform = rc.get("transform")
+            if transform == "year4":
+                dep_val = dep_val[:4]
+                if not dep_val.isdigit():
+                    continue
+                rq = rq.replace("{year}", dep_val)
+            elif transform == "sparql_literal":
+                rq = rq.replace("{house}", _esc_sparql_literal(dep_val))
+            else:
+                rq = rq.replace("{value}", dep_val)
+
+            try:
+                related_rows[block_id] = await sparql.select(pfx + rq)
+            except Exception as e:
+                log.warning(f"related {block_id}: {e}")
+
+        # ── Merge config + dati → view ──────────────────────────────
+        view = build_view(_kind, cfg_view, scalars=scalars,
+                           multis=multis, related=related_rows)
+
+        return tmpl.TemplateResponse("detail.html", {
             "request":    request,
             "active_tab": _route_cfg.get("active_tab", _tab_id),
-            "rows":       rows,
-            "r0":         rows[0],
-            "uniq":       uniq,
-            "uri":        uri,
-            "slug":       slug,
+            "view":       view,
         })
