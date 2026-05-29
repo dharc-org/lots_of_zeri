@@ -586,9 +586,15 @@ footer {
 
 /* ════════════════════════════════════════════════════════════════
    DETAIL VIEW — schede di dettaglio (catalogo, evento, lotto)
-   Appendi in coda a frontend/static/css/style.css
-   Usa le variabili ZAC già definite (--zac-red, --ff-head, ecc.).
    ════════════════════════════════════════════════════════════════ */
+
+/* ── Indice di navigazione laterale ───────────────────────────── */
+/* wrapper topbar + titolo sopra la grid */
+.detail-header-area {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 0;
+}
 
 .detail-layout {
   display: grid;
@@ -596,90 +602,124 @@ footer {
   gap: 2.5rem;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem 1.5rem 4rem;
+  padding: 1.5rem 1.5rem 4rem;
 }
 
-/* ── Indice di navigazione laterale ───────────────────────────── */
 .detail-nav {
   position: sticky;
-  top: 2rem;
+  top: 6rem;
   align-self: start;
   height: fit-content;
 }
+
 .detail-nav-item {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: .5rem;
-  padding: .55rem 0;
-  border-bottom: 1px solid var(--zac-border, #e4ddd0);
+  gap: .4rem;
+  padding: .6rem 0;
+  border-bottom: 1px solid var(--gray-1);
   text-decoration: none;
-  color: var(--zac-ink2, #6b6256);
-  font-size: .85rem;
+  color: var(--ink) !important;
+  font-size: .95rem;
   transition: color .15s ease, border-color .15s ease;
+  margin-left: -3.5rem; /* uguale al padding-left del contenitore padre */
+  padding-left: 3.5rem;
 }
-.detail-nav-item:hover { color: var(--zac-red, #8b2635); }
+.detail-nav-item:hover { color: var(--terra); }
 .detail-nav-item.active {
-  color: var(--zac-red, #8b2635);
-  border-color: var(--zac-red, #8b2635);
+  color: var(--terra) !important;
+  border-color: var(--terra) !important;
 }
+
+
 .detail-nav-num {
-  font-family: var(--ff-mono, "JetBrains Mono", monospace);
-  font-size: .72rem;
+  font-family: var(--ff-body);
+  font-size: .95rem;
   opacity: .6;
+}
+
+.detail-nav nav {
+  margin: 0;
+  padding: 0;
 }
 
 /* ── Topbar: back + switch ────────────────────────────────────── */
 .detail-topbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
+  padding-bottom: 1rem;
   margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--gray-1);
 }
+
 .detail-back {
   display: inline-flex;
   align-items: center;
   gap: .4rem;
-  color: var(--zac-ink2, #6b6256);
+  color: var(--gray-3);
   text-decoration: none;
   font-size: .85rem;
 }
-.detail-back:hover { color: var(--zac-red, #8b2635); }
+.detail-back:hover { color: var(--terra); }
 .detail-switch { display: flex; align-items: center; gap: .5rem; }
-.detail-switch-label { font-size: .78rem; color: var(--zac-ink2, #6b6256); }
+.detail-switch-label { font-size: .78rem; color: var(--gray-3); margin-right: .25rem; }
+
 .detail-switch-btn {
   font-size: .8rem;
-  padding: .3rem .8rem;
-  border: 1px solid var(--zac-border, #e4ddd0);
-  border-radius: 4px;
-  text-decoration: none;
-  color: var(--zac-ink, #2c2419);
-  background: #fff;
+  font-weight: 700;
+  padding: .3rem .9rem;
+  border: 1px solid var(--terra);
+  border-radius: 2px;
+  text-decoration: none !important;
+  color: var(--terra) !important;  
   transition: all .15s ease;
 }
-.detail-switch-btn:not(.disabled):hover {
-  background: var(--zac-red, #8b2635);
-  border-color: var(--zac-red, #8b2635);
-  color: #fff;
+
+/* ── Asta: sfondo muted, hover accentuato ── */
+.detail-switch-btn--asta {
+  background: var(--terra-light) !important;
+  color: var(--paper-light) !important;
+  border-color: var(--terra-light) !important;
 }
-.detail-switch-btn.disabled { opacity: .4; cursor: default; }
+.detail-switch-btn--asta:hover {
+  background: var(--terra) !important;
+  border-color: var(--terra) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(217, 64, 16, 0.25);
+}
+
+/* ── Lista lotti: outline terra ── */
+.detail-switch-btn--lotti {
+  background: transparent;
+  color: var(--terra) !important;
+  border-color: var(--terra) !important;
+}
+
+.detail-switch-btn--lotti:hover {
+  background: var(--paper-dark) !important;
+  border-color: var(--terra-muted) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(217, 64, 16, 0.25);
+}
 
 /* ── Titolo ───────────────────────────────────────────────────── */
-.detail-head { margin-bottom: 1.5rem; text-align: right; }
+.detail-head { margin-bottom: 1.5rem; text-align: right; padding-left: calc(220px + 2.5rem); }
 .detail-title {
-  font-family: var(--ff-head, "Playfair Display", serif);
-  font-size: 1.9rem;
+  font-family: var(--ff-head);
+  font-size: 1.3rem;
   line-height: 1.2;
-  color: var(--zac-ink, #2c2419);
+  color: var(--ink);
   margin: 0;
 }
 .detail-subtitle {
   font-style: italic;
-  color: var(--zac-ink2, #6b6256);
+  color: var(--gray-3);
   margin-top: .4rem;
 }
 
-.detail-section { margin-bottom: 2.5rem; scroll-margin-top: 2rem; }
+.detail-section { margin-bottom: 2.5rem; scroll-margin-top: 6rem; }
 
 /* ── Visore IIIF (placeholder) ────────────────────────────────── */
 .iiif-placeholder {
@@ -687,19 +727,19 @@ footer {
   background:
     repeating-linear-gradient(45deg,
       rgba(0,0,0,.02) 0 12px, transparent 12px 24px),
-    var(--zac-bg, #faf7f0);
-  border: 1px dashed var(--zac-border, #cdc4b4);
+    var(--paper-light);
+  border: 1px dashed var(--gray-1);
   border-radius: 8px;
   display: grid;
   place-items: center;
 }
 .iiif-placeholder-inner {
   text-align: center;
-  color: var(--zac-ink2, #6b6256);
+  color: var(--gray-3);
 }
 .iiif-placeholder-inner i { font-size: 2.5rem; opacity: .5; }
 .iiif-placeholder-inner p {
-  font-family: var(--ff-head, "Playfair Display", serif);
+  font-family: var(--ff-head);
   font-size: 1.1rem;
   margin: .5rem 0 .2rem;
 }
@@ -707,8 +747,8 @@ footer {
 
 /* ── Scheda metadati (<dl>) ───────────────────────────────────── */
 .detail-card {
-  background: #fff;
-  border: 1px solid var(--zac-border, #e4ddd0);
+  background: var(--paper-light);
+  border: 1px solid var(--gray-1);
   border-radius: 8px;
   padding: .5rem 1.5rem;
   margin: 0;
@@ -718,24 +758,24 @@ footer {
   grid-template-columns: 200px 1fr;
   gap: 1.5rem;
   padding: 1rem 0;
-  border-bottom: 1px solid var(--zac-border, #f0ebe0);
+  border-bottom: 1px solid var(--gray-1);
 }
 .detail-row:last-child { border-bottom: none; }
 .detail-dt {
   font-size: .78rem;
   text-transform: uppercase;
   letter-spacing: .03em;
-  color: var(--zac-ink2, #8a8174);
+  color: var(--gray-3);
   margin: 0;
 }
-.detail-dd { margin: 0; color: var(--zac-ink, #2c2419); line-height: 1.5; }
+.detail-dd { margin: 0; color: var(--ink); line-height: 1.5; }
 .detail-link {
-  color: var(--zac-red, #8b2635);
+  color: var(--terra);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
 .detail-contrib { margin-bottom: .25rem; }
-.detail-role { color: var(--zac-ink2, #8a8174); font-size: .9em; }
+.detail-role { color: var(--gray-3); font-size: .9em; }
 
 /* ── Caroselli correlati ──────────────────────────────────────── */
 .detail-related-head {
@@ -744,16 +784,16 @@ footer {
   justify-content: space-between;
   margin-bottom: 1rem;
   padding-bottom: .5rem;
-  border-bottom: 2px solid var(--zac-border, #e4ddd0);
+  border-bottom: 2px solid var(--gray-1);
 }
 .detail-related-title {
-  font-family: var(--ff-head, "Playfair Display", serif);
+  font-family: var(--ff-head);
   font-size: 1.3rem;
   margin: 0;
 }
 .detail-related-count {
   font-size: .8rem;
-  color: var(--zac-red, #8b2635);
+  color: var(--terra);
 }
 
 .detail-carousel {
@@ -764,7 +804,7 @@ footer {
   scroll-snap-type: x mandatory;
   width: 100%;
   max-width: 100%;
-  min-width: 0;        /* impedisce al flex item di sforare il padre */
+  min-width: 0;
 }
 
 .carousel-card {
@@ -773,12 +813,12 @@ footer {
   display: flex;
   align-items: center;
   gap: .75rem;
-  background: #fff;
-  border: 1px solid var(--zac-border, #e4ddd0);
+  background: var(--paper-light);
+  border: 1px solid var(--gray-1);
   border-radius: 8px;
   padding: .85rem;
   text-decoration: none;
-  color: var(--zac-ink, #2c2419);
+  color: var(--ink);
   transition: box-shadow .15s ease, transform .15s ease;
 }
 .carousel-card:hover {
@@ -788,11 +828,11 @@ footer {
 .carousel-thumb {
   flex: 0 0 48px;
   height: 60px;
-  background: var(--zac-bg, #faf7f0);
+  background: var(--paper-dark);
   border-radius: 4px;
   display: grid;
   place-items: center;
-  color: var(--zac-gold, #c8a96e);
+  color: var(--gray-2);
   font-size: 1.3rem;
 }
 .carousel-body { flex: 1; min-width: 0; }
@@ -805,11 +845,11 @@ footer {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-.carousel-meta { font-size: .78rem; color: var(--zac-ink2, #8a8174); margin-top: .2rem; }
+.carousel-meta { font-size: .78rem; color: var(--gray-3); margin-top: .2rem; }
 .carousel-cta {
   flex: 0 0 auto;
   font-size: .78rem;
-  color: var(--zac-red, #8b2635);
+  color: var(--terra);
   white-space: nowrap;
 }
 
@@ -820,11 +860,18 @@ footer {
   justify-content: center;
   gap: .6rem;
   padding: 2rem;
-  background: var(--zac-bg, #faf7f0);
-  border: 1px dashed var(--zac-border, #cdc4b4);
+  background: var(--paper-light);
+  border: 1px dashed var(--gray-1);
   border-radius: 8px;
-  color: var(--zac-ink2, #8a8174);
+  color: var(--gray-3);
   font-size: .85rem;
+}
+
+/* ── Torna ai cataloghi ───────────────────────────────────────────────── */
+.detail-back-bottom {
+  padding-top: 2rem;
+  border-top: 1px solid var(--gray-1);
+  margin-top: 1rem;
 }
 
 /* ── Responsive ───────────────────────────────────────────────── */

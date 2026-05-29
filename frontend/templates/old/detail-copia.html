@@ -20,38 +20,6 @@
 {% block title %}{{ view.title }} — ZAC{% endblock %}
 
 {% block content %}
-
-{# ── Topbar e titolo: fuori dalla grid, a tutta larghezza ── #}
-<div class="detail-header-area">
-
-  {# Breadcrumb + switch "Vai a:" #}
-  <div class="detail-topbar">
-
-    {% if view.switch %}
-    <div class="detail-switch">
-      <span class="detail-switch-label">Vai a:</span>
-    {% for b in view.switch %}
-        {% if 'url' in b and b.url %}
-          <a href="{{ b.url }}" class="detail-switch-btn detail-switch-btn--asta">{{ b.label_it }}</a>
-        {% else %}
-          <span class="detail-switch-btn detail-switch-btn--lotti disabled">{{ b.label_it }}</span>
-        {% endif %}
-      {% endfor %}
-    </div>
-    {% endif %}
-  </div>
-
-  {# Titolo #}
-  <header class="detail-head">
-    <h1 class="detail-title">{{ view.title }}</h1>
-    {% if view.subtitle %}
-      <p class="detail-subtitle">{{ view.subtitle }}</p>
-    {% endif %}
-  </header>
-
-</div>{# /detail-header-area #}
-
-{# ── Grid: nav laterale + contenuto ── #}
 <div class="detail-layout">
 
   {# ── Indice di navigazione laterale (sticky) ───────────────────── #}
@@ -72,6 +40,33 @@
 
   {# ── Colonna principale ────────────────────────────────────────── #}
   <main class="detail-main">
+
+    {# Breadcrumb + switch "Vai a:" #}
+    <div class="detail-topbar">
+      <a href="{{ view.back.url }}" class="detail-back">
+        <i class="bi bi-arrow-left"></i> {{ view.back.label_it }}
+      </a>
+      {% if view.switch %}
+      <div class="detail-switch">
+        <span class="detail-switch-label">Vai a:</span>
+        {% for b in view.switch %}
+          {% if 'url' in b and b.url %}
+            <a href="{{ b.url }}" class="detail-switch-btn">{{ b.label_it }}</a>
+          {% else %}
+            <span class="detail-switch-btn disabled">{{ b.label_it }}</span>
+          {% endif %}
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    {# Titolo #}
+    <header class="detail-head">
+      <h1 class="detail-title">{{ view.title }}</h1>
+      {% if view.subtitle %}
+        <p class="detail-subtitle">{{ view.subtitle }}</p>
+      {% endif %}
+    </header>
 
     {# ── Sezione 1 — Visore IIIF (solo se has_viewer) — PLACEHOLDER ── #}
     {% if view.has_viewer %}
@@ -204,15 +199,8 @@
     </section>
     {% endfor %}
 
-    {# ── Torna ai cataloghi ─────────────────────────────────────── #}
-    <div class="detail-back-bottom">
-      <a href="{{ view.back.url }}" class="detail-back">
-        <i class="bi bi-arrow-left"></i> {{ view.back.label_it }}
-      </a>
-    </div>
-
   </main>
-</div>{# /detail-layout #}
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -225,8 +213,7 @@
       const id = a.getAttribute('href').slice(1);
       const sec = document.getElementById(id);
       if (sec) map[id] = a;
-    }); 
-    if (items.length > 0) items[0].classList.add('active'); // Attiva il primo item al caricamento 
+    });
     if (!('IntersectionObserver' in window)) return;
     const obs = new IntersectionObserver((entries) => {
       entries.forEach(e => {
