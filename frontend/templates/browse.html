@@ -26,11 +26,12 @@
     <span                class="search-tab disabled">Lotti</span>
   </div>
 
-  {# Search bar (UI only, da collegare) #}
+  {# Search bar — collegata al form filtri (facet-form) tramite l'attributo form #}
   <div class="search-bar-wrap">
     <div class="search-bar">
-      <input type="text" placeholder="Parola chiave…" disabled>
-      <button type="button" class="search-btn" aria-label="Cerca">
+      <input type="text" name="q" form="facet-form" id="search-q"
+             placeholder="Parola chiave…" value="{{ active_filters.get('q', '') }}">
+      <button type="submit" form="facet-form" class="search-btn" aria-label="Cerca">
         <i class="bi bi-search"></i>
       </button>
     </div>
@@ -41,20 +42,22 @@
 </div>
 
 {# ── Action bar: count + pill + sort + viste ────────────── #}
-{% set has_any_active = false %}
+{# namespace() necessario: {% set %} dentro un for-loop Jinja2 non persiste fuori dal loop #}
+{% set ns = namespace(has_any_active=false) %}
+{% if active_filters.get('q') %}{% set ns.has_any_active = true %}{% endif %}
 {% for facet in facet_defs %}
   {% if facet.type == 'range' %}
     {% set kf = facet.id ~ '_from' %}
     {% set kt = facet.id ~ '_to'   %}
     {% if active_filters.get(kf) and active_filters.get(kt) %}
       {% if active_filters[kf] != facet.range.min or active_filters[kt] != facet.range.max %}
-        {% set has_any_active = true %}
+        {% set ns.has_any_active = true %}
       {% endif %}
     {% endif %}
   {% elif facet.type == 'multiselect' %}
-    {% if active_filters.get(facet.id) %}{% set has_any_active = true %}{% endif %}
+    {% if active_filters.get(facet.id) %}{% set ns.has_any_active = true %}{% endif %}
   {% elif facet.type in ['text_search', 'boolean'] %}
-    {% if active_filters.get(facet.id) %}{% set has_any_active = true %}{% endif %}
+    {% if active_filters.get(facet.id) %}{% set ns.has_any_active = true %}{% endif %}
   {% endif %}
 {% endfor %}
 
@@ -62,6 +65,14 @@
 
   <div class="action-left">
     <span class="result-count"><strong>{{ total }}</strong> Risultati</span>
+
+    {# Pill ricerca per parola chiave #}
+    {% if active_filters.get('q') %}
+      <span class="active-pill" data-facet="q" data-type="text">
+        “{{ active_filters['q'] }}”
+        <button type="button" class="pill-remove" aria-label="Rimuovi">×</button>
+      </span>
+    {% endif %}
 
     {# Pill filtri attivi, rimovibili #}
     {% for facet in facet_defs %}
@@ -79,8 +90,10 @@
 
       {% elif facet.type == 'multiselect' %}
         {% for v in active_filters.get(facet.id, []) %}
+          {# Lookup URI → label nelle options della faccetta; fallback all'URI se assente #}
+          {% set pill_label = (facet.options | selectattr('uri', 'equalto', v) | map(attribute='value') | first) or v %}
           <span class="active-pill" data-facet="{{ facet.id }}" data-type="multi" data-value="{{ v }}">
-            {{ v }}
+            {{ pill_label }}
             <button type="button" class="pill-remove" aria-label="Rimuovi">×</button>
           </span>
         {% endfor %}
@@ -103,7 +116,7 @@
       {% endif %}
     {% endfor %}
 
-    {% if has_any_active %}
+    {% if ns.has_any_active %}
       <a href="{{ tab_route }}" class="btn-cancella">
         <i class="bi bi-trash"></i> cancella
       </a>
@@ -111,17 +124,24 @@
   </div>
 
   <div class="action-right">
-    <label class="sort-label">Ordina per</label>
-    <select class="sort-select" id="sort-select" disabled>
-      <option value="date_asc">Data ↑ crescente</option>
-      <option value="date_desc">Data ↓ decrescente</option>
-      <option value="name_asc">Nome A–Z</option>
-      <option value="name_desc">Nome Z–A</option>
+    <label class="sort-label" for="sort-select">Ordina per</label>
+    <select class="sort-select" id="sort-select" name="sort" form="facet-form">
+      <option value="date_asc"  {% if active_filters.get('sort') == 'date_asc'  %}selected{% endif %}>Data ↑ crescente</option>
+      <option value="date_desc" {% if active_filters.get('sort') == 'date_desc' %}selected{% endif %}>Data ↓ decrescente</option>
+      <option value="name_asc"  {% if active_filters.get('sort') == 'name_asc'  %}selected{% endif %}>Nome A–Z</option>
+      <option value="name_desc" {% if active_filters.get('sort') == 'name_desc' %}selected{% endif %}>Nome Z–A</option>
     </select>
 
-    <button class="btn-export" type="button" disabled>
-      Export <i class="bi bi-download"></i>
-    </button>
+    <div class="dropdown">
+      <button class="btn-export dropdown-toggle" type="button" id="export-toggle"
+              data-bs-toggle="dropdown" aria-expanded="false">
+        Export <i class="bi bi-download"></i>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="export-toggle">
+        <li><a class="dropdown-item" href="#" data-export-format="csv">CSV</a></li>
+        <li><a class="dropdown-item" href="#" data-export-format="json">JSON</a></li>
+      </ul>
+    </div>
 
     <div class="view-toggle" role="group" aria-label="Vista">
       <button type="button" class="view-btn active" data-view="list" aria-label="Vista lista">
@@ -244,7 +264,32 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
-  
+  var tabRoute = {{ tab_route|tojson }};
+
+  /* ── Ordina per: submit automatico del form filtri ──── */
+  var sortSelect = document.getElementById('sort-select');
+  if (sortSelect) {
+    sortSelect.addEventListener('change', function () {
+      var form = document.getElementById('facet-form');
+      if (form) form.submit();
+    });
+  }
+
+  /* ── Export (CSV / JSON) ─────────────────────────────── */
+  document.querySelectorAll('[data-export-format]').forEach(function (link) {
+    link.addEventListener('click', function (e) {
+      e.preventDefault();
+      var apiUrl = new URL('/api' + tabRoute + '/export', window.location.origin);
+      var current = new URL(window.location.href);
+      current.searchParams.forEach(function (value, key) {
+        apiUrl.searchParams.append(key, value);
+      });
+      apiUrl.searchParams.set('format', link.dataset.exportFormat);
+      window.location.href = apiUrl.toString();
+    });
+  });
+
+
   /* ── Toggle vista lista/griglia ─────────────────────── */
   var container = document.getElementById('zac-catalogue-results-list');
   document.querySelectorAll('.view-btn').forEach(function (btn) {

@@ -8,10 +8,13 @@ Results are loaded 50 at a time: first page SSR, subsequent batches via
 GET /api{path}/results?offset=50&limit=50&...filters... → JSON.
 """
 import asyncio
+import csv
+import io
+import json
 import logging
 
 from fastapi import APIRouter, Request, Query
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 
 from backend.services.sparql import FilterEngine
@@ -22,6 +25,9 @@ router = APIRouter()
 tmpl: Jinja2Templates = None
 
 PAGE_SIZE = 50          # results per batch (SSR + infinite scroll)
+
+EXPORT_BATCH = 500      # SPARQL rows fetched per export batch (streaming)
+EXPORT_MAX   = 10000    # hard cap on rows exported in one request
 
 
 def setup(t: Jinja2Templates):
@@ -82,7 +88,23 @@ def _build_engine(cfg, tab_id: str, params: dict, *, skip_facet: str = None) -> 
             if val in ("true", "false"):
                 engine.apply(fid, boolean=(val == "true"))
 
+    # Ricerca libera per parola chiave (barra di ricerca, param "q")
+    q = params.get("q")
+    if q:
+        engine.apply_search(q)
+
     return engine
+
+
+def _resolve_sort(request: Request, route_cfg: dict) -> tuple[str, str]:
+    """Read the 'sort' query param, validate it against route.sort_fields,
+    and return (sort_key, order_by_sparql_fragment)."""
+    sort_fields = route_cfg.get("sort_fields", {})
+    default     = route_cfg.get("default_sort", next(iter(sort_fields), ""))
+    sort        = request.query_params.get("sort") or default
+    if sort not in sort_fields:
+        sort = default
+    return sort, sort_fields.get(sort, "")
 
 
 async def _facet_values(sparql, cfg, tab_id: str, facet_id: str,
@@ -171,6 +193,11 @@ def _parse_params(request: Request, facets: dict) -> dict:
             val = query_params.get(facet_id)
             if val in ("true", "false"):
                 params[facet_id] = val
+
+    # Ricerca libera per parola chiave (barra di ricerca)
+    q = query_params.get("q", "").strip()
+    if q:
+        params["q"] = q
 
     return params
 
@@ -284,6 +311,7 @@ def register_tab_routes(cfg):
 
         _register_list_route(tab_id, tab_cfg, route_cfg, cfg)  # example GET /cataloghi, GET /aste
         _register_api_route(tab_id, tab_cfg, route_cfg, cfg)
+        _register_export_route(tab_id, tab_cfg, route_cfg, cfg)
         _register_detail_route(tab_id, tab_cfg, route_cfg, cfg)
 
 
@@ -305,10 +333,12 @@ def _register_list_route(tab_id, tab_cfg, route_cfg, cfg):
         # ── 1. Tutti i facet + count + dati in parallelo ──────────
         all_facets = list(facets.keys())
 
+        sort, order_by = _resolve_sort(request, route_cfg)
+
         engine  = _build_engine(cfg, tab_id, params)
         pfx     = cfg.get_prefixes()
         count_q = pfx + engine.build_query(cfg.get_results_query(route_cfg["count_query"]), 0, 0)
-        data_q  = pfx + engine.build_query(cfg.get_results_query(route_cfg["results_query"]), PAGE_SIZE, 0)
+        data_q  = pfx + engine.build_query(cfg.get_results_query(route_cfg["results_query"]), PAGE_SIZE, 0, order_by)
         
         facet_tasks = [
             _facet_values(sparql, cfg, tab_id, facet_id,
@@ -362,6 +392,9 @@ def _register_list_route(tab_id, tab_cfg, route_cfg, cfg):
             elif ftype == "boolean":
                 active_filters[fid] = params.get(fid, "")
 
+        active_filters["q"]    = params.get("q", "")
+        active_filters["sort"] = sort
+
         facet_defs = _build_facet_defs(facets, facet_values, params, dynamic_ranges)
         log.warning(f"ACTIVE_FILTERS: {active_filters}")
         return tmpl.TemplateResponse("browse.html", {
@@ -396,8 +429,9 @@ def _register_api_route(tab_id, tab_cfg, route_cfg, cfg):
 
         engine = _build_engine(cfg, _tab_id, params)
         pfx    = cfg.get_prefixes()
+        _, order_by = _resolve_sort(request, _route_cfg)
         data_q = pfx + engine.build_query(
-            cfg.get_results_query(_route_cfg["results_query"]), limit, offset
+            cfg.get_results_query(_route_cfg["results_query"]), limit, offset, order_by
         )
 
         try:
@@ -413,6 +447,106 @@ def _register_api_route(tab_id, tab_cfg, route_cfg, cfg):
             "limit":    limit,
             "returned": len(items),
         })
+
+
+def _register_export_route(tab_id, tab_cfg, route_cfg, cfg):
+    """
+    Streaming export (CSV / JSON) dei risultati filtrati correnti.
+
+    GET /api{path}/export?format=csv|json&...filtri attivi...&sort=...
+
+    Esegue la stessa results_query usata per il browse, paginandola
+    internamente a blocchi di EXPORT_BATCH (così non si carica mai
+    l'intero result-set in memoria né si stressa il triplestore con
+    una singola query enorme), fino a un massimo di EXPORT_MAX righe.
+    Le righe duplicate (stesso URI, multivalori 1:N) vengono deduplicate
+    in streaming, come per la paginazione a video.
+    """
+    api_path  = "/api" + route_cfg["path"] + "/export"
+    facets    = tab_cfg.get("facets", {})
+    uri_var   = route_cfg.get("uri_var", "uri")
+    field_map = route_cfg.get("result_fields", {})
+    columns   = ["uri"] + list(field_map.keys())
+    filename  = route_cfg.get("export_filename", "zac_export")
+
+    @router.get(api_path)
+    async def tab_export(request: Request,
+                          format: str = Query("csv", pattern="^(csv|json)$"),
+                          _tab_id=tab_id, _route_cfg=route_cfg, _facets=facets):
+        sparql = request.app.state.sparql
+        cfg    = request.app.state.config
+        params = _parse_params(request, _facets)
+
+        engine   = _build_engine(cfg, _tab_id, params)
+        pfx      = cfg.get_prefixes()
+        _, order_by = _resolve_sort(request, _route_cfg)
+        template = cfg.get_results_query(_route_cfg["results_query"])
+
+        async def rows():
+            """Genera dict di riga deduplicate, paginando la query a blocchi."""
+            seen    = set()
+            offset  = 0
+            exported = 0
+            while exported < EXPORT_MAX:
+                batch_limit = min(EXPORT_BATCH, EXPORT_MAX - exported)
+                q = pfx + engine.build_query(template, batch_limit, offset, order_by)
+                try:
+                    batch = await sparql.select(q)
+                except Exception as e:
+                    log.error(f"Export {_tab_id}: {e}")
+                    break
+                if not batch:
+                    break
+                for r in batch:
+                    u = r.get(uri_var, "")
+                    if u in seen:
+                        continue
+                    seen.add(u)
+                    row = {"uri": u}
+                    for local_name, sparql_var in field_map.items():
+                        row[local_name] = r.get(sparql_var, "")
+                    yield row
+                    exported += 1
+                    if exported >= EXPORT_MAX:
+                        break
+                offset += len(batch)
+                if len(batch) < batch_limit:
+                    break
+
+        if format == "json":
+            async def gen_json():
+                yield "["
+                first = True
+                async for row in rows():
+                    if not first:
+                        yield ","
+                    first = False
+                    yield json.dumps(row, ensure_ascii=False)
+                yield "]"
+
+            return StreamingResponse(
+                gen_json(),
+                media_type="application/json",
+                headers={"Content-Disposition": f'attachment; filename="{filename}.json"'},
+            )
+
+        # CSV (default)
+        async def gen_csv():
+            buf    = io.StringIO()
+            writer = csv.writer(buf)
+            writer.writerow(columns)
+            yield buf.getvalue()
+            async for row in rows():
+                buf.seek(0)
+                buf.truncate(0)
+                writer.writerow([row.get(c, "") for c in columns])
+                yield buf.getvalue()
+
+        return StreamingResponse(
+            gen_csv(),
+            media_type="text/csv",
+            headers={"Content-Disposition": f'attachment; filename="{filename}.csv"'},
+        )
 
 
 def _register_detail_route(tab_id, tab_cfg, route_cfg, cfg):

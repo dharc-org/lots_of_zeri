@@ -148,15 +148,34 @@ class FilterEngine:
 
         return self
 
+    def apply_search(self, text: Optional[str] = None) -> "FilterEngine":
+        """
+        Applica la ricerca libera per parola chiave (barra di ricerca).
+        Usa lo snippet '{tab}___search' / 'text_search' definito in
+        sparql_queries.yaml (facet_id convenzionale "_search").
+        """
+        if text:
+            snippet = self._config.get_filter_snippet(self._tab, "_search", "text_search")
+            if snippet:
+                escaped = text.replace("\\", "\\\\").replace('"', '\\"').replace("\n", " ")
+                self._clauses.append(snippet.replace("{text_value}", escaped))
+        return self
+
     def build(self) -> str:
         """Return combined SPARQL filter block."""
         return "\n".join(self._clauses) if self._clauses else ""
 
-    def build_query(self, template: str, limit: int, offset: int) -> str:
-        """Inject filters + pagination into a query template."""
+    def build_query(self, template: str, limit: int, offset: int, order_by: str = "") -> str:
+        """Inject filters + ordering + pagination into a query template.
+        Se order_by è vuoto, l'intera clausola 'ORDER BY {ORDER}' viene rimossa
+        (altrimenti 'ORDER BY' senza argomenti è SPARQL invalido → query fallisce)."""
+        q = template.replace("{FILTERS}", self.build())
+        if order_by:
+            q = q.replace("{ORDER}", order_by)
+        else:
+            q = q.replace("ORDER BY {ORDER}", "")
         return (
-            template
-            .replace("{FILTERS}", self.build())
-            .replace("{limit}",   str(limit))
-            .replace("{offset}",  str(offset))
+            q
+            .replace("{limit}",  str(limit))
+            .replace("{offset}", str(offset))
         )

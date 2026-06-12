@@ -62,17 +62,17 @@ facet_queries:
     GROUP BY ?facetURI ?facetValue ORDER BY DESC(?count) LIMIT 200
 
   eventi_asta__cronologia_oggetti: |
-    SELECT ?facetURI ?facetValue (COUNT(DISTINCT ?auction) AS ?count)
-    WHERE {
-      ?auction a crm:E7_Activity ;
-        crm:P2_has_type aat:300054751 ;
-        crm:P125_used_objects_of_type ?obj_type .
-      ?obj_type crm:P2_has_type zac:object_period ;
-        rdfs:label ?facetValue .
-      BIND(?obj_type AS ?facetURI)
-      {FILTERS}
-    }
-    GROUP BY ?facetURI ?facetValue ORDER BY DESC(?count) LIMIT 200
+      SELECT ?facetURI ?facetValue (COUNT(DISTINCT ?auction) AS ?count)
+      WHERE {
+        ?auction a crm:E7_Activity ;
+          crm:P2_has_type aat:300054751 ;
+          crm:P125_used_objects_of_type ?obj_period .
+        ?obj_period crm:P2_has_type zac:object_period ;
+          rdfs:label ?facetValue .
+        BIND(?obj_period AS ?facetURI)
+        {FILTERS}
+      }
+      GROUP BY ?facetURI ?facetValue ORDER BY DESC(?count) LIMIT 200
 
   eventi_asta__periodo__range: |
     SELECT (MIN(?ys) AS ?minYear) (MAX(?ye) AS ?maxYear)
@@ -229,15 +229,22 @@ filter_snippets:
       VALUES ?obj_type { {values_clause} }
 
   eventi_asta__cronologia_oggetti:
-    multiselect: |
-      ?auction crm:P125_used_objects_of_type ?obj_type .
-      ?obj_type crm:P2_has_type zac:object_period .
-      VALUES ?obj_type { {values_clause} }
+      multiselect: |
+        ?auction crm:P125_used_objects_of_type ?obj_period .
+        ?obj_period crm:P2_has_type zac:object_period .
+        VALUES ?obj_period { {values_clause} }
 
   eventi_asta__luogo:
     multiselect: |
       ?auction crm:P7_took_place_at ?place .
       VALUES ?place { {values_clause} }
+
+  # Ricerca libera per parola chiave — usata dalla barra di ricerca
+  # Effettua la corrispondenza su: etichetta asta, casa d'asta, banditore, luogo
+  eventi_asta___search:
+    text_search: |
+      ?auction rdfs:label ?searchLabel .
+      FILTER(CONTAINS(LCASE(STR(?searchLabel)), LCASE("{text_value}")))
 
   cataloghi__anno_pubblicazione:
     year_range: |
@@ -284,6 +291,14 @@ filter_snippets:
       ?obj_type_f crm:P2_has_type zac:object_type .
       VALUES ?obj_type_f { {values_clause} }
 
+  # Ricerca libera per parola chiave — usata dalla barra di ricerca
+  # Effettua la corrispondenza su: titolo, sottotitolo, identificativo, autori/casa d'asta
+  cataloghi___search:
+    text_search: |
+      ?doc crm:P102_has_title ?searchTitleNode .
+      ?searchTitleNode rdfs:label ?searchLabel .
+      FILTER(CONTAINS(LCASE(STR(?searchLabel)), LCASE("{text_value}")))
+
 
 # ─────────────────────────────────────────
 # MAIN RESULT QUERIES
@@ -312,7 +327,7 @@ results:
       }
       {FILTERS}
     }
-    ORDER BY ?yearLabel ?auctionLabel
+    ORDER BY {ORDER}
     LIMIT {limit}
     OFFSET {offset}
 
@@ -358,7 +373,7 @@ results:
         }
         {FILTERS}
     }
-    ORDER BY ?year ?docId
+    ORDER BY {ORDER}
     LIMIT {limit}
     OFFSET {offset}
 

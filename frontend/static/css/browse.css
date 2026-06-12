@@ -207,6 +207,19 @@
   scrollbar-color: var(--gray-1) transparent;
 }
 
+/* ── Bottone Cerca sticky in fondo al pannello filtri ─────── */
+.sidebar-cta {
+  position: sticky;
+  bottom: -1.25rem;             /* compensa il padding-bottom del panel */
+  margin: 0.5rem -0.25rem -1.25rem;
+  padding: 0.75rem 1rem 1rem;
+  background: var(--paper-light);
+  border-top: 1px solid var(--gray-1);
+  /* sfumatura sopra il bordo: i filtri che scorrono sotto svaniscono dolcemente */
+  box-shadow: 0 -10px 10px -8px color-mix(in srgb, var(--ink) 12%, transparent);
+  z-index: 2;
+}
+
 .zac-sidebar-toggle {
   display: flex;
   flex-direction: column;
@@ -258,8 +271,16 @@
   letter-spacing: 0.15em;
   text-transform: uppercase;
   color: var(--gray-3);
-  padding-bottom: 0.75rem;
   border-bottom: 1px solid var(--gray-1);
+  /* sticky in cima al pannello scrollabile, speculare a .sidebar-cta */
+  position: sticky;
+  top: -1.25rem;                /* compensa il padding-top del panel */
+  margin: -1.25rem -0.25rem 0;
+  padding: 1rem 1rem 0.75rem;
+  background: var(--paper-light);
+  box-shadow: 0 10px 10px -8px color-mix(in srgb, var(--ink) 12%, transparent);
+  z-index: 2;
+}
   margin-left: 0.5rem;
   margin-bottom: 0.25rem;
 } 
@@ -540,4 +561,3 @@
   display: inline-block; margin-top: 1rem;
   color: var(--terra) !important; text-decoration: underline;
 }
-
