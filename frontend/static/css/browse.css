@@ -280,7 +280,6 @@
   background: var(--paper-light);
   box-shadow: 0 10px 10px -8px color-mix(in srgb, var(--ink) 12%, transparent);
   z-index: 2;
-}
   margin-left: 0.5rem;
   margin-bottom: 0.25rem;
 } 

@@ -357,6 +357,29 @@ def _register_list_route(tab_id, tab_cfg, route_cfg, cfg):
             if isinstance(val, Exception):
                 log.error(f"Facet {facet_id}: {val}")
 
+        # ── 2c. Label cache for active pills whose option disappeared due to 0-result cross-filter
+        missing_uris = []
+        for fid, fcfg in facets.items():
+            if fcfg.get("type") == "multiselect":
+                known = {o["uri"] for o in facet_values.get(fid, [])}
+                for v in params.get(fid, []):
+                    if v not in known:
+                        missing_uris.append((fid, v))
+
+        if missing_uris:
+            extra_tasks = [
+                _facet_values(sparql, cfg, tab_id, fid, _build_engine(cfg, tab_id, {}, skip_facet=fid).build())
+                for fid, _ in missing_uris
+            ]
+            extra_results = await asyncio.gather(*extra_tasks, return_exceptions=True)
+            for (fid, v), opts in zip(missing_uris, extra_results):
+                if isinstance(opts, Exception):
+                    continue
+                existing_uris = {o["uri"] for o in facet_values[fid]}
+                for o in opts:
+                    if o["uri"] == v and o["uri"] not in existing_uris:
+                        facet_values[fid].append({**o, "count": 0})
+
         # ── 2b. Range dinamici per slider ────────────────────────────────
         dynamic_ranges = {}
         for fid, fcfg in facets.items():
@@ -385,6 +408,7 @@ def _register_list_route(tab_id, tab_cfg, route_cfg, cfg):
                 rng = fcfg.get("range", {})
                 active_filters[fid + "_from"] = params.get(fid + "_from") or rng.get("min", 1860)
                 active_filters[fid + "_to"]   = params.get(fid + "_to")   or rng.get("max", 1940)
+                active_filters[fid + "_is_set"] = (fid + "_from" in params) or (fid + "_to" in params)
             elif ftype == "multiselect":
                 active_filters[fid] = params.get(fid, [])
             elif ftype == "text_search":

@@ -47,12 +47,8 @@
 {% if active_filters.get('q') %}{% set ns.has_any_active = true %}{% endif %}
 {% for facet in facet_defs %}
   {% if facet.type == 'range' %}
-    {% set kf = facet.id ~ '_from' %}
-    {% set kt = facet.id ~ '_to'   %}
-    {% if active_filters.get(kf) and active_filters.get(kt) %}
-      {% if active_filters[kf] != facet.range.min or active_filters[kt] != facet.range.max %}
-        {% set ns.has_any_active = true %}
-      {% endif %}
+    {% if active_filters.get(facet.id ~ '_is_set') %}
+      {% set ns.has_any_active = true %}
     {% endif %}
   {% elif facet.type == 'multiselect' %}
     {% if active_filters.get(facet.id) %}{% set ns.has_any_active = true %}{% endif %}
@@ -77,21 +73,17 @@
     {# Pill filtri attivi, rimovibili #}
     {% for facet in facet_defs %}
       {% if facet.type == 'range' %}
-        {% set kf = facet.id ~ '_from' %}
-        {% set kt = facet.id ~ '_to'   %}
-        {% if active_filters.get(kf) is not none and active_filters.get(kt) is not none %}
-          {% if active_filters[kf] != facet.range.min or active_filters[kt] != facet.range.max %}
-            <span class="active-pill" data-facet="{{ facet.id }}" data-type="range">
-              {{ active_filters[kf] }} — {{ active_filters[kt] }}
-              <button type="button" class="pill-remove" aria-label="Rimuovi">×</button>
-            </span>
-          {% endif %}
+        {% if active_filters.get(facet.id ~ '_is_set') %}
+          <span class="active-pill" data-facet="{{ facet.id }}" data-type="range">
+            {{ active_filters[facet.id ~ '_from'] }} — {{ active_filters[facet.id ~ '_to'] }}
+            <button type="button" class="pill-remove" aria-label="Rimuovi">×</button>
+          </span>
         {% endif %}
 
       {% elif facet.type == 'multiselect' %}
         {% for v in active_filters.get(facet.id, []) %}
           {# Lookup URI → label nelle options della faccetta; fallback all'URI se assente #}
-          {% set pill_label = (facet.options | selectattr('uri', 'equalto', v) | map(attribute='value') | first) or v %}
+          {% set pill_label = (facet.options | selectattr('uri', 'equalto', v) | map(attribute='value') | first) or v %}      
           <span class="active-pill" data-facet="{{ facet.id }}" data-type="multi" data-value="{{ v }}">
             {{ pill_label }}
             <button type="button" class="pill-remove" aria-label="Rimuovi">×</button>
