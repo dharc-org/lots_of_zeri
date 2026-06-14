@@ -102,24 +102,37 @@ evento:
     label_it: "Torna alle aste"
   has_viewer: false
   switch:
-    - { label_it: "Catalogo",    link_key: "docId", route: "/cataloghi/{id}" }
+    - { label_it: "Catalogo",    link_key: "docSlug", route: "/cataloghi/{slug}" }
     - { label_it: "lista Lotti", disabled: true }
-
+ 
   sections:
     - { anchor: "scheda",  label_it: "Scheda catalografica" }
     - { anchor: "lotti",   label_it: "Lotti in vendita" }
     - { anchor: "related", label_it: "Aste correlate" }
-
+ 
   fields:
-    - { key: "label",        label_it: "Titolo",            multi: false }
-    - { key: "house",        label_it: "Organizzatore",     multi: false }
-    - { key: "auctioneer",   label_it: "Banditore",         multi: false }
-    - { key: "time_span",    label_it: "Periodo",           multi: false }
-    - { key: "place",        label_it: "Luogo di vendita",  multi: false }
-    - { key: "object_types", label_it: "Tipologia oggetti", multi: true, pill: true }
-    - { key: "docId",        label_it: "Catalogo",          multi: false,
-        link_route: "/cataloghi/{id}", link_key: "docId" }
-
+    - { key: "label",           label_it: "Titolo",                    multi: false }
+    - { key: "organizzatori",   label_it: "Organizzatore",             multi: true,
+        facet_link: { route: "/aste", param: "organizzatore" } }
+    - { key: "organizzazioni",  label_it: "Organizzazioni coinvolte",  multi: true,
+        facet_link: { route: "/aste", param: "organizzatore" } }
+    - { key: "banditori",       label_it: "Banditore",                 multi: true,
+        facet_link: { route: "/aste", param: "banditore" } }
+    - { key: "persone",         label_it: "Persone coinvolte",         multi: true,
+        facet_link: { route: "/aste", param: "organizzatore" } }
+    - { key: "dateStart",       label_it: "Data inizio asta",          multi: false }
+    - { key: "dateEnd",         label_it: "Data fine asta",            multi: false }
+    - { key: "place",           label_it: "Luogo di vendita",          multi: false,
+        facet_link: { route: "/aste", param: "luogo", uri_key: "placeURI" } }
+    - { key: "collezioni",      label_it: "Collezione in vendita",     multi: true,
+        facet_link: { route: "/cataloghi", param: "collezione" } }
+    - { key: "auctionCode",     label_it: "Codice asta",               multi: false }
+    - { key: "object_periods",  label_it: "Cronologia oggetti",        multi: true, pill: true }
+    - { key: "object_types",    label_it: "Tipologia oggetti",         multi: true, pill: true,
+        facet_link: { route: "/aste", param: "tipologia_oggetti" } }
+    - { key: "docLabel",        label_it: "Catalogo",                  multi: false,
+        link_route: "/cataloghi/{slug}", link_key: "docSlug" }
+ 
   related:
     - id: "evento_lotti"
       title_it: "Lotti in vendita nell'asta"
@@ -130,13 +143,19 @@ evento:
       title_it: "Aste correlate"
       card: "evento"
       count_label_it: "aste della stessa casa d'asta"
-
+ 
   query_blocks:
     scalars: "evento_scalars"
     multis:
-      object_types: "evento_object_types"
+      organizzatori:  "evento_organizzatori"
+      organizzazioni: "evento_organizzazioni"
+      banditori:      "evento_banditori"
+      persone:        "evento_persone"
+      collezioni:     "evento_collezioni"
+      object_types:   "evento_object_types"
+      object_periods: "evento_object_periods"
     related:
       evento_related_house:
         query:      "evento_related_house"
-        depends_on: "house"          # label casa d'asta
-        transform:  "sparql_literal" # escape → {house}
+        depends_on: "house"
+        transform:  "sparql_literal"
