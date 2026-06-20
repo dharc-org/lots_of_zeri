@@ -62,17 +62,17 @@ facet_queries:
     GROUP BY ?facetURI ?facetValue ORDER BY DESC(?count) LIMIT 200
 
   eventi_asta__cronologia_oggetti: |
-    SELECT ?facetURI ?facetValue (COUNT(DISTINCT ?auction) AS ?count)
-    WHERE {
-      ?auction a crm:E7_Activity ;
-        crm:P2_has_type aat:300054751 ;
-        crm:P125_used_objects_of_type ?obj_type .
-      ?obj_type crm:P2_has_type zac:object_period ;
-        rdfs:label ?facetValue .
-      BIND(?obj_type AS ?facetURI)
-      {FILTERS}
-    }
-    GROUP BY ?facetURI ?facetValue ORDER BY DESC(?count) LIMIT 200
+      SELECT ?facetURI ?facetValue (COUNT(DISTINCT ?auction) AS ?count)
+      WHERE {
+        ?auction a crm:E7_Activity ;
+          crm:P2_has_type aat:300054751 ;
+          crm:P125_used_objects_of_type ?obj_period .
+        ?obj_period crm:P2_has_type zac:object_period ;
+          rdfs:label ?facetValue .
+        BIND(?obj_period AS ?facetURI)
+        {FILTERS}
+      }
+      GROUP BY ?facetURI ?facetValue ORDER BY DESC(?count) LIMIT 200
 
   eventi_asta__periodo__range: |
     SELECT (MIN(?ys) AS ?minYear) (MAX(?ye) AS ?maxYear)
@@ -229,15 +229,22 @@ filter_snippets:
       VALUES ?obj_type { {values_clause} }
 
   eventi_asta__cronologia_oggetti:
-    multiselect: |
-      ?auction crm:P125_used_objects_of_type ?obj_type .
-      ?obj_type crm:P2_has_type zac:object_period .
-      VALUES ?obj_type { {values_clause} }
+      multiselect: |
+        ?auction crm:P125_used_objects_of_type ?obj_period .
+        ?obj_period crm:P2_has_type zac:object_period .
+        VALUES ?obj_period { {values_clause} }
 
   eventi_asta__luogo:
     multiselect: |
       ?auction crm:P7_took_place_at ?place .
       VALUES ?place { {values_clause} }
+
+  # Ricerca libera per parola chiave — usata dalla barra di ricerca
+  # Effettua la corrispondenza su: etichetta asta, casa d'asta, banditore, luogo
+  eventi_asta___search:
+    text_search: |
+      ?auction rdfs:label ?searchLabel .
+      FILTER(CONTAINS(LCASE(STR(?searchLabel)), LCASE("{text_value}")))
 
   cataloghi__anno_pubblicazione:
     year_range: |
@@ -284,6 +291,14 @@ filter_snippets:
       ?obj_type_f crm:P2_has_type zac:object_type .
       VALUES ?obj_type_f { {values_clause} }
 
+  # Ricerca libera per parola chiave — usata dalla barra di ricerca
+  # Effettua la corrispondenza su: titolo, sottotitolo, identificativo, autori/casa d'asta
+  cataloghi___search:
+    text_search: |
+      ?doc crm:P102_has_title ?searchTitleNode .
+      ?searchTitleNode rdfs:label ?searchLabel .
+      FILTER(CONTAINS(LCASE(STR(?searchLabel)), LCASE("{text_value}")))
+
 
 # ─────────────────────────────────────────
 # MAIN RESULT QUERIES
@@ -312,7 +327,7 @@ results:
       }
       {FILTERS}
     }
-    ORDER BY ?yearLabel ?auctionLabel
+    ORDER BY {ORDER}
     LIMIT {limit}
     OFFSET {offset}
 
@@ -358,7 +373,7 @@ results:
         }
         {FILTERS}
     }
-    ORDER BY ?year ?docId
+    ORDER BY {ORDER}
     LIMIT {limit}
     OFFSET {offset}
 
@@ -491,42 +506,140 @@ detail:
     LIMIT 12
 
   # ── EVENTO ─────────────────────────────────────────────────────
-
+ 
   evento_scalars: |
-    SELECT DISTINCT ?label ?house ?auctioneer ?time_span ?place ?docId
+    SELECT DISTINCT
+      ?label ?houseURI ?house
+      ?dateStart ?dateEnd
+      ?placeURI ?place
+      ?auctionCode ?docSlug ?docLabel
     WHERE {
         <{uri}> a crm:E7_Activity .
         OPTIONAL { <{uri}> rdfs:label ?label }
+ 
+        # organizzatore (scalar: prima casa d'asta trovata — per il link related)
         OPTIONAL {
           <{uri}> crm:P9_consists_of ?org .
           ?org crm:P2_has_type zac:auction_organisation ;
-            crm:P14_carried_out_by ?h .
-          ?h rdfs:label ?house .
+            crm:P14_carried_out_by ?houseURI .
+          ?houseURI rdfs:label ?house .
         }
+ 
+        # date inizio / fine (P82a, P82b)
         OPTIONAL {
-          <{uri}> crm:P9_consists_of ?auc .
-          ?auc crm:P2_has_type zac:auctioneering ;
-            crm:P14_carried_out_by ?a .
-          ?a rdfs:label ?auctioneer .
+          <{uri}> crm:P4_has_time-span ?ts .
+          ?ts crm:P82a_begin_of_the_begin ?dateStart .
+          ?ts crm:P82b_end_of_the_end ?dateEnd .
         }
-        OPTIONAL { <{uri}> crm:P4_has_time-span ?ts . ?ts rdfs:label ?time_span . }
-        OPTIONAL { <{uri}> crm:P7_took_place_at ?pl . ?pl rdfs:label ?place . }
+ 
+        # luogo
+        OPTIONAL {
+          <{uri}> crm:P7_took_place_at ?placeURI .
+          ?placeURI rdfs:label ?place .
+        }
+ 
+        # codice asta (identificatore preferito dell'evento stesso)
+        OPTIONAL {
+          <{uri}> crm:P48_has_preferred_identifier ?codeNode .
+          ?codeNode rdfs:label ?auctionCode .
+        }
+ 
+        # catalogo collegato
         OPTIONAL {
           ?doc crm:P70_documents <{uri}> .
-          ?doc crm:P48_has_preferred_identifier ?docId .
+          ?doc rdfs:label ?docLabel .
+          BIND(REPLACE(STR(?doc), "^.*/", "") AS ?docSlug)
         }
     }
     LIMIT 1
-
-  # Tipologie oggetti (multivalore)
-  evento_object_types: |
-    SELECT DISTINCT ?value
+ 
+  # Organizzatori (multivalore — E74_Group)
+  evento_organizzatori: |
+    SELECT DISTINCT ?uri ?value
     WHERE {
-        <{uri}> crm:P125_used_objects_of_type ?otype .
-        ?otype crm:P2_has_type zac:object_type ; rdfs:label ?value .
+        <{uri}> crm:P9_consists_of ?org .
+        ?org crm:P2_has_type zac:auction_organisation ;
+          crm:P14_carried_out_by ?house .
+        BIND(?house AS ?uri)
+        ?house rdfs:label ?value .
     }
     ORDER BY ?value
-
+ 
+  # Organizzazioni coinvolte (multivalore — qualsiasi E74_Group non già organizzatore)
+  evento_organizzazioni: |
+    SELECT DISTINCT ?uri ?value
+    WHERE {
+        <{uri}> crm:P9_consists_of ?sub .
+        ?sub crm:P14_carried_out_by ?org .
+        ?org a crm:E74_Group .
+        FILTER NOT EXISTS {
+          ?sub crm:P2_has_type zac:auction_organisation .
+        }
+        BIND(?org AS ?uri)
+        ?org rdfs:label ?value .
+    }
+    ORDER BY ?value
+ 
+  # Banditori (multivalore)
+  evento_banditori: |
+    SELECT DISTINCT ?uri ?value
+    WHERE {
+        <{uri}> crm:P9_consists_of ?auc .
+        ?auc crm:P2_has_type zac:auctioneering ;
+          crm:P14_carried_out_by ?auct .
+        BIND(?auct AS ?uri)
+        ?auct rdfs:label ?value .
+    }
+    ORDER BY ?value
+ 
+  # Persone coinvolte (multivalore — E21_Person non banditore)
+  evento_persone: |
+    SELECT DISTINCT ?uri ?value
+    WHERE {
+        <{uri}> crm:P9_consists_of ?sub .
+        ?sub crm:P14_carried_out_by ?person .
+        ?person a crm:E21_Person .
+        FILTER NOT EXISTS {
+          ?sub crm:P2_has_type zac:auctioneering .
+        }
+        BIND(?person AS ?uri)
+        ?person rdfs:label ?value .
+    }
+    ORDER BY ?value
+ 
+  # Collezioni in vendita (multivalore — E78_Curated_Holding)
+  evento_collezioni: |
+    SELECT DISTINCT ?uri ?value
+    WHERE {
+        <{uri}> crm:P16_used_specific_object ?coll .
+        ?coll a crm:E78_Curated_Holding .
+        BIND(?coll AS ?uri)
+        ?coll rdfs:label ?value .
+    }
+    ORDER BY ?value
+ 
+  # Tipologie oggetti (multivalore)
+  evento_object_types: |
+    SELECT DISTINCT ?uri ?value
+    WHERE {
+        <{uri}> crm:P125_used_objects_of_type ?otype .
+        ?otype crm:P2_has_type zac:object_type .
+        BIND(?otype AS ?uri)
+        ?otype rdfs:label ?value .
+    }
+    ORDER BY ?value
+ 
+  # Cronologia oggetti (multivalore)
+  evento_object_periods: |
+    SELECT DISTINCT ?uri ?value
+    WHERE {
+        <{uri}> crm:P125_used_objects_of_type ?otype .
+        ?otype crm:P2_has_type zac:object_period .
+        BIND(?otype AS ?uri)
+        ?otype rdfs:label ?value .
+    }
+    ORDER BY ?value
+ 
   # Correlati: altre aste della stessa casa d'asta (organizzatore), escluso il corrente
   # {house} = label casa (passata dal router dopo gli scalari)
   evento_related_house: |

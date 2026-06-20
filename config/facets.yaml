@@ -42,6 +42,17 @@ eventi_asta:
       year:   "yearLabel"
       place:  "placeLabel"
 
+    # Ordinamento — chiave param "sort" → frammento SPARQL ORDER BY
+    sort_fields:
+      date_asc:  "ASC(?yearLabel) ASC(?auctionLabel)"
+      date_desc: "DESC(?yearLabel) DESC(?auctionLabel)"
+      name_asc:  "ASC(?auctionLabel)"
+      name_desc: "DESC(?auctionLabel)"
+    default_sort: "date_asc"
+
+    # Export CSV/JSON
+    export_filename: "zac_aste"
+
   facets:
     organizzatore:
       label_it: "Organizzatore/Casa d'Asta"
@@ -114,6 +125,17 @@ cataloghi:
       house:      "houseLabel"
       language:   "langLabel"
       illustrated: "illustrated"   
+
+    # Ordinamento — chiave param "sort" → frammento SPARQL ORDER BY
+    sort_fields:
+      date_asc:  "ASC(?year) ASC(?docId)"
+      date_desc: "DESC(?year) DESC(?docId)"
+      name_asc:  "ASC(?title) ASC(?docId)"
+      name_desc: "DESC(?title) DESC(?docId)"
+    default_sort: "date_asc"
+
+    # Export CSV/JSON
+    export_filename: "zac_cataloghi"
 
   facets:
     autori:

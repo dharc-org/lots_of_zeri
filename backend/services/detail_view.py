@@ -31,6 +31,16 @@ def _extract_year4(val: str) -> Optional[str]:
     return m.group(0) if m else None
 
 
+def _format_date(val: Optional[str]) -> Optional[str]:
+    """Formatta una data ISO (2025-01-15 → 15/01/2025). Ritorna il valore grezzo se non parsabile."""
+    if not val:
+        return None
+    import re
+    m = re.match(r"(\d{4})-(\d{2})-(\d{2})", str(val))
+    if m:
+        return f"{m.group(3)}/{m.group(2)}/{m.group(1)}"
+    return val
+
 def _scalar(rows: List[dict], key: str) -> Optional[str]:
     """Primo valore non vuoto per `key` fra le righe (gli scalars sono LIMIT 1)."""
     for r in rows:
@@ -97,7 +107,8 @@ def build_view(
     # Slug/id per i link interni — ricavati dagli scalars
     auction_slug = _scalar(sc, "auctionSlug")
     doc_id       = _scalar(sc, "docId")
-    link_vals    = {"auctionSlug": auction_slug, "docId": doc_id}
+    doc_slug     = _scalar(sc, "docSlug")
+    link_vals    = {"auctionSlug": auction_slug, "docId": doc_id, "docSlug": doc_slug}
 
     # ── Switch "Vai a:" ──────────────────────────────────────────────
     switch = []
@@ -164,6 +175,11 @@ def build_view(
         # Scalare (eventualmente con link interno o link a faccetta range)
         else:
             val = _scalar(sc, key)
+
+            # Formattazione date ISO → gg/mm/aaaa
+            if key in ("dateStart", "dateEnd") and val:
+                val = _format_date(val)
+
             out["value"] = val
             out["has_value"] = val not in (None, "", "NaN")
 
@@ -173,15 +189,24 @@ def build_view(
                 if lv:
                     out["link"] = f["link_route"].replace("{slug}", lv).replace("{id}", lv)
 
-            # Link a faccetta range (es. anno → ?param_from=YYYY&param_to=YYYY)
             fl = f.get("facet_link")
-            if out["has_value"] and fl and fl.get("kind") == "range_year":
-                year4 = _extract_year4(val)
-                route = fl.get("route", "")
-                param = fl.get("param", "")
-                if year4 and route and param:
-                    out["link"] = (f"{route}?{param}_from={year4}"
-                                   f"&{param}_to={year4}")
+            if out["has_value"] and fl:
+                if fl.get("kind") == "range_year":
+                    # Link a faccetta range (es. anno → ?param_from=YYYY&param_to=YYYY)
+                    year4 = _extract_year4(val)
+                    route = fl.get("route", "")
+                    param = fl.get("param", "")
+                    if year4 and route and param:
+                        out["link"] = (f"{route}?{param}_from={year4}"
+                                       f"&{param}_to={year4}")
+                else:
+                    # Link a faccetta multiselect (scalare con URI separata, es. place)
+                    uri_key = fl.get("uri_key", key + "URI")
+                    uri_val = _scalar(sc, uri_key)
+                    route   = fl.get("route", "")
+                    param   = fl.get("param", "")
+                    if uri_val and route and param:
+                        out["link"] = f"{route}?{param}={quote(str(uri_val), safe='')}"
 
         fields.append(out)
 
