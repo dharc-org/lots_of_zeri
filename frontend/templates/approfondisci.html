@@ -1,27 +1,1128 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ZAC — Zeri Auction Catalogues</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Crimson+Pro:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  <link href="/static/css/style.css" rel="stylesheet">
-</head>
-<body class="d-flex flex-column min-vh-100">
+{% extends "base.html" %}
+{% block title %}Approfondisci — ZAC{% endblock %}
 
-{% include "partials/_nav.html" %}
+{% block styles %}
+<style>
+/* ══════════════════════════════════════════════════════════
+   approfondisci.html — stili page-specific
+   ══════════════════════════════════════════════════════════ */
 
-<main class="flex-grow-1 d-flex align-items-center py-5">
-  <div class="container">
-    <h1>APPROFONDISCI</h1>
-    <p>Coming soon</p>
-  </div>
-</main>
+/* ── Layout principale ─────────────────────────────────── */
+.appr-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 0;
+  min-height: calc(100vh - 6rem);
+}
 
-{% include "partials/_footer.html" %}
+/* ── Sidebar ───────────────────────────────────────────── */
+.appr-sidebar {
+  position: sticky;
+  top: 6rem;
+  height: fit-content;
+  padding: 2.5rem 1.5rem 2.5rem 2rem;
+  border-right: 1px solid var(--gray-1);
+}
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+.appr-nav-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.appr-nav-item {
+  padding: .55rem 0;
+  border-bottom: 1px solid var(--gray-1);
+}
+
+.appr-nav-item:last-child {
+  border-bottom: none;
+}
+
+.appr-nav-link {
+  font-family: var(--ff-body);
+  font-size: .82rem;
+  color: var(--gray-3) !important;
+  text-decoration: none !important;
+  display: block;
+  text-align: right;
+  transition: color .15s ease;
+  line-height: 1.4;
+}
+
+.appr-nav-link:hover,
+.appr-nav-link.active {
+  color: var(--terra) !important;
+}
+
+/* ── Contenuto principale ──────────────────────────────── */
+.appr-main {
+  padding: 3rem 3.5rem 5rem;
+  max-width: 860px;
+}
+
+/* ── Sezione generica ──────────────────────────────────── */
+.appr-section {
+  padding-bottom: 4rem;
+  border-bottom: 1px solid var(--gray-1);
+  margin-bottom: 4rem;
+  scroll-margin-top: 7rem;
+}
+
+.appr-section:last-child {
+  border-bottom: none;
+}
+
+/* ── Titolo sezione ────────────────────────────────────── */
+.appr-section-title {
+  font-family: var(--ff-head);
+  font-size: 2rem;
+  font-weight: 400;
+  text-align: right;
+  margin: 0 0 .5rem;
+  line-height: 1.15;
+}
+
+.appr-section-title em {
+  font-style: italic;
+}
+
+.appr-title-rule {
+  border: none;
+  border-top: 1px solid var(--gray-1);
+  margin: 0 0 1.75rem;
+}
+
+/* ── Lead (testo introduttivo grande) ──────────────────── */
+.appr-lead {
+  font-family: var(--ff-body);
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: var(--ink);
+  margin-bottom: 1.75rem;
+}
+
+.appr-lead strong {
+  font-weight: 600;
+}
+
+/* ── Corpo testo ────────────────────────────────────────── */
+.appr-body {
+  font-family: var(--ff-body);
+  font-size: .92rem;
+  line-height: 1.7;
+  color: var(--ink-light);
+}
+
+.appr-body p { margin-bottom: 1rem; }
+.appr-body p:last-child { margin-bottom: 0; }
+
+/* ── Due colonne testo ─────────────────────────────────── */
+.appr-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+/* ── Callout citazione ─────────────────────────────────── */
+.appr-callout {
+  background: var(--paper-dark);
+  border-left: 3px solid var(--terra);
+  padding: 1.25rem 1.5rem;
+  margin: 2rem 0 0;
+  font-family: var(--ff-body);
+  font-size: .92rem;
+  line-height: 1.65;
+  color: var(--ink);
+}
+
+.appr-callout strong { font-weight: 600; }
+
+/* ── Link CTA fine sezione ─────────────────────────────── */
+.appr-cta {
+  text-align: right;
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--gray-1);
+}
+
+.appr-cta a {
+  font-family: var(--ff-body);
+  font-size: .9rem;
+  font-weight: 500;
+  color: var(--terra) !important;
+  text-decoration: none !important;
+  border-bottom: 1px solid var(--terra);
+  padding-bottom: 1px;
+}
+
+.appr-cta a:hover {
+  color: var(--terra-dark) !important;
+  border-color: var(--terra-dark);
+}
+
+/* ── Sezione scura (anatomia, segni, copertine) ────────── */
+.appr-dark-section {
+  background: var(--ink);
+  border-radius: 4px;
+  padding: 1.5rem 1.75rem 2rem;
+  margin: 2rem 0;
+}
+
+.appr-dark-label {
+  font-family: var(--ff-mono);
+  font-size: .72rem;
+  letter-spacing: .12em;
+  color: var(--gray-1);
+  margin-bottom: .35rem;
+}
+
+.appr-dark-sublabel {
+  font-family: var(--ff-body);
+  font-size: .78rem;
+  color: var(--gray-2);
+  margin-bottom: 1.25rem;
+}
+
+.appr-dark-rule {
+  border: none;
+  border-top: 1px solid var(--gray-3);
+  margin: .35rem 0 1.25rem;
+}
+
+/* ── Griglia immagini scura (5 colonne) ─────────────────── */
+.appr-img-grid-5 {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: .75rem;
+}
+
+.appr-img-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: .75rem;
+}
+
+.appr-img-item {}
+
+.appr-img-thumb {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  display: block;
+  border-radius: 2px;
+}
+
+/* Placeholder immagine */
+.appr-img-placeholder {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  background: var(--gray-4);
+  border-radius: 2px;
+  display: grid;
+  place-items: center;
+  color: var(--gray-2);
+  font-size: 1.5rem;
+  opacity: .5;
+}
+
+.appr-img-caption {
+  margin-top: .5rem;
+}
+
+.appr-img-caption-title {
+  font-family: var(--ff-body);
+  font-size: .75rem;
+  color: var(--terra-muted);
+  font-weight: 500;
+  display: block;
+}
+
+.appr-img-caption-sub {
+  font-family: var(--ff-body);
+  font-size: .72rem;
+  color: var(--gray-2);
+  display: block;
+  line-height: 1.4;
+}
+
+/* ── Lotto: layout testo + immagine annotata ───────────── */
+.appr-lotto-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.5rem;
+  align-items: start;
+}
+
+.appr-lotto-img-wrap {
+  position: relative;
+}
+
+.appr-lotto-img {
+  width: 100%;
+  border: 1px solid var(--gray-1);
+  display: block;
+}
+
+.appr-lotto-caption {
+  font-family: var(--ff-body);
+  font-size: .75rem;
+  color: var(--gray-3);
+  text-align: right;
+  margin-top: .5rem;
+  line-height: 1.4;
+}
+
+/* ── Etymologie (sezione asta) ─────────────────────────── */
+.appr-asta-hero {
+  text-align: center;
+  margin-bottom: 1.75rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--gray-1);
+}
+
+.appr-asta-latin {
+  font-family: var(--ff-head);
+  font-style: italic;
+  font-size: 1.5rem;
+  color: var(--ink);
+  margin: 0 0 .25rem;
+}
+
+.appr-asta-latin-sub {
+  font-family: var(--ff-body);
+  font-size: .85rem;
+  color: var(--terra);
+  margin: 0;
+}
+
+.appr-etym-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1px;
+  background: var(--gray-1);
+  border: 1px solid var(--gray-1);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.appr-etym-cell {
+  background: var(--paper-light);
+  padding: 1rem 1.25rem;
+}
+
+.appr-etym-cell--mid {
+  background: var(--paper-dark);
+}
+
+.appr-etym-lang {
+  font-family: var(--ff-mono);
+  font-size: .7rem;
+  letter-spacing: .12em;
+  color: var(--terra);
+  margin-bottom: .4rem;
+}
+
+.appr-etym-word {
+  font-family: var(--ff-head);
+  font-size: 1.1rem;
+  color: var(--ink);
+  display: block;
+  margin-bottom: .2rem;
+}
+
+.appr-etym-note {
+  font-family: var(--ff-body);
+  font-size: .75rem;
+  color: var(--gray-3);
+  font-style: italic;
+  line-height: 1.4;
+}
+
+/* ── Stat (collezione) ─────────────────────────────────── */
+.appr-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--gray-1);
+  border: 1px solid var(--gray-1);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.appr-stat-cell {
+  background: var(--paper-light);
+  padding: 1.25rem 1.5rem;
+}
+
+.appr-stat-number {
+  font-family: var(--ff-head);
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--terra);
+  line-height: 1;
+  display: block;
+  margin-bottom: .3rem;
+}
+
+.appr-stat-label {
+  font-family: var(--ff-mono);
+  font-size: .72rem;
+  letter-spacing: .08em;
+  color: var(--gray-3);
+}
+
+/* ── Foto panoramica biblioteca ─────────────────────────── */
+.appr-panorama-wrap {
+  margin: 1.5rem 0 .5rem;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.appr-panorama-img {
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+  display: block;
+}
+
+.appr-panorama-placeholder {
+  width: 100%;
+  height: 180px;
+  background: var(--gray-4);
+  display: grid;
+  place-items: center;
+  color: var(--gray-2);
+  opacity: .5;
+}
+
+.appr-panorama-caption {
+  margin-top: .5rem;
+}
+
+.appr-panorama-caption-label {
+  font-family: var(--ff-mono);
+  font-size: .7rem;
+  letter-spacing: .1em;
+  color: var(--gray-2);
+}
+
+.appr-panorama-caption-sub {
+  font-family: var(--ff-body);
+  font-size: .75rem;
+  color: var(--gray-3);
+}
+
+/* ── Corpus: grafico barre orizzontali ─────────────────── */
+.appr-chart-label {
+  font-family: var(--ff-mono);
+  font-size: .72rem;
+  letter-spacing: .12em;
+  color: var(--gray-3);
+  margin-bottom: .5rem;
+}
+
+.appr-bar-chart {
+  margin-bottom: 1.75rem;
+}
+
+.appr-bar-row {
+  display: grid;
+  grid-template-columns: 120px 1fr auto;
+  gap: .75rem;
+  align-items: center;
+  margin-bottom: .45rem;
+}
+
+.appr-bar-country {
+  font-family: var(--ff-body);
+  font-size: .82rem;
+  color: var(--ink);
+  text-align: right;
+}
+
+.appr-bar-track {
+  background: var(--paper-dark);
+  border-radius: 2px;
+  height: 14px;
+  overflow: hidden;
+}
+
+.appr-bar-fill {
+  height: 100%;
+  background: var(--terra);
+  border-radius: 2px;
+  transition: width .4s ease;
+}
+
+.appr-bar-count {
+  font-family: var(--ff-mono);
+  font-size: .78rem;
+  color: var(--gray-3);
+  min-width: 2.5rem;
+}
+
+/* ── Griglia lotti (4 colonne) ─────────────────────────── */
+.appr-lotti-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.appr-lotto-card-img {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: 2px;
+  display: block;
+  margin-bottom: .5rem;
+}
+
+.appr-lotto-card-placeholder {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  background: var(--paper-dark);
+  border: 1px solid var(--gray-1);
+  border-radius: 2px;
+  display: grid;
+  place-items: center;
+  color: var(--gray-2);
+  font-size: 1.5rem;
+  margin-bottom: .5rem;
+}
+
+.appr-lotto-card-title {
+  font-family: var(--ff-body);
+  font-size: .8rem;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: .15rem;
+}
+
+.appr-lotto-card-sub {
+  font-family: var(--ff-body);
+  font-size: .73rem;
+  color: var(--gray-3);
+  line-height: 1.4;
+}
+
+/* ── Responsive ─────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .appr-layout { grid-template-columns: 1fr; }
+  .appr-sidebar { display: none; }
+  .appr-main { padding: 2rem 1.5rem 4rem; }
+  .appr-cols { grid-template-columns: 1fr; }
+  .appr-lotto-layout { grid-template-columns: 1fr; }
+  .appr-img-grid-5 { grid-template-columns: repeat(3, 1fr); }
+  .appr-img-grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .appr-etym-grid { grid-template-columns: 1fr; }
+  .appr-stat-grid { grid-template-columns: 1fr; }
+  .appr-lotti-grid { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="appr-layout">
+
+  {# ── Sidebar navigazione ──────────────────────────────── #}
+  <aside class="appr-sidebar">
+    <ul class="appr-nav-list">
+      <li class="appr-nav-item">
+        <a class="appr-nav-link" href="#catalogo">Cos'è un catalogo · 01</a>
+      </li>
+      <li class="appr-nav-item">
+        <a class="appr-nav-link" href="#asta">Cos'è un'asta · 02</a>
+      </li>
+      <li class="appr-nav-item">
+        <a class="appr-nav-link" href="#lotto">Cos'è un lotto · 03</a>
+      </li>
+      <li class="appr-nav-item">
+        <a class="appr-nav-link" href="#collezione">La Collezione · 04</a>
+      </li>
+      <li class="appr-nav-item">
+        <a class="appr-nav-link" href="#corpus">Il <em>Corpus</em> digitalizzato · 05</a>
+      </li>
+    </ul>
+  </aside>
+
+  {# ── Contenuto principale ─────────────────────────────── #}
+  <main class="appr-main">
+
+    {# ════════════════════════════════════════════════════
+       01 — Cos'è un catalogo d'asta
+    ════════════════════════════════════════════════════ #}
+    <section id="catalogo" class="appr-section">
+
+      <h2 class="appr-section-title">Cos'è un catalogo d'asta</h2>
+      <hr class="appr-title-rule">
+
+      <p class="appr-lead">
+        I cataloghi d'asta sono pubblicazioni nate per far conoscere ai potenziali
+        acquirenti gli oggetti messi in vendita in occasione di un'asta. Sono prodotti
+        dalla stessa casa d'asta con qualche settimana o mese di anticipo.
+      </p>
+
+      <div class="appr-cols">
+        <div class="appr-body">
+          <p>Essi contengono sia indicazioni rispetto alle modalità di acquisto, sia la
+          descrizione dei singoli lotti, più o meno dettagliata. Specialmente tra i
+          cataloghi prodotti tra la fine dell'800 e i primi decenni del '900 esiste
+          un'enorme <strong>varietà di formati</strong> e <strong>tipologie</strong>:
+          dalle piccole brossure senza immagini, assimilabili ad altra letteratura
+          effimera di tipo promozionale, al volume di grandi dimensioni con legature
+          importanti, copertine in pelle, decorazioni e illustrazioni di grande qualità,
+          che diventa a sua volta oggetto da collezione.</p>
+          <p>Nel secondo dopoguerra si producono in genere cataloghi meno pregiati. Solo
+          con il progredire tecnico dell'editoria e il miglioramento della qualità di
+          stampa delle illustrazioni, dall'ultimo decennio del Novecento il catalogo
+          torna ad essere un oggetto pregiato.</p>
+        </div>
+        <div class="appr-body">
+          <p>La <strong>struttura interna</strong> di un catalogo d'asta, standardizzata
+          nell'800, è rimasta pressoché invariata fino ai giorni nostri.</p>
+          <p>Sul <strong>frontespizio</strong> sono riportati dati quali casa d'asta con
+          relative sedi e indirizzi, collaboratori coinvolti (banditori, consulenti, altri
+          esperti), tipologie di oggetti messi all'incanto, collezioni di provenienza,
+          giorni e luoghi dell'esposizione delle opere al pubblico e dell'asta.</p>
+          <p>Nelle <strong>pagine iniziali</strong> si trovano istruzioni per gli
+          acquirenti e condizioni di vendita: percentuali, modalità di pagamento,
+          consegne, tempistiche. A questi apparati spesso segue un testo introduttivo
+          che illustra le caratteristiche delle opere, o la storia delle collezioni di
+          provenienza.</p>
+        </div>
+      </div>
+
+      {# Sezione scura: Anatomia del catalogo #}
+      <div class="appr-dark-section">
+        <div class="appr-dark-label">ANATOMIA DEL CATALOGO</div>
+        <hr class="appr-dark-rule">
+        <div class="appr-dark-sublabel">Le parti ricorrenti, attraverso le scansioni del corpus. Clicca per ingrandire.</div>
+        <div class="appr-img-grid-5">
+          <div class="appr-img-item">
+            <div class="appr-img-placeholder"><i class="bi bi-image"></i></div>
+            {# <img class="appr-img-thumb" src="/static/img/approfondisci/approfondisci_catalogo_01_frontespizio.jpg" alt="Frontespizio"> #}
+            <div class="appr-img-caption">
+              <span class="appr-img-caption-title">01 Frontespizio</span>
+              <span class="appr-img-caption-sub">Collezioni Villa Malta, Roma 1906</span>
+            </div>
+          </div>
+          <div class="appr-img-item">
+            <div class="appr-img-placeholder"><i class="bi bi-image"></i></div>
+            {# <img class="appr-img-thumb" src="/static/img/approfondisci/approfondisci_catalogo_02_condizioni.jpg" alt="Condizioni"> #}
+            <div class="appr-img-caption">
+              <span class="appr-img-caption-title">02 Condizioni</span>
+              <span class="appr-img-caption-sub">Istruzioni e modalità di vendita</span>
+            </div>
+          </div>
+          <div class="appr-img-item">
+            <div class="appr-img-placeholder"><i class="bi bi-image"></i></div>
+            {# <img class="appr-img-thumb" src="/static/img/approfondisci/approfondisci_catalogo_03_introduzione.jpg" alt="Introduzione"> #}
+            <div class="appr-img-caption">
+              <span class="appr-img-caption-title">03 Introduzione</span>
+              <span class="appr-img-caption-sub">F. Mason Perkins, Siena 1907</span>
+            </div>
+          </div>
+          <div class="appr-img-item">
+            <div class="appr-img-placeholder"><i class="bi bi-image"></i></div>
+            {# <img class="appr-img-thumb" src="/static/img/approfondisci/approfondisci_catalogo_04_elenco_lotti.jpg" alt="Elenco lotti"> #}
+            <div class="appr-img-caption">
+              <span class="appr-img-caption-title">04 Elenco lotti</span>
+              <span class="appr-img-caption-sub">Vendita Reiset, Hôtel Drouot 1879</span>
+            </div>
+          </div>
+          <div class="appr-img-item">
+            <div class="appr-img-placeholder"><i class="bi bi-image"></i></div>
+            {# <img class="appr-img-thumb" src="/static/img/approfondisci/approfondisci_catalogo_05_lista_prezzi.jpg" alt="Lista prezzi"> #}
+            <div class="appr-img-caption">
+              <span class="appr-img-caption-title">05 Lista prezzi</span>
+              <span class="appr-img-caption-sub">Allegato, Lepke Berlin 1929</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="appr-cols">
+        <div class="appr-body">
+          <p>Nel caso di oggetti o raccolte di pregio è frequente che l'introduzione sia
+          redatta da noti <strong>storici dell'arte</strong> e che diventi un piccolo
+          saggio critico. Ciò accade soprattutto nei primi decenni del '900, quando molti
+          curatori di importanti musei collaboravano alla stesura dei testi e alla
+          validazione, grazie alla loro consulenza, della qualità dei lotti.</p>
+          <p>Inizia poi il catalogo vero e proprio, ovvero l'elenco dei lotti, in ordine
+          di vendita. Questi possono essere suddivisi in raggruppamenti a seconda della
+          tipologia di oggetti, delle scuole che li hanno creati, delle collezioni di
+          provenienza, degli ambienti in cui erano collocati nel contesto originario (es.
+          opere nel salone di un palazzo); oppure mescolati senza un preciso criterio.</p>
+        </div>
+        <div class="appr-body">
+          <p>Il livello di accuratezza della descrizione dei lotti varia molto da un
+          catalogo all'altro e dipende da diversi fattori, come il prestigio e i mezzi
+          economici della casa d'asta, il valore delle opere, le velleità del
+          collezionista. Nei cataloghi più curati, per dipinti, sculture e disegni sono
+          riportati il nome dell'artista, documentato o presunto, il soggetto dell'opera,
+          tecnica e dimensioni, storia collezionistica, bibliografia e considerazioni di
+          tipo critico o estetico.</p>
+          <p>Le quote di aggiudicazione e gli acquirenti finali sono talvolta riportati
+          in liste prodotte successivamente alla vendita che vengono inserite in un
+          secondo tempo nei cataloghi a cui si riferiscono.</p>
+        </div>
+      </div>
+
+      <div class="appr-callout">
+        Un catalogo d'asta può essere una fonte fondamentale per ricostruire collezioni
+        disperse, e per chiarire la storia conservativa e attribuzionistica di un'opera.
+        A volte può costituire l'<strong>unica testimonianza</strong> dell'esistenza di
+        un oggetto che si sposta da una collezione all'altra, per vie alternative alle
+        transizioni private o all'acquisto presso antiquari e gallerie. Risulta quindi uno
+        strumento fondamentale per studiosi, mercanti d'arte, collezionisti, addetti alla
+        tutela del patrimonio.
+      </div>
+
+      <div class="appr-cta">
+        <a href="/cataloghi">Vedi i cataloghi →</a>
+      </div>
+
+    </section>
+
+
+    {# ════════════════════════════════════════════════════
+       02 — Cos'è un'asta
+    ════════════════════════════════════════════════════ #}
+    <section id="asta" class="appr-section">
+
+      <h2 class="appr-section-title">Cos'è un'asta</h2>
+      <hr class="appr-title-rule">
+
+      <div class="appr-asta-hero">
+        <p class="appr-asta-latin"><em>Sub hasta vendēre</em></p>
+        <p class="appr-asta-latin-sub">Vendere nell'antica Roma</p>
+      </div>
+
+      <div class="appr-etym-grid">
+        <div class="appr-etym-cell">
+          <div class="appr-etym-lang">IT</div>
+          <span class="appr-etym-word">asta · incanto</span>
+          <span class="appr-etym-note">da hasta, la lancia;<br>da in quantum</span>
+        </div>
+        <div class="appr-etym-cell appr-etym-cell--mid">
+          <div class="appr-etym-lang">EN · DE</div>
+          <span class="appr-etym-word">auction · Auktion</span>
+          <span class="appr-etym-note">da auctio ← augere,<br>«aumentare»</span>
+        </div>
+        <div class="appr-etym-cell">
+          <div class="appr-etym-lang">FR</div>
+          <span class="appr-etym-word">enchère</span>
+          <span class="appr-etym-note">da in-carire,<br>«aumentare di prezzo»</span>
+        </div>
+      </div>
+
+      <div class="appr-cols">
+        <div class="appr-body">
+          <p><em>Sub hasta vendēre</em>, vendere al miglior offerente i beni dei debitori
+          del tesoro pubblico, in un punto contrassegnato da una lancia che il funzionario
+          incaricato conficcava nel terreno. Questa era l'usanza nell'antica Roma da cui
+          trae origine il termine "asta" nel significato che ha in italiano di vendita al
+          migliore offerente, o all'incanto (a sua volta dal latino medievale in quantum).</p>
+          <p>Sempre dal latino derivano l'inglese <strong>auction</strong> e il tedesco
+          <strong>auktion</strong>, da auctio (a sua volta da augere, "aumentare"), e il
+          francese <strong>enchère</strong>, da in-carire ("aumentare di prezzo"). Si
+          tratta di modi diversi per indicare la stessa pratica, antichissima ma
+          standardizzatasi come oggi la conosciamo tra XVII e XVIII secolo in Inghilterra,
+          non a caso patria delle più antiche e note case d'asta del mondo, Sotheby's e
+          Christie's, fondate rispettivamente nel 1744 e nel 1766.</p>
+          <p>In una vendita all'asta, da sempre, passa ogni sorta di oggetto: dipinti,
+          sculture, disegni, mobili, suppellettili, ma anche automobili, vini pregiati,
+          giocattoli, abiti, orologi e utensili di ogni tipo. Potenzialmente, qualsiasi
+          genere di manufatto può essere ceduto in questo modo, per volontà dei possessori,
+          per quella dei loro eredi, o per recuperare somme per soddisfare i creditori,
+          nel caso delle aste giudiziarie.</p>
+        </div>
+        <div class="appr-body">
+          <p>Vengono messe all'asta anche collezioni complete, o addirittura interi
+          immobili (ville, castelli, palazzi) con tutto ciò che contengono. L'asta si
+          differenzia dalla trattativa diretta tra venditore e acquirente poiché è un
+          <strong>evento pubblico</strong> a cui chiunque può partecipare, e che mette in
+          competizione tra loro i potenziali acquirenti. Questi rilanciano al rialzo le
+          loro offerte, nel tentativo di aggiudicarsi il lotto. Scopo dell'asta è
+          realizzare il più alto ricavo possibile, da dividere tra proprietari e
+          organizzatori sulla base di percentuali prestabilite.</p>
+          <p>Oggi in genere sono gli esperti di ciascun settore (dipartimenti), interni
+          alle stesse case d'asta, a effettuare le stime e a definire i prezzi minimi
+          (base d'asta) o i range ai quali si presume un lotto possa essere venduto. Da
+          sempre, però, nell'organizzazione vengono interpellati anche specialisti esterni,
+          tra cui studiosi o periti che certificano l'autenticità, propongono attribuzioni,
+          stimano valori.</p>
+          <p>Naturalmente può capitare che un lotto resti invenduto non avendo raggiunto
+          il prezzo minimo, e in questo caso torna al collezionista o resta in carico alla
+          casa d'asta. Viceversa, l'aggiudicazione può avvenire a valori molto più alti
+          di quelli previsti.</p>
+        </div>
+      </div>
+
+      <div class="appr-cta">
+        <a href="/aste">Vedi le aste →</a>
+      </div>
+
+    </section>
+
+
+    {# ════════════════════════════════════════════════════
+       03 — Cos'è un lotto
+    ════════════════════════════════════════════════════ #}
+    <section id="lotto" class="appr-section">
+
+      <h2 class="appr-section-title">Cos'è un lotto</h2>
+      <hr class="appr-title-rule">
+
+      <div class="appr-lotto-layout">
+        <div class="appr-body">
+          <p>Un lotto è un'<strong>unità di vendita</strong> contrassegnato da un numero
+          progressivo che lo identifica come univoco all'interno di un'asta. Può
+          comprendere uno o più oggetti, anche tipologicamente differenti.</p>
+          <p>All'interno di un catalogo può essere descritto in maniera più o meno
+          particolareggiata, ed essere accompagnato da un'illustrazione.</p>
+          <p>A ciascun lotto è assegnata prima dell'inizio della vendita una 'base d'asta',
+          e cioè una quotazione minima, riportata sul catalogo stesso o su liste di prezzi
+          allegate.</p>
+          <p>Durante l'asta i lotti vengono prima presentati al pubblico, poi battuti dal
+          banditore e assegnati al migliore offerente.</p>
+          <p>Negli scambi tra gli storici dell'arte e nella bibliografia di riferimento,
+          il <a href="/lotti"><strong>numero di lotto</strong></a> diventa
+          <strong>elemento identificativo</strong> dell'opera venduta ed è quindi
+          riportato tra i dati sulla provenance, spesso associato all'attribuzione
+          proposta nel catalogo.</p>
+        </div>
+        <div class="appr-lotto-img-wrap">
+          <div class="appr-img-placeholder" style="aspect-ratio: 3/4;">
+            <i class="bi bi-image" style="font-size:2rem;"></i>
+          </div>
+          {# <img class="appr-lotto-img" src="/static/img/approfondisci/approfondisci_lotto_01_annotato.jpg" alt="Pagina di catalogo con numero di lotto e attribuzione proposta"> #}
+          <p class="appr-lotto-caption">Vente Reiset, Hôtel Drouot, Parigi 1879 · lotto n. 2</p>
+        </div>
+      </div>
+
+      <div class="appr-cta">
+        <a href="/lotti">Vedi i lotti →</a>
+      </div>
+
+    </section>
+
+
+    {# ════════════════════════════════════════════════════
+       04 — La Collezione
+    ════════════════════════════════════════════════════ #}
+    <section id="collezione" class="appr-section">
+
+      <h2 class="appr-section-title">La Collezione</h2>
+      <hr class="appr-title-rule">
+
+      <p class="appr-lead">
+        Per supportare la sua attività di conoscitore, Federico Zeri accumulò un'enorme
+        quantità di cataloghi d'asta: quella dei cataloghi di vendita nel corso degli anni
+        è diventata la sezione più nutrita della sua grande biblioteca d'arte
+      </p>
+
+      <div class="appr-stat-grid">
+        <div class="appr-stat-cell">
+          <span class="appr-stat-number">37.000</span>
+          <span class="appr-stat-label">cataloghi d'asta</span>
+        </div>
+        <div class="appr-stat-cell">
+          <span class="appr-stat-number">83.000</span>
+          <span class="appr-stat-label">volumi della biblioteca</span>
+        </div>
+        <div class="appr-stat-cell">
+          <span class="appr-stat-number">1879–1998</span>
+          <span class="appr-stat-label">arco cronologico</span>
+        </div>
+      </div>
+
+      <div class="appr-cols">
+        <div class="appr-body">
+          <p>Gli esemplari sono stati raccolti attraverso i canali più disparati: dalle
+          bancarelle ambulanti alle librerie antiquarie, dalle biblioteche di altri
+          studiosi, altrimenti destinate alla dispersione, alle collezioni di gallerie e
+          case d'asta. Come per il suo eccezionale archivio fotografico, anche per
+          costituire questa raccolta è stata fondamentale la lunga collaborazione di Zeri
+          con il mercato.</p>
+          <p>Molti dei cataloghi raccolti da Zeri appartennero infatti ad
+          <strong>antiquari</strong> (come Eugenio Di Castro e Alfredo Barsanti) e
+          <strong>collezionisti</strong>, ma solo in alcuni casi è possibile identificare
+          con certezza le provenienze, grazie agli <em>ex libris</em> e ad altri segni di
+          possesso, o a notizie ricavate da fonti esterne.</p>
+          <p>La raccolta di Zeri copre un arco cronologico di oltre un secolo, dal 1879,
+          data del catalogo più antico, fino al 1998, anno della sua morte. I volumi sono
+          quindi una preziosa testimonianza, oltre che della circolazione delle opere,
+          anche del mutamento del gusto collezionistico e delle quotazioni che ne seguirono.</p>
+        </div>
+        <div class="appr-body">
+          <p>I cataloghi riferiti a vendite miste di opere d'arte (in cui compaiono
+          pitture, sculture, disegni, oggettistica varia) sono raggruppati per paese di
+          appartenenza delle case d'asta, con una grossa prevalenza di nazioni come
+          Germania, Francia, Italia, Inghilterra, Paesi Bassi, Stati Uniti d'America. A
+          questi nuclei più corposi si affiancano sezioni minori intestate a Austria,
+          Svizzera, Belgio, Danimarca, Spagna, Finlandia e Grecia.</p>
+          <p>All'interno dei raggruppamenti, l'ordinamento dato da Zeri, mantenuto come
+          tale nella biblioteca della Fondazione, è strettamente cronologico. I cataloghi
+          si susseguono infatti per anno e per giorno di vendita, a ricostruire una sorta
+          di <strong>calendario delle aste</strong>.</p>
+          <p>Sono presenti infine sezioni separate di cataloghi dedicati a specifiche
+          tipologie di oggetti, in particolare disegni, orologi, arazzi. Anche in questo
+          caso il sotto-ordinamento è di tipo cronologico. Alcuni dei volumi presentano
+          note manoscritte o materiali allegati come liste di prezzi, biglietti di invito,
+          annunci pubblicitari di vendite successive.</p>
+        </div>
+      </div>
+
+      {# Sezione scura: Segni di possesso #}
+      <div class="appr-dark-section">
+        <div class="appr-dark-label">SEGNI DI POSSESSO E MATERIALI ALLEGATI</div>
+        <hr class="appr-dark-rule">
+        <div class="appr-dark-sublabel">Le parti ricorrenti, attraverso le scansioni del corpus. Clicca per ingrandire.</div>
+        <div class="appr-img-grid-4">
+          <div class="appr-img-item">
+            <div class="appr-img-placeholder"><i class="bi bi-image"></i></div>
+            {# <img class="appr-img-thumb" src="/static/img/approfondisci/approfondisci_collezione_01_exlibris.jpg" alt="Ex libris"> #}
+            <div class="appr-img-caption">
+              <span class="appr-img-caption-title">Ex libris</span>
+              <span class="appr-img-caption-sub">Dr. Otto e Lili Fröhlich</span>
+            </div>
+          </div>
+          <div class="appr-img-item">
+            <div class="appr-img-placeholder"><i class="bi bi-image"></i></div>
+            {# <img class="appr-img-thumb" src="/static/img/approfondisci/approfondisci_collezione_02_timbri.jpg" alt="Timbri"> #}
+            <div class="appr-img-caption">
+              <span class="appr-img-caption-title">Timbri</span>
+              <span class="appr-img-caption-sub">Possessori e gallerie</span>
+            </div>
+          </div>
+          <div class="appr-img-item">
+            <div class="appr-img-placeholder"><i class="bi bi-image"></i></div>
+            {# <img class="appr-img-thumb" src="/static/img/approfondisci/approfondisci_collezione_03_note_manoscritte.jpg" alt="Note manoscritte"> #}
+            <div class="appr-img-caption">
+              <span class="appr-img-caption-title">Note manoscritte</span>
+              <span class="appr-img-caption-sub">Quotazioni a margine</span>
+            </div>
+          </div>
+          <div class="appr-img-item">
+            <div class="appr-img-placeholder"><i class="bi bi-image"></i></div>
+            {# <img class="appr-img-thumb" src="/static/img/approfondisci/approfondisci_collezione_04_lista_prezzi.jpg" alt="Liste prezzi allegate"> #}
+            <div class="appr-img-caption">
+              <span class="appr-img-caption-title">Liste prezzi allegate</span>
+              <span class="appr-img-caption-sub">Schätzungspreise, Lepke</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {# Foto panoramica biblioteca #}
+      <div class="appr-panorama-wrap">
+        <div class="appr-panorama-placeholder">
+          <i class="bi bi-image" style="font-size:2rem;"></i>
+        </div>
+        {# <img class="appr-panorama-img" src="/static/img/approfondisci/approfondisci_collezione_05_biblioteca.jpg" alt="Fotografia della Biblioteca Zeri"> #}
+      </div>
+      <div class="appr-panorama-caption">
+        <span class="appr-panorama-caption-label">FOTOGRAFIA · BIBLIOTECA ZERI</span><br>
+        <span class="appr-panorama-caption-sub">L'ordinamento per anno e giorno di vendita ricostruisce una sorta di calendario delle aste.</span>
+      </div>
+
+    </section>
+
+
+    {# ════════════════════════════════════════════════════
+       05 — Il Corpus digitalizzato
+    ════════════════════════════════════════════════════ #}
+    <section id="corpus" class="appr-section">
+
+      <h2 class="appr-section-title">Il <em>Corpus</em> digitalizzato</h2>
+      <hr class="appr-title-rule">
+
+      <p class="appr-lead">
+        I 1.900 cataloghi d'asta selezionati per il progetto <em>Lots of Zeri</em> coprono
+        un arco temporale dal 1879 agli anni Trenta del '900. La scelta del nucleo da
+        digitalizzare è stata dettata principalmente da due esigenze. In primis, rendere
+        disponibili alla libera consultazione online cataloghi storici liberi dalle
+        limitazioni previste dalle leggi sul diritto d'autore. In secondo luogo, offrire
+        una panoramica trasversale sul mondo del mercato anteriore alla crisi economica
+        del 1929.
+      </p>
+
+      {# Grafico: Cataloghi per paese #}
+      <div class="appr-chart-label">CATALOGHI PER PAESE</div>
+      <div class="appr-bar-chart" id="bar-chart">
+        {# Renderizzato via JS da cataloghi_per_paese.json #}
+      </div>
+
+      <div class="appr-cols">
+        <div class="appr-body">
+          <p>I volumi, tutti appartenenti alla sezione preminente della raccolta di Zeri,
+          sono riferiti ad aste miste che includono soprattutto dipinti, sculture, disegni,
+          arti decorative o in cui sono passate intere collezioni. All'interno del range
+          cronologico sono stati privilegiati i cataloghi più pregiati per qualità di
+          stampa, livello estetico delle finiture e delle illustrazioni, dettaglio nella
+          descrizione dei lotti. In totale si tratta di 1050 cataloghi tedeschi, 523
+          francesi, 236 italiani, 44 cataloghi inglesi, 26 dei Paesi Bassi, 21 di altre
+          nazionalità</p>
+          <p>Di grande interesse è la varietà dell'<strong>impostazione grafica</strong>,
+          dei font utilizzati e dei particolari decorativi di corredo al testo, a
+          testimonianza della grande abilità dei tipografi dell'epoca. Le stampe sulle
+          copertine rappresentano talvolta opere di altissimo artigianato, spaziando dal
+          neorinascimento al neobarocco e all'eclettismo, fino all'Art Nouveau e all'Art
+          Déco di impronta più razionalista.</p>
+        </div>
+        <div class="appr-body">
+          <p>Molto varie sono anche la tipologia, le dimensioni e la qualità delle
+          illustrazioni interne. Si va dalle piccole immagini inframezzate al testo, alle
+          tavole a tutta pagina che consentono una visione dettagliata del lotto. Dal
+          punto di vista tecnico si assiste al passaggio dalle incisioni, presenti nei
+          cataloghi più datati, alle stampe fotomeccaniche — collotipie e mezzatinte —
+          che diventano predominanti dalla fine dell'Ottocento.</p>
+          <p>Date le finalità commerciali dei cataloghi, da segnalare è la necessità di
+          relativizzare le attribuzioni riportate nella descrizione dei lotti, seppur
+          proposte da periti ed esperti coinvolti nell'organizzazione delle aste. Nei
+          decenni a cavallo tra Otto e Novecento, lo stadio ancora 'acerbo' di molta parte
+          degli studi portava a imprecisioni e inesattezze, in seguito corrette col
+          progredire delle ricerche. Non di rado, poi, venivano operate vere e proprie
+          forzature per sostenere quotazioni più alte. Per questo, i dati sugli autori dei
+          lotti, in epoca storica ma tutt'oggi, vanno presi con il beneficio di inventario
+          e verificati su base documentaria.</p>
+        </div>
+      </div>
+
+      {# Sezione scura: Copertine per stile #}
+      <div class="appr-dark-section">
+        <div class="appr-dark-label">COPERTINE PER STILE</div>
+        <hr class="appr-dark-rule">
+        <div class="appr-img-grid-5">
+          <div class="appr-img-item">
+            <div class="appr-img-placeholder"><i class="bi bi-image"></i></div>
+            {# <img class="appr-img-thumb" src="/static/img/approfondisci/approfondisci_corpus_01_neorinascimentale.jpg" alt="Neorinascimentale"> #}
+            <div class="appr-img-caption">
+              <span class="appr-img-caption-title">Neorinascimentale</span>
+              <span class="appr-img-caption-sub">Cavalletti, Roma 1905</span>
+            </div>
+          </div>
+          <div class="appr-img-item">
+            <div class="appr-img-placeholder"><i class="bi bi-image"></i></div>
+            {# <img class="appr-img-thumb" src="/static/img/approfondisci/approfondisci_corpus_02_neogotico.jpg" alt="Neogotico"> #}
+            <div class="appr-img-caption">
+              <span class="appr-img-caption-title">Neogotico</span>
+              <span class="appr-img-caption-sub">Singher, Parigi 1912</span>
+            </div>
+          </div>
+          <div class="appr-img-item">
+            <div class="appr-img-placeholder"><i class="bi bi-image"></i></div>
+            {# <img class="appr-img-thumb" src="/static/img/approfondisci/approfondisci_corpus_03_neobarocco.jpg" alt="Neobarocco"> #}
+            <div class="appr-img-caption">
+              <span class="appr-img-caption-title">Neobarocco</span>
+              <span class="appr-img-caption-sub">Lepke, Berlino 1904</span>
+            </div>
+          </div>
+          <div class="appr-img-item">
+            <div class="appr-img-placeholder"><i class="bi bi-image"></i></div>
+            {# <img class="appr-img-thumb" src="/static/img/approfondisci/approfondisci_corpus_04_jugendstil.jpg" alt="Jugendstil"> #}
+            <div class="appr-img-caption">
+              <span class="appr-img-caption-title">Jugendstil</span>
+              <span class="appr-img-caption-sub">Helbing, Monaco 1917</span>
+            </div>
+          </div>
+          <div class="appr-img-item">
+            <div class="appr-img-placeholder"><i class="bi bi-image"></i></div>
+            {# <img class="appr-img-thumb" src="/static/img/approfondisci/approfondisci_corpus_05_quadricromia.jpg" alt="Quadricromia"> #}
+            <div class="appr-img-caption">
+              <span class="appr-img-caption-title">Quadricromia</span>
+              <span class="appr-img-caption-sub">von Berger, Berlino 1929</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {# Griglia: Rappresentazione dei lotti #}
+      <div class="appr-chart-label" style="margin-top:1.5rem;">RAPPRESENTAZIONE DEI LOTTI</div>
+      <hr style="border:none;border-top:1px solid var(--gray-1);margin:.35rem 0 0;">
+      <div class="appr-lotti-grid">
+        {% for i in range(4) %}
+        <div>
+          <div class="appr-lotto-card-placeholder"><i class="bi bi-image"></i></div>
+          {# <img class="appr-lotto-card-img" src="/static/img/approfondisci/approfondisci_corpus_lotti_0{{ i+1 }}.jpg" alt="Rappresentazione lotto"> #}
+          <div class="appr-lotto-card-title">Lorem Ipsum</div>
+          <div class="appr-lotto-card-sub">nei cataloghi più datati · San Donato</div>
+        </div>
+        {% endfor %}
+      </div>
+
+    </section>
+
+  </main>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+/* ── Grafico barre orizzontali: cataloghi per paese ──────── */
+(function () {
+  const data = [
+    { paese: "Germania",              count: 1065 },
+    { paese: "Francia",               count: 532  },
+    { paese: "Italia",                count: 208  },
+    { paese: "Inghilterra",           count: 45   },
+    { paese: "Paesi Bassi",           count: 26   },
+    { paese: "Stati Uniti d'America", count: 14   },
+    { paese: "Belgio",                count: 3    },
+    { paese: "Svizzera",              count: 2    },
+  ];
+
+  const max = data[0].count;
+  const chart = document.getElementById('bar-chart');
+  if (!chart) return;
+
+  chart.innerHTML = data.map(d => `
+    <div class="appr-bar-row">
+      <span class="appr-bar-country">${d.paese}</span>
+      <div class="appr-bar-track">
+        <div class="appr-bar-fill" style="width:${(d.count / max * 100).toFixed(1)}%"></div>
+      </div>
+      <span class="appr-bar-count">${d.count.toLocaleString('it-IT')}</span>
+    </div>
+  `).join('');
+
+  /* Animazione all'entrata */
+  const fills = chart.querySelectorAll('.appr-bar-fill');
+  fills.forEach(f => {
+    const w = f.style.width;
+    f.style.width = '0';
+    requestAnimationFrame(() => {
+      f.style.transition = 'width .6s ease';
+      f.style.width = w;
+    });
+  });
+})();
+
+/* ── Evidenzia voce sidebar al scroll ────────────────────── */
+(function () {
+  const sections = document.querySelectorAll('.appr-section');
+  const links    = document.querySelectorAll('.appr-nav-link');
+  if (!sections.length) return;
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const id = entry.target.id;
+        const active = document.querySelector(`.appr-nav-link[href="#${id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+})();
+</script>
+{% endblock %}

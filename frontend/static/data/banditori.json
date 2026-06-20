@@ -1,0 +1,88 @@
+{
+  "banditori": [
+    {
+      "n": "Lair-Dubreuil, Fernand",
+      "t": 147
+    },
+    {
+      "n": "Chevallier, Paul",
+      "t": 118
+    },
+    {
+      "n": "Baudoin, Henri",
+      "t": 64
+    },
+    {
+      "n": "Maurer, Carl",
+      "t": 12
+    },
+    {
+      "n": "Sangiorgi, Giuseppe",
+      "t": 10
+    },
+    {
+      "n": "Couturier, André",
+      "t": 8
+    },
+    {
+      "n": "Geri, Alfredo",
+      "t": 8
+    },
+    {
+      "n": "Tual, Léon",
+      "t": 5
+    }
+  ],
+  "case": [
+    "Hôtel Drouot",
+    "Hugo Helbing",
+    "Rudolf Bangel",
+    "Rudolph Lepke's Kunst-Auctions-Haus",
+    "Galerie Georges Petit",
+    "Heberle H. Lempertz' Söhne",
+    "Hanstein M. Lempertz' Antiquariat",
+    "Christie, Manson & Woods"
+  ],
+  "edges": [
+    [
+      0,
+      0,
+      103
+    ],
+    [
+      0,
+      4,
+      42
+    ],
+    [
+      1,
+      0,
+      68
+    ],
+    [
+      1,
+      4,
+      43
+    ],
+    [
+      2,
+      0,
+      47
+    ],
+    [
+      2,
+      4,
+      17
+    ],
+    [
+      5,
+      0,
+      8
+    ],
+    [
+      7,
+      0,
+      5
+    ]
+  ]
+}

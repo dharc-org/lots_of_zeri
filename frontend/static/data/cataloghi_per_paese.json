@@ -1,0 +1,37 @@
+{
+  "title": "Cataloghi per paese",
+  "items": [
+    {
+      "paese": "Germania",
+      "count": 1065
+    },
+    {
+      "paese": "Francia",
+      "count": 532
+    },
+    {
+      "paese": "Italia",
+      "count": 208
+    },
+    {
+      "paese": "Inghilterra",
+      "count": 45
+    },
+    {
+      "paese": "Paesi Bassi",
+      "count": 26
+    },
+    {
+      "paese": "Stati Uniti d'America",
+      "count": 14
+    },
+    {
+      "paese": "Belgio",
+      "count": 3
+    },
+    {
+      "paese": "Svizzera",
+      "count": 2
+    }
+  ]
+}

@@ -1,27 +1,102 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ZAC — Zeri Auction Catalogues</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Crimson+Pro:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  <link href="/static/css/style.css" rel="stylesheet">
-</head>
-<body class="d-flex flex-column min-vh-100">
+{% extends "base.html" %}
+{% block title %}Esplora — ZAC{% endblock %}
 
-{% include "partials/_nav.html" %}
+{% block styles %}
+<link href="/static/css/esplora.css" rel="stylesheet">
+{% endblock %}
 
-<main class="flex-grow-1 d-flex align-items-center py-5">
-  <div class="container">
-    <h1>ESPLORA</h1>
-    <p>Coming soon</p>
+{% block content %}
+<div class="expl-page">
+
+  {# ── Header editoriale ──────────────────────────────── #}
+  <header class="expl-header">
+    <div class="expl-eyebrow">ESPLORA IL CORPUS</div>
+    <h1 class="expl-title">Quattro finestre sul mercato</h1>
+    <hr class="expl-title-rule">
+    <p class="expl-standfirst">
+Tra il 1879 e il 1939, il mercato dell'arte europeo prendeva forma nelle sale delle grandi case di vendita. Le tracce che ci restano ne restituiscono quattro dimensioni: le <strong>organizzazioni</strong> e le <strong>persone</strong> che animavano le aste, gli <strong>oggetti</strong> che passavano all'incanto, i <strong>luoghi</strong> dove si vendeva.
+    </p>
+  </header>
+
+  {# ── Toolbar sticky: eyebrow + tab ───────────────────── #}
+  <div class="expl-toolbar">
+    <div class="expl-toolbar-top">
+<nav class="expl-tabs" role="tablist">
+        <button class="expl-tab active" data-tab="case" role="tab" aria-selected="true">
+          <span class="expl-tab-num">01</span><span class="expl-tab-label">Case d'asta</span>
+        </button>
+        <button class="expl-tab" data-tab="banditori" role="tab" aria-selected="false">
+          <span class="expl-tab-num">02</span><span class="expl-tab-label">Banditori</span>
+        </button>
+        <button class="expl-tab" data-tab="tipologie" role="tab" aria-selected="false">
+          <span class="expl-tab-num">03</span><span class="expl-tab-label">Tipologie di oggetti</span>
+        </button>
+        <button class="expl-tab" data-tab="trend" role="tab" aria-selected="false">
+          <span class="expl-tab-num">04</span><span class="expl-tab-label">Trend di mercato</span>
+        </button>
+      </nav>
+    </div>
+
   </div>
-</main>
 
-{% include "partials/_footer.html" %}
+  {# ── Pannelli grafici ────────────────────────────────── #}
+  <div class="expl-panels">
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+    {# ════ 01 — Case d'asta ════ #}
+    <div class="expl-panel active" id="panel-case" role="tabpanel">
+      <p class="expl-metanote">Il grafico mostra la presenza nel corpus Zeri, non l'attività reale delle case d'asta. Una casa con pochi cataloghi conservati appare meno attiva di una con molti, indipendentemente dal volume reale delle vendite. Il corpus privilegia cataloghi di qualità tipografica elevata: le case minori e le aste locali sono sottorappresentate. L'intensità del colore è relativa a ciascuna casa: il tono più scuro indica l'anno di punta di quella specifica casa, e non è confrontabile tra case diverse.</p>
+      <div class="expl-chart-wrap">
+        <div id="case-rows"></div>
+      </div>
+    </div>
+
+    {# ════ 02 — Banditori ════ #}
+    <div class="expl-panel" id="panel-banditori" role="tabpanel">
+      <div class="expl-chart-wrap">
+        <svg id="band-svg" viewBox="0 0 660 300" style="width:100%;display:block;"></svg>
+      </div>
+      <p class="expl-note">Il banditore è documentato nel <strong>30% degli eventi</strong> (604 su 2.039), quasi tutti francesi: il <em>commissaire-priseur</em> è una figura del sistema d'asta parigino. Legami con almeno 3 aste insieme.</p>
+    </div>
+
+    {# ════ 03 — Tipologie ════ #}
+    <div class="expl-panel" id="panel-tipologie" role="tabpanel">
+      <div class="expl-chart-wrap">
+        <div id="tip-chips" class="expl-chips"></div>
+        <svg id="tip-svg" viewBox="0 0 660 252" style="width:100%;display:block;margin-top:10px;"></svg>
+      </div>
+      <p class="expl-note">Conteggio per <strong>menzioni</strong>: un evento che vende più tipologie conta in ciascuna. «Altre» raccoglie 74 voci minori del vocabolario (stampe, ceramiche, tappeti, bronzi…).</p>
+    </div>
+
+    {# ════ 04 — Trend mercato ════ #}
+    <div class="expl-panel" id="panel-trend" role="tabpanel">
+      <div class="expl-chart-wrap expl-chart-wrap--map">
+        <div class="expl-trend-timeline">
+          <div class="expl-tl-labels">
+            <span id="tl-from" class="expl-tl-year">1879</span>
+            <span class="expl-tl-range-label">trascina per filtrare</span>
+            <span id="tl-to" class="expl-tl-year">1939</span>
+          </div>
+          <div class="expl-tl-track" id="tl-track">
+            <canvas id="tl-hist" height="28"></canvas>
+            <div class="expl-tl-brush" id="tl-brush">
+              <div class="expl-tl-handle" id="tl-h-left"></div>
+              <div class="expl-tl-handle" id="tl-h-right"></div>
+            </div>
+          </div>
+        </div>
+        <div class="expl-map-wrap">
+          <svg id="trend-map" style="width:100%;display:block;"></svg>
+          <div id="trend-tooltip" class="expl-tooltip" style="display:none;"></div>
+        </div>
+      </div>
+      <p class="expl-note"><span id="trend-note-count">—</span> eventi georeferenziati su <span id="trend-note-tot">—</span> totali nel periodo selezionato.</p>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script src="/static/js/esplora.js"></script>
+{% endblock %}

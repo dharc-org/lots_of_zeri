@@ -1,0 +1,299 @@
+/* ══════════════════════════════════════════════════════════
+   esplora.css
+   ══════════════════════════════════════════════════════════ */
+
+
+/* ══════════════════════════════════════════════════════════
+   HEADER EDITORIALE
+   ══════════════════════════════════════════════════════════ */
+.expl-header {
+  padding: 2.5rem 5rem 2rem;
+  border-bottom: 1px solid var(--gray-1);
+}
+
+.expl-eyebrow {
+  font-family: var(--ff-mono);
+  font-size: .68rem;
+  letter-spacing: .14em;
+  color: var(--gray-2);
+  margin-bottom: .4rem;
+}
+
+.expl-title {
+  font-family: var(--ff-head);
+  font-size: 2rem;
+  font-weight: 400;
+  line-height: 1.12;
+  margin: 0;
+}
+
+.expl-title-rule {
+  border: none;
+  border-top: 1px solid var(--gray-1);
+  margin: .5rem 0 1.5rem;
+}
+
+.expl-standfirst {
+  font-family: var(--ff-body);
+  font-size: .92rem;
+  line-height: 1.75;
+  color: var(--gray-4);
+  margin: 0;
+  max-width: 90ch;
+  margin-left: auto;
+}
+
+.expl-standfirst strong {
+  font-weight: 600;
+  color: var(--terra);
+}
+
+/* ── Pagina ─────────────────────────────────────────────── */
+.expl-page {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - var(--navbar-h, 60px));
+}
+
+/* ══════════════════════════════════════════════════════════
+   TOOLBAR STICKY
+   ══════════════════════════════════════════════════════════ */
+.expl-toolbar {
+  position: sticky;
+  top: var(--navbar-h, 60px);
+  z-index: 100;
+  background: var(--paper);
+  border-bottom: 2px solid var(--gray-1);
+}
+
+/* Riga superiore: eyebrow + tab */
+.expl-toolbar-top {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: 0 5rem;
+  border-bottom: 1px solid var(--gray-1);
+}
+
+/* Tab */
+.expl-tabs {
+  display: flex;
+  flex: 1;
+  gap: 0;
+}
+
+.expl-tab {
+  display: flex;
+  align-items: baseline;
+  gap: .45rem;
+  padding: .7rem 1.4rem .6rem;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  transition: border-color .15s;
+}
+
+.expl-tab:hover .expl-tab-label { color: var(--ink); }
+
+.expl-tab.active { border-bottom-color: var(--terra); }
+
+.expl-tab-num {
+  font-family: var(--ff-mono);
+  font-size: .65rem;
+  letter-spacing: .08em;
+  color: var(--gray-2);
+}
+
+.expl-tab-label {
+  font-family: var(--ff-body);
+  font-size: .85rem;
+  font-weight: 500;
+  color: var(--gray-3);
+  transition: color .15s;
+}
+
+.expl-tab.active .expl-tab-label { color: var(--terra); }
+.expl-tab.active .expl-tab-num   { color: var(--terra-muted); }
+
+
+/* ══════════════════════════════════════════════════════════
+   PANNELLI
+   ══════════════════════════════════════════════════════════ */
+.expl-panels {
+  flex: 1;
+  padding: 1.75rem 5rem 3rem;
+}
+
+.expl-panel { display: none; }
+.expl-panel.active { display: block; }
+
+/* ── Nota metodologica ─────────────────────────────────── */
+.expl-metanote {
+  font-family: var(--ff-body);
+  font-size: .78rem;
+  line-height: 1.6;
+  color: var(--gray-2);
+  border-left: 2px solid var(--gray-1);
+  padding-left: .85rem;
+  margin-bottom: 1rem;
+}
+
+/* ── Wrap grafico ───────────────────────────────────────── */
+.expl-chart-wrap {
+  background: var(--paper-light);
+  border: 1px solid var(--gray-1);
+  border-radius: 4px;
+  padding: 1.25rem 1.5rem 1rem;
+  margin-bottom: .75rem;
+}
+
+.expl-chart-wrap--map {
+  padding: 1rem 1.25rem;
+}
+
+/* ── Nota ───────────────────────────────────────────────── */
+.expl-note {
+  font-family: var(--ff-body);
+  font-size: .76rem;
+  line-height: 1.5;
+  color: var(--gray-2);
+  border-top: 1px solid var(--gray-1);
+  padding-top: .6rem;
+  margin: 0;
+}
+
+/* ── Riga dettaglio heatstrip ───────────────────────────── */
+.expl-det-line {
+  font-family: var(--ff-mono);
+  font-size: .73rem;
+  color: var(--terra);
+  min-height: .9rem;
+  margin-top: .5rem;
+}
+
+/* ── Chip tipologie ─────────────────────────────────────── */
+.expl-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.expl-chip {
+  font-family: var(--ff-mono);
+  font-size: .7rem;
+  padding: 3px 9px;
+  border-radius: 12px;
+  cursor: pointer;
+  background: none;
+  border: 1px solid currentColor;
+  transition: background .15s, color .15s;
+}
+
+/* ══════════════════════════════════════════════════════════
+   TREND MERCATO — timeline + mappa
+   ══════════════════════════════════════════════════════════ */
+.expl-trend-timeline {
+  margin-bottom: .85rem;
+}
+
+.expl-tl-labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: .25rem;
+}
+
+.expl-tl-year {
+  font-family: var(--ff-mono);
+  font-size: .78rem;
+  color: var(--terra);
+  font-weight: 500;
+}
+
+.expl-tl-range-label {
+  font-family: var(--ff-mono);
+  font-size: .63rem;
+  color: var(--gray-2);
+  letter-spacing: .08em;
+}
+
+.expl-tl-track {
+  position: relative;
+  height: 28px;
+  background: var(--paper-dark);
+  border-radius: 3px;
+  overflow: hidden;
+  cursor: col-resize;
+}
+
+.expl-tl-track canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.expl-tl-brush {
+  position: absolute;
+  top: 0; bottom: 0;
+  background: rgba(217,64,16,.18);
+  border-left:  2px solid var(--terra);
+  border-right: 2px solid var(--terra);
+}
+
+.expl-tl-handle {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 10px;
+  cursor: ew-resize;
+}
+
+#tl-h-left  { left:  -6px; }
+#tl-h-right { right: -6px; }
+
+/* Mappa */
+.expl-map-wrap {
+  position: relative;
+  background: var(--paper-dark);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+/* Tooltip */
+.expl-tooltip {
+  position: absolute;
+  background: var(--ink);
+  color: var(--paper-light);
+  font-family: var(--ff-mono);
+  font-size: .72rem;
+  line-height: 1.5;
+  padding: .4rem .7rem;
+  border-radius: 3px;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 10;
+}
+
+#case-rows .sticky-hdr {
+  position: sticky;
+  top: 110px;
+  background: var(--paper-light);
+  z-index: 10;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--gray-1);
+}
+
+/* ══════════════════════════════════════════════════════════
+   RESPONSIVE
+   ══════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .expl-toolbar-top { padding: 0 1rem; gap: .75rem; }
+  .expl-eyebrow     { display: none; }
+  .expl-tab         { padding: .65rem .9rem .55rem; }
+  .expl-tab-label   { font-size: .78rem; }
+  .expl-toolbar-desc { padding: .4rem 1rem .45rem; }
+  .expl-panels      { padding: 1rem 1rem 2.5rem; }
+}
