@@ -21,16 +21,24 @@
 
 {% block content %}
 
-{# ── Topbar e titolo: fuori dalla grid, a tutta larghezza ── #}
+<div class="detail-sticky-top">
+  <nav class="zac-breadcrumbs">
+    <a href="/">Homepage</a>
+    <span class="sep">›</span>
+    <a href="/cataloghi">Cerca</a>
+    <span class="sep">›</span>
+    <a href="{{ view.back.url }}">{{ view.back.breadcrumb_it }}</a>
+    <span class="sep">›</span>
+    <span class="current">Scheda di dettaglio</span>
+  </nav>
+</div>
+
 <div class="detail-header-area">
-
-  {# Breadcrumb + switch "Vai a:" #}
   <div class="detail-topbar">
-
     {% if view.switch %}
     <div class="detail-switch">
       <span class="detail-switch-label">Vai a:</span>
-    {% for b in view.switch %}
+      {% for b in view.switch %}
         {% if 'url' in b and b.url %}
           <a href="{{ b.url }}" class="detail-switch-btn detail-switch-btn--asta">{{ b.label_it }}</a>
         {% else %}
@@ -41,15 +49,13 @@
     {% endif %}
   </div>
 
-  {# Titolo #}
   <header class="detail-head">
     <h1 class="detail-title">{{ view.title }}</h1>
     {% if view.subtitle %}
       <p class="detail-subtitle">{{ view.subtitle }}</p>
     {% endif %}
   </header>
-
-</div>{# /detail-header-area #}
+</div>
 
 {# ── Grid: nav laterale + contenuto ── #}
 <div class="detail-layout">
@@ -85,11 +91,22 @@
           </span>
         </div>
       </div>
+      <div class="iiif-credit">
+        <a href="https://amshistorica.unibo.it" target="_blank" rel="noopener">
+          Riproduzione digitale: AMS Historica, Università di Bologna
+          <i class="bi bi-arrow-up-right"></i>
+        </a>
+      </div>
     </section>
     {% endif %}
 
     {# ── Sezione 2 — Scheda catalografica (<dl>) ──────────────────── #}
     <section id="sec-scheda" class="detail-section">
+
+      <div class="detail-related-head">
+        <h2 class="detail-related-title">Scheda catalografica</h2>
+      </div>
+
       <dl class="detail-card">
         {% for f in view.fields %}
           {% if f.has_value %}

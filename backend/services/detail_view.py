@@ -244,7 +244,13 @@ def build_view(
     return {
         "title":      title,
         "subtitle":   subtitle,
-        "back":       {"url": cfg_view["back"]["url"], "label_it": cfg_view["back"]["label_it"]},
+
+        "back": {
+            "url":           cfg_view["back"]["url"],
+            "label_it":      cfg_view["back"]["label_it"],
+            "breadcrumb_it": cfg_view["back"].get("breadcrumb_it", ""),
+        },
+        
         "has_viewer": cfg_view.get("has_viewer", False),
         "switch":     switch,
         "sections":   sections,

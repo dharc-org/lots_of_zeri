@@ -39,6 +39,8 @@ catalogo:
   back:
     url: "/cataloghi"
     label_it: "Torna ai cataloghi"
+    breadcrumb_it: "Cataloghi"
+
   has_viewer: true
   switch:
     - { label_it: "Asta",        link_key: "auctionSlug", route: "/aste/{slug}" }
@@ -100,6 +102,7 @@ evento:
   back:
     url: "/aste"
     label_it: "Torna alle aste"
+    breadcrumb_it: "Aste"
   has_viewer: false
   switch:
     - { label_it: "Catalogo",    link_key: "docId", route: "/cataloghi/{id}" }
