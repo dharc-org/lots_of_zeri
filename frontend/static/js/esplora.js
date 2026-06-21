@@ -71,15 +71,15 @@ async function loadAndRenderCase() {
 
   /* Header colonne */
   const hdr = document.createElement('div');
-  hdr.style.cssText = 'display:grid;grid-template-columns:180px 86px 1fr 80px;gap:10px;align-items:center;margin-bottom:4px;';
+  hdr.style.cssText = 'display:grid;grid-template-columns:180px 86px 1fr 80px;gap:10px;align-items:center;padding:6px 0;position:sticky;top:140px;background:var(--paper);z-index:10;box-shadow:0 3px 12px rgba(26,20,16,.12); margin:-1.25rem -1.5rem 0;padding:1.25rem 1.5rem 6px;'
   const axisTicks = [1880,1890,1900,1910,1920,1930].map(y =>
-    `<text x="${(y - C.ymin) / N * 610}" y="11" fill="var(--gray-2)" style="font:10.5px var(--ff-mono)">${y}</text>`
+    `<text x="${(y - C.ymin) / N * 610}" y="11" fill="var(--ink)" style="font:10.5px var(--ff-mono)">${y}</text>`
   ).join('');
   hdr.innerHTML = `
-    <div style="font:500 12px var(--ff-body);color:var(--gray-3);">Casa d'asta</div>
-    <div style="font:500 12px var(--ff-body);color:var(--gray-3);">Città</div>
+    <div style="font:500 12px var(--ff-body);color:var(--ink);">Casa d'asta</div>
+    <div style="font:500 12px var(--ff-body);color:var(--ink);">Città</div>
     <svg viewBox="0 0 610 14" preserveAspectRatio="none" style="width:100%;height:14px;display:block;">${axisTicks}</svg>
-    <div style="font:500 12px var(--ff-body);color:var(--gray-3);text-align:right;">Aste totali</div>
+    <div style="font:500 12px var(--ff-body);color:var(--ink);text-align:right;">Aste totali</div>
   `;
   container.appendChild(hdr);
 
@@ -160,93 +160,156 @@ async function loadAndRenderCase() {
    3. BANDITORI — grafo bipartito SVG
    ══════════════════════════════════════════════════════════ */
 async function loadAndRenderBanditori() {
-  const B   = await fetchJSON('banditori.json');
-  const svg = document.getElementById('band-svg');
-  const NS  = 'http://www.w3.org/2000/svg';
+  const B  = await fetchJSON('banditori.json');
+  const NS = 'http://www.w3.org/2000/svg';
+  const wrap = document.getElementById('band-wrap');
+  wrap.style.cssText += 'display:grid;grid-template-columns:260px 1fr;gap:0;padding:0;overflow:hidden;';
 
-  const LX = 200, RX = 440, T0 = 34, T1 = 282;
+  /* Lista banditori */
+  const listDiv = document.createElement('div');
+  listDiv.style.cssText = 'display:flex;flex-direction:column;border-right:1px solid var(--gray-1);';
 
-  function el(tag, attrs, parent) {
+  const listHdr = document.createElement('div');
+  listHdr.style.cssText = 'padding:.75rem 1rem;border-bottom:1px solid var(--gray-1);background:var(--paper); position:sticky;top:0;z-index:2;min-height:3rem;display:flex;flex-direction:column;justify-content:center;position:sticky;top:0;z-index:2;';
+  listHdr.innerHTML = `
+    <div style="font-family:var(--ff-body);font-size:.8rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--gray-3);">Banditori</div>
+    <div style="font-family:var(--ff-mono);font-size:.68rem;color:var(--gray-2);margin-top:.15rem;">${B.all.length} documentati nel corpus</div>
+  `;
+  listDiv.appendChild(listHdr);
+
+  const listBody = document.createElement('div');
+  listBody.style.cssText = 'overflow-y:auto;max-height:900px;';
+
+  let selBand = null;
+  const rows = [];
+
+  B.all.forEach(b => {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:grid;grid-template-columns:1fr auto;gap:4px;padding:5px 10px;border-bottom:0.5px solid rgba(192,175,152,.35);cursor:pointer;align-items:center;transition:background .1s;';
+    const nameColor = b.rel ? 'var(--ink)' : 'var(--gray-2)';
+    row._nameColor = nameColor;
+    row.innerHTML = `
+      <span style="font-size:.78rem;color:${nameColor};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${b.n}">${b.n}</span>
+      <span style="font-family:var(--ff-mono);font-size:.7rem;color:var(--gray-2);">${b.t}</span>
+    `;
+    row.addEventListener('mouseover', () => { if(!row.dataset.sel) row.style.background='rgba(217,64,16,.05)'; });
+    row.addEventListener('mouseout',  () => { if(!row.dataset.sel) row.style.background='none'; });
+    row.addEventListener('click', () => {
+      rows.forEach(r => {
+        r.style.background='none';
+        delete r.dataset.sel;
+        r.querySelector('span').style.color = r._nameColor;
+      });
+      const topIdx = B.top_band.findIndex(tb => tb.n === b.n);
+      const hasEdge = B.edges.some(e => e[0] === topIdx);
+      if(topIdx >= 0 && hasEdge) {
+        row.style.background='rgba(217,64,16,.1)';
+        row.dataset.sel='1';
+        row.querySelector('span').style.color='var(--terra)';
+        selBand = topIdx;
+        hint.textContent = b.n + ' — ' + b.t + ' aste documentate';
+      } else {
+        selBand = -1;
+        hint.textContent = b.n + ' — ' + b.t + (b.t===1?' asta':' aste') + ', nessuna relazione ricorrente con le case rappresentate';
+      }
+      render();
+    });
+    listBody.appendChild(row);
+    rows.push(row);
+  });
+
+  listDiv.appendChild(listBody);
+  wrap.appendChild(listDiv);
+
+  /* Grafico */
+  const grafDiv = document.createElement('div');
+  grafDiv.style.cssText = 'display:flex;flex-direction:column;padding:.75rem 1rem;overflow:visible;';
+
+  const grafHdr = document.createElement('div');
+  grafHdr.style.cssText = 'display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:.5rem;border-bottom:1px solid var(--gray-1);min-height:3rem;position:sticky;top:140px;z-index:10;background:var(--paper);margin-bottom:.5rem;box-shadow:0 3px 12px rgba(26,20,16,.08);';
+  const grafHdrLeft = document.createElement('div');
+  const hint = document.createElement('div');
+  hint.style.cssText = 'font-family:var(--ff-mono);font-size:.68rem;color:var(--gray-2);margin-bottom:.15rem;';
+  hint.textContent = 'Clicca un nome nella lista per evidenziarne i legami';
+  const grafHdrTitle = document.createElement('div');
+  grafHdrTitle.style.cssText = 'font-family:var(--ff-body);font-size:.8rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--gray-3);';
+  grafHdrTitle.textContent = "Banditori con relazioni ricorrenti";
+  grafHdrLeft.appendChild(grafHdrTitle);
+  grafHdrLeft.appendChild(hint);
+  const grafHdrRight = document.createElement('div');
+  grafHdrRight.style.cssText = 'font-family:var(--ff-body);font-size:.8rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--gray-3);';
+  grafHdrRight.textContent = "Case d'asta";
+  grafHdr.appendChild(grafHdrLeft);
+  grafHdr.appendChild(grafHdrRight);
+  grafDiv.appendChild(grafHdr);
+
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('viewBox', '0 0 400 480');
+  svg.style.cssText = 'width:100%;flex:1;display:block;';
+  grafDiv.appendChild(svg);
+
+  wrap.appendChild(grafDiv);
+
+  /* SVG bipartito */
+  const LX=130, RX=270, T0=20, T1=450;
+  const ly = i => T0 + i*(T1-T0)/Math.max(B.top_band.length-1,1);
+  const ry = i => T0 + i*(T1-T0)/Math.max(B.case.length-1,1);
+  const eEls=[], lEls=[], rEls=[];
+
+  function svgEl(tag, attrs) {
     const e = document.createElementNS(NS, tag);
-    for (const k in attrs) e.setAttribute(k, attrs[k]);
-    (parent || svg).appendChild(e);
+    for(const k in attrs) e.setAttribute(k, attrs[k]);
+    svg.appendChild(e);
     return e;
   }
 
-  const ly = i => T0 + i * (T1 - T0) / Math.max(B.banditori.length - 1, 1);
-  const ry = i => T0 + i * (T1 - T0) / Math.max(B.case.length - 1, 1);
-
-  let sel = null;
-  const E = [], LN = [], RN = [];
-
-  /* Archi */
-  B.edges.forEach(([a, b, n]) => {
-    const y1 = ly(a), y2 = ry(b), mx = (LX + RX) / 2;
-    const p = el('path', {
-      d: `M ${LX + 6} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${RX - 6} ${y2}`,
-      fill: 'none', stroke: 'var(--terra)',
-      'stroke-width': Math.max(1.2, Math.sqrt(n) * .85),
-      'stroke-opacity': .45, 'stroke-linecap': 'round'
+  B.edges.forEach(([a,b,n]) => {
+    const y1=ly(a), y2=ry(b), mx=(LX+RX)/2;
+    const p = svgEl('path', {
+      d: `M ${LX+5} ${y1} C ${mx} ${y1},${mx} ${y2},${RX-5} ${y2}`,
+      fill:'none', stroke:'var(--terra)',
+      'stroke-width': Math.max(1.5, Math.sqrt(n)*.9),
+      'stroke-opacity':'.35', 'stroke-linecap':'round'
     });
-    E.push({ p, a, b, n });
+    eEls.push({p,a,b:b,n});
   });
 
-  /* Banditori (sinistra) */
-  B.banditori.forEach((b, i) => {
-    const y = ly(i), r = Math.max(4, Math.sqrt(b.t) * .78);
-    const c = el('circle', { cx: LX, cy: y, r, fill: 'var(--terra)', 'fill-opacity': .55, stroke: 'var(--terra-dark)', 'stroke-width': 1, style: 'cursor:pointer' });
-    const t = el('text', { x: LX - r - 8, y: y + 4, 'text-anchor': 'end', fill: 'var(--ink)', style: 'font:12px var(--ff-body);font-weight:500;cursor:pointer' });
-    t.textContent = b.n;
-    const t2 = el('text', { x: LX - r - 8, y: y + 17, 'text-anchor': 'end', fill: 'var(--gray-2)', style: 'font:10.5px var(--ff-mono)' });
-    t2.textContent = b.t + ' aste';
-    [c, t].forEach(x => x.addEventListener('click', () => {
-      sel = (sel && sel.s === 'L' && sel.i === i) ? null : { s: 'L', i };
-      render();
-    }));
-    LN.push({ c, t, t2 });
+  B.top_band.forEach((band,i) => {
+    const y=ly(i);
+    const c=svgEl('circle',{cx:LX,cy:y,r:5,fill:'var(--terra)','fill-opacity':'.6',stroke:'var(--terra-dark)','stroke-width':'1'});
+    const t=svgEl('text',{x:LX-9,y:y+4,'text-anchor':'end',fill:'var(--ink)'});
+    t.style.font='7px var(--ff-body)';
+    t.textContent = band.n.length>22 ? band.n.slice(0,21)+'…' : band.n;
+    lEls.push({c,t});
   });
 
-  /* Case (destra) */
-  B.case.forEach((n, i) => {
-    const y   = ry(i);
-    const tot = B.edges.filter(e => e[1] === i).reduce((s, e) => s + e[2], 0);
-    const r   = Math.max(4, Math.sqrt(tot) * .78);
-    const c   = el('circle', { cx: RX, cy: y, r, fill: 'var(--paper-light)', stroke: 'var(--ink)', 'stroke-width': 1.2, style: 'cursor:pointer' });
-    const label = n.length > 26 ? n.slice(0, 25) + '…' : n;
-    const txt = el('text', { x: RX + r + 8, y: y + 4, fill: 'var(--ink)', style: 'font:12px var(--ff-body);cursor:pointer' });
-    txt.textContent = label;
-    [c, txt].forEach(x => x.addEventListener('click', () => {
-      sel = (sel && sel.s === 'R' && sel.i === i) ? null : { s: 'R', i };
-      render();
-    }));
-    RN.push({ c, t: txt });
+  B.case.forEach((name,i) => {
+    const y=ry(i);
+    const c=svgEl('circle',{cx:RX,cy:y,r:5,fill:'var(--paper-light)',stroke:'var(--ink)','stroke-width':'1.2'});
+    const t=svgEl('text',{x:RX+9,y:y+4,fill:'var(--ink)'});
+    t.style.font='7px var(--ff-body)';
+    t.textContent = name.length>20 ? name.slice(0,19)+'…' : name;
+    rEls.push({c,t});
   });
-
-  /* Etichette colonne */
-  el('text', { x: LX, y: 16, 'text-anchor': 'end', fill: 'var(--gray-2)', style: 'font:10.5px var(--ff-mono);letter-spacing:.1em' }).textContent = 'BANDITORI';
-  el('text', { x: RX, y: 16, fill: 'var(--gray-2)', style: 'font:10.5px var(--ff-mono);letter-spacing:.1em' }).textContent = "CASE D'ASTA";
 
   function render() {
-    E.forEach(e => {
-      const on = !sel || (sel.s === 'L' && e.a === sel.i) || (sel.s === 'R' && e.b === sel.i);
-      e.p.setAttribute('stroke-opacity', on ? (sel ? .75 : .45) : .08);
+    eEls.forEach(e => {
+      const on = selBand===null || selBand===e.a;
+      e.p.setAttribute('stroke-opacity', on?(selBand!==null?'.75':'.35'):'.04');
     });
-    LN.forEach((n, i) => {
-      const on = !sel || (sel.s === 'L' && sel.i === i) || (sel.s === 'R' && E.some(e => e.b === sel.i && e.a === i));
-      [n.c, n.t, n.t2].forEach(x => x.setAttribute('opacity', on ? 1 : .25));
+    lEls.forEach((n,i) => {
+      const on = selBand===null || selBand===i;
+      [n.c,n.t].forEach(x=>x.setAttribute('opacity',on?1:.2));
     });
-    RN.forEach((n, i) => {
-      const on = !sel || (sel.s === 'R' && sel.i === i) || (sel.s === 'L' && E.some(e => e.a === sel.i && e.b === i));
-      [n.c, n.t].forEach(x => x.setAttribute('opacity', on ? 1 : .25));
+    rEls.forEach((n,i) => {
+      const on = selBand===null || eEls.some(e=>e.a===selBand&&e.b===i);
+      [n.c,n.t].forEach(x=>x.setAttribute('opacity',on?1:.2));
     });
   }
   render();
 }
 
 
-/* ══════════════════════════════════════════════════════════
-   4. TIPOLOGIE OGGETTI — barre impilate
-   ══════════════════════════════════════════════════════════ */
 async function loadAndRenderTipologie() {
   const T    = await fetchJSON('tipologie_oggetti.json');
   const svg  = document.getElementById('tip-svg');

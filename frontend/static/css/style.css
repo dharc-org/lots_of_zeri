@@ -109,7 +109,7 @@ footer {
 .zac-footer {
   background: var(--paper);
   border-top: 3px solid var(--terra);
-  margin-top: 4rem;
+  margin-top: 0;
 }
 
 .zac-footer-inner {

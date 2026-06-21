@@ -9,14 +9,14 @@
 <div class="expl-page">
 
   {# ── Header editoriale ──────────────────────────────── #}
-  <header class="expl-header">
-    <div class="expl-eyebrow">ESPLORA IL CORPUS</div>
-    <h1 class="expl-title">Quattro finestre sul mercato</h1>
-    <hr class="expl-title-rule">
-    <p class="expl-standfirst">
-Tra il 1879 e il 1939, il mercato dell'arte europeo prendeva forma nelle sale delle grandi case di vendita. Le tracce che ci restano ne restituiscono quattro dimensioni: le <strong>organizzazioni</strong> e le <strong>persone</strong> che animavano le aste, gli <strong>oggetti</strong> che passavano all'incanto, i <strong>luoghi</strong> dove si vendeva.
-    </p>
-  </header>
+<header class="expl-header">
+  <div class="expl-eyebrow">ESPLORA IL <em>CORPUS</em></div>
+  <h1 class="expl-title">Il mercato dell'arte, 1879–1929</h1>
+  <hr class="expl-title-rule">
+  <p class="expl-standfirst">
+    Tra il 1879 e il 1929, il mercato dell'arte europeo prendeva forma nelle sale delle grandi case di vendita. Le tracce che ci restano ne restituiscono quattro dimensioni principali: le <strong>organizzazioni</strong> e le <strong>persone</strong> che animavano le aste, gli <strong>oggetti</strong> che passavano all'incanto, i <strong>luoghi</strong> dove si vendeva.
+  </p>
+</header>
 
   {# ── Toolbar sticky: eyebrow + tab ───────────────────── #}
   <div class="expl-toolbar">
@@ -44,7 +44,10 @@ Tra il 1879 e il 1939, il mercato dell'arte europeo prendeva forma nelle sale de
 
     {# ════ 01 — Case d'asta ════ #}
     <div class="expl-panel active" id="panel-case" role="tabpanel">
-      <p class="expl-metanote">Il grafico mostra la presenza nel corpus Zeri, non l'attività reale delle case d'asta. Una casa con pochi cataloghi conservati appare meno attiva di una con molti, indipendentemente dal volume reale delle vendite. Il corpus privilegia cataloghi di qualità tipografica elevata: le case minori e le aste locali sono sottorappresentate. L'intensità del colore è relativa a ciascuna casa: il tono più scuro indica l'anno di punta di quella specifica casa, e non è confrontabile tra case diverse.</p>
+      <p class="expl-metanote-label">Nota metodologica</p>
+      <p class="expl-metanote">Il grafico visualizza la presenza delle case d'asta nel <em>corpus</em> digitalizzato della Fondazione Federico Zeri, ordinate per volume di eventi documentati: quelle con il maggior numero di cataloghi conservati compaiono in cima.
+I dati riflettono la composizione del corpus, non l'attività complessiva delle singole imprese: una casa con pochi cataloghi conservati appare meno presente di una con molti, indipendentemente dal volume reale delle vendite.
+L'intensità del colore è calcolata in modo relativo per ciascuna casa: il tono più scuro indica l'anno di maggiore attività documentata di quella specifica organizzazione, e non è confrontabile tra case d'asta diverse.</p>
       <div class="expl-chart-wrap">
         <div id="case-rows"></div>
       </div>
@@ -52,10 +55,9 @@ Tra il 1879 e il 1939, il mercato dell'arte europeo prendeva forma nelle sale de
 
     {# ════ 02 — Banditori ════ #}
     <div class="expl-panel" id="panel-banditori" role="tabpanel">
-      <div class="expl-chart-wrap">
-        <svg id="band-svg" viewBox="0 0 660 300" style="width:100%;display:block;"></svg>
-      </div>
-      <p class="expl-note">Il banditore è documentato nel <strong>30% degli eventi</strong> (604 su 2.039), quasi tutti francesi: il <em>commissaire-priseur</em> è una figura del sistema d'asta parigino. Legami con almeno 3 aste insieme.</p>
+      <p class="expl-metanote-label">Nota metodologica</p>
+      <p class="expl-metanote">Il grafico visualizza le relazioni tra i banditori documentati nel <em>corpus</em> e le case d'asta presso cui hanno operato. Lo spessore del filo è proporzionale al numero di aste condotte insieme. Il banditore è documentato solo nel 30% degli eventi, con una forte concentrazione nelle vendite parigine, dove il <em>commissaire-priseur</em> era una figura istituzionale: l'assenza del banditore nei cataloghi tedeschi e italiani non indica assenza del ruolo, ma una diversa prassi documentaria. Il grafico include solo i banditori e le case d'asta più presenti nel <em>corpus</em>: un banditore può risultare senza legami visibili pur avendo condotto più aste, se ha operato esclusivamente presso case non rappresentate, o se le collaborazioni non raggiungono la soglia minima di tre aste insieme.</p>
+      <div class="expl-chart-wrap" id="band-wrap"></div>
     </div>
 
     {# ════ 03 — Tipologie ════ #}

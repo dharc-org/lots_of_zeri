@@ -7,16 +7,17 @@
    HEADER EDITORIALE
    ══════════════════════════════════════════════════════════ */
 .expl-header {
-  padding: 2.5rem 5rem 2rem;
+  padding: 2rem 5rem 2.5rem;
   border-bottom: 1px solid var(--gray-1);
 }
 
 .expl-eyebrow {
   font-family: var(--ff-mono);
-  font-size: .68rem;
+  font-size: .75rem;
   letter-spacing: .14em;
   color: var(--gray-2);
-  margin-bottom: .4rem;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
 }
 
 .expl-title {
@@ -25,22 +26,24 @@
   font-weight: 400;
   line-height: 1.12;
   margin: 0;
+  text-align: center;
 }
 
 .expl-title-rule {
   border: none;
   border-top: 1px solid var(--gray-1);
-  margin: .5rem 0 1.5rem;
+  margin: .65rem 0 1.75rem;
 }
 
 .expl-standfirst {
   font-family: var(--ff-body);
-  font-size: .92rem;
+  font-size: 1.05rem;
   line-height: 1.75;
   color: var(--gray-4);
-  margin: 0;
-  max-width: 90ch;
-  margin-left: auto;
+  margin: 0 auto;
+  max-width: 85ch;
+  text-align: center;
+  margin-bottom: 1.5rem;
 }
 
 .expl-standfirst strong {
@@ -64,6 +67,7 @@
   z-index: 100;
   background: var(--paper);
   border-bottom: 2px solid var(--gray-1);
+  background: var(--paper-light)
 }
 
 /* Riga superiore: eyebrow + tab */
@@ -80,6 +84,7 @@
   display: flex;
   flex: 1;
   gap: 0;
+  justify-content: center;
 }
 
 .expl-tab {
@@ -101,14 +106,14 @@
 
 .expl-tab-num {
   font-family: var(--ff-mono);
-  font-size: .65rem;
+  font-size: .90rem;
   letter-spacing: .08em;
   color: var(--gray-2);
 }
 
 .expl-tab-label {
   font-family: var(--ff-body);
-  font-size: .85rem;
+  font-size: .90rem;
   font-weight: 500;
   color: var(--gray-3);
   transition: color .15s;
@@ -124,6 +129,7 @@
 .expl-panels {
   flex: 1;
   padding: 1.75rem 5rem 3rem;
+  background: var(--paper-light);
 }
 
 .expl-panel { display: none; }
@@ -132,21 +138,33 @@
 /* ── Nota metodologica ─────────────────────────────────── */
 .expl-metanote {
   font-family: var(--ff-body);
-  font-size: .78rem;
+  font-size: .92rem;
   line-height: 1.6;
+  color: var(--gray-4);
+  margin-bottom: 2rem;
+  columns: 2;
+  column-width: 250;
+  column-gap: 2rem;
+}
+
+.expl-metanote-label {
+  font-family: var(--ff-mono);
+  font-size: .78rem;
+  font-weight: 500;
+  letter-spacing: .1em;
   color: var(--gray-2);
-  border-left: 2px solid var(--gray-1);
-  padding-left: .85rem;
-  margin-bottom: 1rem;
+  text-transform: uppercase;
+  margin-bottom: .3rem;
 }
 
 /* ── Wrap grafico ───────────────────────────────────────── */
 .expl-chart-wrap {
-  background: var(--paper-light);
+  background: var(--paper);
   border: 1px solid var(--gray-1);
   border-radius: 4px;
   padding: 1.25rem 1.5rem 1rem;
   margin-bottom: .75rem;
+  overflow: hidden;
 }
 
 .expl-chart-wrap--map {
@@ -295,5 +313,18 @@
   .expl-tab         { padding: .65rem .9rem .55rem; }
   .expl-tab-label   { font-size: .78rem; }
   .expl-toolbar-desc { padding: .4rem 1rem .45rem; }
-  .expl-panels      { padding: 1rem 1rem 2.5rem; }
+  .expl-panels      { padding: 1rem 1rem 1rem; }
+}
+
+.expl-panel #band-wrap ::-webkit-scrollbar {
+  width: 9px;
+}
+
+.expl-panel #band-wrap ::-webkit-scrollbar-track {
+  background: var(--paper-dark);
+}
+
+.expl-panel #band-wrap ::-webkit-scrollbar-thumb {
+  background: var(--gray-1);
+  border-radius: 6px;
 }
