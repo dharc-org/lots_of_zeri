@@ -194,6 +194,7 @@
 /* ── Chip tipologie ─────────────────────────────────────── */
 .expl-chips {
   display: flex;
+  justify-content: center;
   flex-wrap: wrap;
   gap: 5px;
 }
@@ -201,6 +202,7 @@
 .expl-chip {
   font-family: var(--ff-mono);
   font-size: .7rem;
+  font-weight: 500;
   padding: 3px 9px;
   border-radius: 12px;
   cursor: pointer;
@@ -328,3 +330,13 @@
   background: var(--gray-1);
   border-radius: 6px;
 }
+
+/* Scrollbar case d'asta */
+#panel-case .expl-chart-wrap div::-webkit-scrollbar { width: 9px; }
+#panel-case .expl-chart-wrap div::-webkit-scrollbar-track { background: var(--paper-dark); }
+#panel-case .expl-chart-wrap div::-webkit-scrollbar-thumb { background: var(--gray-1); border-radius: 6px; }
+
+/* Scrollbar banditori lista */
+#band-wrap div::-webkit-scrollbar { width: 9px; }
+#band-wrap div::-webkit-scrollbar-track { background: var(--paper-dark); }
+#band-wrap div::-webkit-scrollbar-thumb { background: var(--gray-1); border-radius: 6px; }
