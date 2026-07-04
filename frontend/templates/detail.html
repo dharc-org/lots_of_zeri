@@ -243,10 +243,58 @@
 {% if view.has_viewer and view.manifest_url %}
 <script src="https://cdn.jsdelivr.net/npm/mirador@latest/dist/mirador.min.js"></script>
 <script>
-  Mirador.viewer({
-    id: 'mirador-viewer',
-    windows: [{ manifestId: {{ view.manifest_url|tojson }} }]
-  });
+Mirador.viewer({
+  id: 'mirador-viewer',
+  windows: [{ manifestId: {{ view.manifest_url|tojson }} }],
+  selectedTheme: 'dark',
+themes: {
+  dark: {
+    palette: {
+      mode: 'dark',
+      primary: {
+        main: '#E86040',
+        contrastText: '#FDF6E4',   // --paper-light, al posto del bianco calcolato automaticamente
+      },
+      secondary: {
+        main: '#E86040',
+        contrastText: '#FDF6E4',
+      },
+      common: {
+        white: '#FDF6E4',
+      },
+      background: {
+        default: '#352C24',
+        paper: '#352C24',
+      },
+      shades: {
+        dark: '#241d17',
+        main: '#352C24',
+        light: '#4a3d30',
+      }
+    }
+  }
+},
+  workspace: {
+    isWorkspaceAddVisible: false,
+  },
+  workspaceControlPanel: {
+    enabled: false,
+  },
+  window: {
+    panels: {
+      info: false,
+      attribution: false,
+      canvas: false,
+      annotations: false,
+      search: false,
+    },
+    hideWindowTitle: true,
+    allowClose: false,
+    allowMaximize: false,
+    allowFullscreen: true,
+  },
+});
+
 </script>
 {% endif %}
 {% endblock %}

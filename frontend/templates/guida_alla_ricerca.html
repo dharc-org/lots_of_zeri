@@ -12,12 +12,12 @@
 
 {# ── Header ──────────────────────────────────────────────── #}
 <div class="guida-header container-fluid px-5 py-5">
-  <div class="row">
-    <div class="col-md-5">
+  <div class="guida-header-flex">
+    <div class="guida-header-title-col">
       <h1 class="guida-title">Guida alla ricerca</h1>
       <hr class="guida-title-rule">
     </div>
-    <div class="col-md-5 offset-md-1">
+    <div class="guida-header-text-col">
       <p class="guida-intro">
         I cataloghi d'asta sono documenti complessi: promuovono un evento di vendita, descrivono gli oggetti messi all'incanto e permettono agli acquirenti di scegliere cosa comprare. Nella piattaforma è possibile cercare all'interno dei tre livelli a cui queste fonti fanno riferimento.
       </p>
@@ -27,16 +27,17 @@
 
 {# ── Le 3 entità ─────────────────────────────────────────── #}
 <div class="guida-entita container-fluid px-5 py-4">
-  <h2 class="guida-section-title">Le 3 entità</h2>
-  <hr class="guida-section-rule">
+  <div class="guida-entita-inner">
 
-  <div class="row g-4 mt-2">
+    <h2 class="guida-section-title">Le 3 entità</h2>
+    <hr class="guida-section-rule">
 
-    {# Catalogo #}
-    <div class="col-md-4">
+    <div class="guida-cards-row">
+
+      {# Catalogo #}
       <div class="guida-card">
         <div class="guida-card-icon">
-          <i class="bi bi-journal-text"></i>
+           <i class="ph ph-book-open-text"></i>
         </div>
         <h3 class="guida-card-title">Catalogo</h3>
         <p class="guida-card-desc">
@@ -52,13 +53,11 @@
         </div>
         <a href="/cataloghi" class="guida-card-link">Cerca tra i cataloghi <i class="bi bi-arrow-right"></i></a>
       </div>
-    </div>
 
-    {# Asta #}
-    <div class="col-md-4">
+      {# Asta #}
       <div class="guida-card">
         <div class="guida-card-icon">
-          <i class="bi bi-hammer"></i>
+          <i class="ph ph-gavel"></i>
         </div>
         <h3 class="guida-card-title">Asta</h3>
         <p class="guida-card-desc">
@@ -74,13 +73,11 @@
         </div>
         <a href="/aste" class="guida-card-link">Cerca tra le aste <i class="bi bi-arrow-right"></i></a>
       </div>
-    </div>
 
-    {# Lotto #}
-    <div class="col-md-4">
+      {# Lotto #}
       <div class="guida-card">
         <div class="guida-card-icon">
-          <i class="bi bi-list-ol"></i>
+          <i class="ph ph-list-numbers"></i>
         </div>
         <h3 class="guida-card-title">Lotto</h3>
         <p class="guida-card-desc">
@@ -95,8 +92,8 @@
         </div>
         <a href="#" class="guida-card-link disabled">Cerca tra i lotti <i class="bi bi-arrow-right"></i></a>
       </div>
-    </div>
 
+    </div>
   </div>
 </div>
 
