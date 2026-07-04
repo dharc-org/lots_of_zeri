@@ -37,6 +37,7 @@ eventi_asta:
     uri_var: "auction"
     slug_from_uri: true
     result_fields:
+      thumb: "thumb"
       label:  "auctionLabel"
       house:  "houseLabel"
       year:   "yearLabel"
@@ -119,6 +120,7 @@ cataloghi:
     uri_var: "doc"
     slug_from_uri: true
     result_fields:
+      thumb: "thumb"
       doc_id:     "docId"
       title:      "title"
       year:       "year"

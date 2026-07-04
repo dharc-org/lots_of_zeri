@@ -173,7 +173,13 @@
           {% for item in items %}
           <a href="{{ tab_route }}/{{ item.slug or item.doc_id or item.uri.split('/')[-1] }}"
             class="result-row">
-            <div class="row-thumb"><div class="thumb-placeholder"></div></div>
+            <div class="row-thumb">
+              {% if item.thumb %}
+                <img src="{{ item.thumb }}" alt="" loading="lazy" class="thumb-img">
+              {% else %}
+                <div class="thumb-placeholder"></div>
+              {% endif %}
+            </div>
             <div class="row-body">
               <div class="row-title">{{ item.title or item.label or item.slug }}</div>
               <div class="row-meta">
@@ -202,7 +208,13 @@
           {% for item in items %}
           <a href="{{ tab_route }}/{{ item.slug or item.doc_id or item.uri.split('/')[-1] }}"
             class="result-card-grid">
-            <div class="card-cover"><div class="thumb-placeholder"></div></div>
+            <div class="card-cover">
+              {% if item.thumb %}
+                <img src="{{ item.thumb }}" alt="" loading="lazy" class="cover-img">
+              {% else %}
+                <div class="thumb-placeholder"></div>
+              {% endif %}
+            </div>
             <div class="card-body">
               <div class="card-title">{{ item.title or item.label or item.slug }}</div>
               <div class="card-meta">
@@ -358,12 +370,16 @@ document.addEventListener('DOMContentLoaded', function () {
           if (item.language) metaParts.push(item.language);
           var metaText = metaParts.join(' · ');
 
+          var thumbHtml = item.thumb
+            ? '<img src="' + item.thumb + '" alt="" loading="lazy" class="thumb-img">'
+            : '<div class="thumb-placeholder"></div>';
+
           /* lista */
           var aL = document.createElement('a');
           aL.href = tabRoute + '/' + slug;
           aL.className = 'result-row';
           aL.innerHTML =
-            '<div class="row-thumb"><div class="thumb-placeholder"></div></div>'
+            '<div class="row-thumb">' + thumbHtml + '</div>'
             + '<div class="row-body">'
             +   '<div class="row-title">' + title + '</div>'
             +   '<div class="row-meta">' + metaText + '</div>'
@@ -372,12 +388,16 @@ document.addEventListener('DOMContentLoaded', function () {
             + '<div class="row-actions"><span class="btn-apri">Apri →</span></div>';
           listEl.appendChild(aL);
 
+          var thumbHtmlGrid = item.thumb
+            ? '<img src="' + item.thumb + '" alt="" loading="lazy" class="cover-img">'
+            : '<div class="thumb-placeholder"></div>';
+
           /* griglia */
           var aG = document.createElement('a');
           aG.href = tabRoute + '/' + slug;
           aG.className = 'result-card-grid';
           aG.innerHTML =
-            '<div class="card-cover"><div class="thumb-placeholder"></div></div>'
+            '<div class="card-cover">' + thumbHtmlGrid + '</div>'
             + '<div class="card-body">'
             +   '<div class="card-title">' + title + '</div>'
             +   '<div class="card-meta">' + metaText + '</div>'
@@ -385,6 +405,7 @@ document.addEventListener('DOMContentLoaded', function () {
             + '</div>';
           gridEl.appendChild(aG);
         });
+
         offset += (data.items || []).length;
         if (offset >= total) observer.disconnect();
         sentinel.innerHTML = '';

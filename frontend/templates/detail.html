@@ -21,26 +21,10 @@
 
 {% block content %}
 
-<<<<<<< HEAD
-<div class="detail-sticky-top">
-  <nav class="zac-breadcrumbs">
-    <a href="/">Homepage</a>
-    <span class="sep">›</span>
-    <a href="/cataloghi">Cerca</a>
-    <span class="sep">›</span>
-    <a href="{{ view.back.url }}">{{ view.back.breadcrumb_it }}</a>
-    <span class="sep">›</span>
-    <span class="current">Scheda di dettaglio</span>
-  </nav>
-</div>
-
-<div class="detail-header-area">
-=======
 {# ── Topbar e titolo: fuori dalla grid, a tutta larghezza ── #}
 <div class="detail-header-area w-100">
 
   {# Breadcrumb + switch "Vai a:" #}
->>>>>>> 12d05e6cf5e4947689ac0ff76fc548c78604f3ee
   <div class="detail-topbar">
     {% if view.switch %}
     <div class="detail-switch">
@@ -87,23 +71,9 @@
   <main class="detail-main">
 
     {# ── Sezione 1 — Visore IIIF (solo se has_viewer) — PLACEHOLDER ── #}
-    {% if view.has_viewer %}
+    {% if view.has_viewer and view.manifest_url %}
     <section id="sec-viewer" class="detail-section">
-      <div class="iiif-placeholder">
-        <div class="iiif-placeholder-inner">
-          <i class="bi bi-images"></i>
-          <p>Visore IIIF</p>
-          <span class="iiif-placeholder-note">
-            Riproduzione digitale — integrazione AMS Historica in arrivo
-          </span>
-        </div>
-      </div>
-      <div class="iiif-credit">
-        <a href="https://amshistorica.unibo.it" target="_blank" rel="noopener">
-          Riproduzione digitale: AMS Historica, Università di Bologna
-          <i class="bi bi-arrow-up-right"></i>
-        </a>
-      </div>
+      <div id="mirador-viewer" style="height:500px;position:relative;min-width:324px;"></div>
     </section>
     {% endif %}
 
@@ -267,4 +237,16 @@
     });
   })();
 </script>
+
+
+{{ super() }}
+{% if view.has_viewer and view.manifest_url %}
+<script src="https://cdn.jsdelivr.net/npm/mirador@latest/dist/mirador.min.js"></script>
+<script>
+  Mirador.viewer({
+    id: 'mirador-viewer',
+    windows: [{ manifestId: {{ view.manifest_url|tojson }} }]
+  });
+</script>
+{% endif %}
 {% endblock %}

@@ -399,6 +399,11 @@ def _register_list_route(tab_id, tab_cfg, route_cfg, cfg):
 
         total = int(float((count_res or [{}])[0].get("total", 0)))
         items = _extract_items(data_res, route_cfg)
+        if "thumb" in route_cfg.get("result_fields", {}):
+            cache = request.app.state.cache
+            thumbs = await sparql.thumbnails_batch([it["uri"] for it in items], cache=cache)
+            for it in items:
+                it["thumb"] = thumbs.get(it["uri"])
 
         # ── 3. active_filters per sidebar ────────────────────────
         active_filters = {}
@@ -465,6 +470,12 @@ def _register_api_route(tab_id, tab_cfg, route_cfg, cfg):
             data_res = []
 
         items = _extract_items(data_res, _route_cfg)
+        items = _extract_items(data_res, _route_cfg)
+        if "thumb" in _route_cfg.get("result_fields", {}):
+            cache = request.app.state.cache
+            thumbs = await sparql.thumbnails_batch([it["uri"] for it in items], cache=cache)
+            for it in items:
+                it["thumb"] = thumbs.get(it["uri"])
         return JSONResponse(content={
             "items":    items,
             "offset":   offset,
@@ -616,6 +627,10 @@ def _register_detail_route(tab_id, tab_cfg, route_cfg, cfg):
         scalars = safe(0)
         if not scalars:
             return tmpl.TemplateResponse("404.html", {"request": request}, status_code=404)
+        
+        manifest_url = None
+        if cfg_view.get("has_viewer"):
+            manifest_url = await sparql.manifest_url_for(uri)
 
         multis = {}
         for j, field_key in enumerate(multi_map.keys(), start=1):
@@ -658,7 +673,8 @@ def _register_detail_route(tab_id, tab_cfg, route_cfg, cfg):
 
         # ── Merge config + dati → view ──────────────────────────────
         view = build_view(_kind, cfg_view, scalars=scalars,
-                           multis=multis, related=related_rows)
+                           multis=multis, related=related_rows,
+                           manifest_url=manifest_url)
 
         return tmpl.TemplateResponse("detail.html", {
             "request":    request,

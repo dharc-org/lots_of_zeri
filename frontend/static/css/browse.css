@@ -422,6 +422,14 @@
 #zac-catalogue-results-list[data-view="list"] .results-grid { display: none; }
 #zac-catalogue-results-list[data-view="grid"] .results-list { display: none; }
 
+/* Thumbnail da IIIF manifest */
+.thumb-img,
+.card-cover .cover-img {
+  width: 100%; aspect-ratio: 3/4;
+  object-fit: cover; object-position: center top;
+  display: block;
+}
+
 
 /* ── RESULT ROW (vista lista) ──────────────────────────── */
 .results-list { display: flex; flex-direction: column; gap: 0.75rem; }

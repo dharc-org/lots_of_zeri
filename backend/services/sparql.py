@@ -80,6 +80,73 @@ class SparqlService:
             await self._client.aclose()
 
 
+    # ─── CATALOGUE (CERCA) THUMBNAIL LOADING ────────────────────────────
+
+    async def manifest_urls_batch(self, uris: list[str]) -> dict[str, str]:
+        """Una sola query per N URI: risolve il manifest per ognuno (catalogo o asta)."""
+        if not uris:
+            return {}
+        values = " ".join(f"<{u}>" for u in uris)
+        q = f"""SELECT ?item ?m WHERE {{
+          VALUES ?item {{ {values} }}
+          {{ ?item crm:P138i_has_representation ?m }}
+          UNION
+          {{ ?doc crm:P70_documents ?item ; crm:P138i_has_representation ?m }}
+        }}"""
+        rows = self.parse_bindings(await self.query(q, add_prefixes=True))
+        out = {}
+        for r in rows:
+            if r.get("item") and r.get("m") and r["item"] not in out:
+                out[r["item"]] = r["m"]
+        return out
+
+    async def fetch_thumbnail_from_manifest(self, manifest_url: str) -> Optional[str]:
+        try:
+            r = await self.client.get(manifest_url, headers={"Accept": "application/json"})
+            r.raise_for_status()
+            m = r.json()
+        except (httpx.HTTPError, ValueError):
+            return None
+        try:
+            thumb = m["sequences"][0]["canvases"][0]["thumbnail"]
+        except (KeyError, IndexError, TypeError):
+            return None
+        if isinstance(thumb, list):
+            thumb = thumb[0]
+        return thumb.get("@id") if isinstance(thumb, dict) else thumb
+
+    async def thumbnails_batch(self, uris: list[str], cache=None) -> dict[str, Optional[str]]:
+        """Risolve thumbnail per N URI: 1 query SPARQL + fetch manifest solo per i cache-miss."""
+        result: dict[str, Optional[str]] = {}
+        to_lookup = []
+        for u in uris:
+            if cache is not None:
+                cached = cache.get(f"thumb:{u}")
+                if cached is not None:
+                    result[u] = cached if cached != "__none__" else None
+                    continue
+            to_lookup.append(u)
+
+        if to_lookup:
+            manifest_map = await self.manifest_urls_batch(to_lookup)
+            import asyncio as _asyncio
+            manifest_urls = [manifest_map.get(u) for u in to_lookup]
+            fetched = await _asyncio.gather(*(
+                self.fetch_thumbnail_from_manifest(m) if m else _asyncio.sleep(0, result=None)
+                for m in manifest_urls
+            ))
+            for u, t in zip(to_lookup, fetched):
+                result[u] = t
+                if cache is not None:
+                    cache.set(f"thumb:{u}", t if t is not None else "__none__", ttl=86400)
+
+        return result
+    
+    async def manifest_url_for(self, uri: str) -> Optional[str]:
+        m = await self.manifest_urls_batch([uri])
+        return m.get(uri)
+
+
 class SparqlError(Exception):
     pass
 

@@ -92,6 +92,7 @@ def build_view(
     scalars: List[dict],
     multis: Dict[str, List[dict]],
     related: Dict[str, List[dict]],
+    manifest_url: Optional[str] = None,
 ) -> dict:
     """
     kind        : "catalogo" | "evento" | …
@@ -281,4 +282,5 @@ def build_view(
         "sections":   sections,
         "fields":     fields,
         "related":    related_out,
+        "manifest_url": manifest_url,
     }
