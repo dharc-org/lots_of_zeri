@@ -99,19 +99,6 @@ facet_queries:
     }
     GROUP BY ?facetURI ?facetValue ORDER BY DESC(?count) LIMIT 200
 
-  eventi_asta__collezione: |
-    SELECT ?facetURI ?facetValue (COUNT(DISTINCT ?auction) AS ?count)
-    WHERE {
-      ?auction a crm:E7_Activity ;
-        crm:P2_has_type aat:300054751 ;
-        crm:P16_used_specific_object ?coll .
-      ?coll a crm:E78_Curated_Holding ;
-        rdfs:label ?facetValue .
-      BIND(?coll AS ?facetURI)
-      {FILTERS}
-    }
-    GROUP BY ?facetURI ?facetValue ORDER BY DESC(?count) LIMIT 200
-
   # boolean: ?facetURI = ?facetValue (stringa "true"/"false")
   cataloghi__illustrazioni: |
     SELECT ?facetURI ?facetValue (COUNT(DISTINCT ?doc) AS ?count)
@@ -251,12 +238,6 @@ filter_snippets:
     multiselect: |
       ?auction crm:P7_took_place_at ?place .
       VALUES ?place { {values_clause} }
-
-  eventi_asta__collezione:
-    multiselect: |
-      ?auction crm:P16_used_specific_object ?coll .
-      ?coll a crm:E78_Curated_Holding .
-      VALUES ?coll { {values_clause} }
 
   # Ricerca libera per parola chiave — usata dalla barra di ricerca
   # Effettua la corrispondenza su: etichetta asta, casa d'asta, banditore, luogo

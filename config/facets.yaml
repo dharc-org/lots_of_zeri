@@ -31,7 +31,7 @@ eventi_asta:
     results_query: "eventi_asta"
     count_query: "eventi_asta_count"
     detail_kind: "evento"
-    icon: "bi-hammer"
+    icon: "ph ph-gavel"
     entity_label: "aste"
     # How to extract items from SPARQL result rows
     uri_var: "auction"
@@ -83,14 +83,20 @@ eventi_asta:
       type: "multiselect"
       ui_widget: "checkbox_list"
 
+    collezione:
+      label_it: "Collezione in vendita"
+      label_en: "Collection for Sale"
+      type: "multiselect"
+      ui_widget: "checkbox_list"
+
     tipologia_oggetti:
-      label_it: "Tipologia degli oggetti"
+      label_it: "Tipologia oggetti"
       label_en: "Object Types Sold"
       type: "multiselect"
       ui_widget: "checkbox_list"
 
     cronologia_oggetti:
-      label_it: "Cronologia degli oggetti"
+      label_it: "Cronologia oggetti"
       label_en: "Object Chronology Sold"
       type: "multiselect"
       ui_widget: "checkbox_list"
@@ -115,7 +121,7 @@ cataloghi:
     results_query: "catalogo"
     count_query: "catalogo_count"
     detail_kind: "catalogo"
-    icon: "bi-journal-text"
+    icon: "ph ph-book-open-text"
     entity_label: "cataloghi"
     uri_var: "doc"
     slug_from_uri: true
@@ -156,6 +162,12 @@ cataloghi:
         max: 1940
         step: 1
 
+    luogo:
+      label_it: "Luogo di pubblicazione"
+      label_en: "Place of Publication"
+      type: "multiselect"
+      ui_widget: "checkbox_list"
+
     collezione:
       label_it: "Collezione in vendita"
       label_en: "Collection"
@@ -180,8 +192,8 @@ cataloghi:
       type: "boolean"
       ui_widget: "toggle"
       values:
-        "true": "Con illustrazioni"
-        "false" : "Senza illustrazioni"
+        "true": "Si"
+        "false" : "No"
 
 # ─────────────────────────────────────────
 # TAB 3 — LOTTI (disabled)
@@ -213,10 +225,3 @@ ui:
   results_per_page: 50
   max_facet_values: 50
   debounce_ms: 300
-  theme:
-    primary_color: "#8b2635"
-    secondary_color: "#c8a96e"
-    background: "#faf7f0"
-    font_heading: "Playfair Display"
-    font_body: "Crimson Pro"
-    font_mono: "JetBrains Mono"

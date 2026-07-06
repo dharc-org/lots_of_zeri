@@ -431,7 +431,7 @@ def _register_list_route(tab_id, tab_cfg, route_cfg, cfg):
             "active_tab":     route_cfg.get("active_tab", tab_id),
             "tab_route":      route_cfg["path"],
             "tab_label":      tab_cfg.get("label_it", tab_id),
-            "icon":           route_cfg.get("icon", "bi-search"),
+           "icon": route_cfg.get("icon", "ph ph-magnifying-glass"),
             "entity_label":   route_cfg.get("entity_label", "risultati"),
             "facet_defs":     facet_defs,
             "active_filters": active_filters,

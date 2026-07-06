@@ -6,8 +6,9 @@
 .appr-layout {
   display: grid;
   grid-template-columns: 260px 1fr;
-  gap: 0;
+  gap: 2.5rem;
   min-height: calc(100vh - 6rem);
+  padding-left: 1.5rem;
 }
 
 /* ── Sidebar ───────────────────────────────────────────── */
@@ -15,8 +16,7 @@
   position: sticky;
   top: 6rem;
   height: fit-content;
-  padding: 2.5rem 1.5rem 2.5rem 2rem;
-  border-right: 1px solid var(--gray-1);
+  padding: 2.5rem 0;
 }
 
 .appr-nav-list {
@@ -26,7 +26,7 @@
 }
 
 .appr-nav-item {
-  padding: .55rem 0;
+  padding: .6rem 0;
   border-bottom: 1px solid var(--gray-1);
 }
 
@@ -52,15 +52,14 @@
 
 /* ── Contenuto principale ──────────────────────────────── */
 .appr-main {
-  padding: 3rem 3.5rem 5rem;
+  padding: 3rem 1.5rem 5rem 5rem;
   max-width: 860px;
 }
 
 /* ── Sezione generica ──────────────────────────────────── */
 .appr-section {
-  padding-bottom: 4rem;
-  border-bottom: 1px solid var(--gray-1);
-  margin-bottom: 4rem;
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
   scroll-margin-top: 7rem;
 }
 
@@ -71,11 +70,15 @@
 /* ── Titolo sezione ────────────────────────────────────── */
 .appr-section-title {
   font-family: var(--ff-head);
-  font-size: var(--fs-h2);
+  font-size: 2rem;
   font-weight: 400;
   text-align: right;
   margin: 0 0 .5rem;
   line-height: 1.15;
+}
+
+.appr-section--spaced {
+  margin-top: 3rem;
 }
 
 .appr-section-title em {
@@ -86,15 +89,22 @@
   border: none;
   border-top: 1px solid var(--gray-1);
   margin: 0 0 1.75rem;
+  opacity: 1;
 }
 
 /* ── Lead (testo introduttivo grande) ──────────────────── */
 .appr-lead {
   font-family: var(--ff-body);
-  font-size: var(--fs-body);
+  font-size: 1.05rem;
   line-height: 1.65;
   color: var(--ink);
   margin-bottom: 1.75rem;
+  font-weight: 400;
+}
+
+.appr-hl {
+  color: var(--terra);
+  font-weight: 600;
 }
 
 .appr-lead strong {
@@ -104,7 +114,7 @@
 /* ── Corpo testo ────────────────────────────────────────── */
 .appr-body {
   font-family: var(--ff-body);
-  font-size: var(--fs-body-sm);
+  font-size: .92rem;
   line-height: 1.7;
   color: var(--ink-light);
 }
@@ -117,17 +127,19 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 2rem;
+  padding-top: 0-5rem;
   margin-bottom: 1.5rem;
 }
 
 /* ── Callout citazione ─────────────────────────────────── */
 .appr-callout {
   background: var(--paper-dark);
-  border-left: 3px solid var(--terra);
-  padding: 1.25rem 1.5rem;
+  border-top: 1px solid var(--gray-1);
+  border-bottom: 1px solid var(--gray-1);
+  padding: 1.5rem;
   margin: 2rem 0 0;
   font-family: var(--ff-body);
-  font-size: var(--fs-body-sm);
+  font-size: .92rem;
   line-height: 1.65;
   color: var(--ink);
 }
@@ -144,7 +156,7 @@
 
 .appr-cta a {
   font-family: var(--ff-body);
-  font-size: var(--fs-body-sm);
+  font-size: .9rem;
   font-weight: 500;
   color: var(--terra) !important;
   text-decoration: none !important;
@@ -159,7 +171,7 @@
 
 /* ── Sezione scura (anatomia, segni, copertine) ────────── */
 .appr-dark-section {
-  background: var(--ink);
+  background: var(--ink-light);
   border-radius: 4px;
   padding: 1.5rem 1.75rem 2rem;
   margin: 2rem 0;
@@ -167,23 +179,23 @@
 
 .appr-dark-label {
   font-family: var(--ff-mono);
-  font-size: var(--fs-caption);
+  font-size: .72rem;
   letter-spacing: .12em;
-  color: var(--gray-1);
-  margin-bottom: .35rem;
+  color: var(--paper);
+  margin-bottom: .15rem;
 }
 
 .appr-dark-sublabel {
   font-family: var(--ff-body);
-  font-size: var(--fs-caption);
-  color: var(--gray-2);
+  font-size: .78rem;
+  color: var(--paper);
   margin-bottom: 1.25rem;
 }
 
 .appr-dark-rule {
   border: none;
-  border-top: 1px solid var(--gray-3);
-  margin: .35rem 0 1.25rem;
+  border-top: 1px solid var(--paper);
+  margin: .35rem 0 0.5rem;
 }
 
 /* ── Griglia immagini scura (5 colonne) ─────────────────── */
@@ -228,7 +240,7 @@
 
 .appr-img-caption-title {
   font-family: var(--ff-body);
-  font-size: var(--fs-caption);
+  font-size: .75rem;
   color: var(--terra-muted);
   font-weight: 500;
   display: block;
@@ -236,8 +248,8 @@
 
 .appr-img-caption-sub {
   font-family: var(--ff-body);
-  font-size: var(--fs-caption);
-  color: var(--gray-2);
+  font-size: .72rem;
+  color: var(--paper);
   display: block;
   line-height: 1.4;
 }
@@ -262,7 +274,7 @@
 
 .appr-lotto-caption {
   font-family: var(--ff-body);
-  font-size: var(--fs-caption);
+  font-size: .75rem;
   color: var(--gray-3);
   text-align: right;
   margin-top: .5rem;
@@ -272,67 +284,69 @@
 /* ── Etymologie (sezione asta) ─────────────────────────── */
 .appr-asta-hero {
   text-align: center;
-  margin-bottom: 1.75rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid var(--gray-1);
+  margin-bottom: 1rem;
+}
+
+.appr-title-rule-thick {
+  border: none;
+  border-top: 2px solid var(--gray-1);
+  margin: -1.3rem 0 1rem;
+  opacity: 1;
 }
 
 .appr-asta-latin {
   font-family: var(--ff-head);
   font-style: italic;
-  font-size: 1.5rem;
-  color: var(--ink);
+  font-size: var(--fs-h3);
+  color: var(--terra);
   margin: 0 0 .25rem;
+  font-weight: 500;
 }
 
 .appr-asta-latin-sub {
-  font-family: var(--ff-body);
-  font-size: var(--fs-body-sm);
-  color: var(--terra);
+  font-family: var(--ff-mono);
+  font-size: var(--fs-body);
+  color: var(--ink-light);
   margin: 0;
 }
 
 .appr-etym-grid {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  gap: 1px;
-  background: var(--gray-1);
-  border: 1px solid var(--gray-1);
-  border-radius: 4px;
-  overflow: hidden;
   margin-bottom: 2rem;
 }
 
 .appr-etym-cell {
-  background: var(--paper-light);
   padding: 1rem 1.25rem;
+  text-align: center;
 }
 
 .appr-etym-cell--mid {
-  background: var(--paper-dark);
+  border-left: 1px solid var(--gray-1);
+  border-right: 1px solid var(--gray-1);
 }
 
 .appr-etym-lang {
   font-family: var(--ff-mono);
-  font-size: var(--fs-mono-sm);
+  font-size: var(--fs-mono);
   letter-spacing: .12em;
   color: var(--terra);
+  font-weight: 500;
   margin-bottom: .4rem;
 }
 
 .appr-etym-word {
-  font-family: var(--ff-head);
-  font-size: 1.1rem;
+  font-family: var(--ff-body);
+  font-size: 1rem;
   color: var(--ink);
   display: block;
-  margin-bottom: .2rem;
+  margin-bottom: .3rem;
 }
 
 .appr-etym-note {
   font-family: var(--ff-body);
   font-size: var(--fs-caption);
   color: var(--gray-3);
-  font-style: italic;
   line-height: 1.4;
 }
 
@@ -365,7 +379,7 @@
 
 .appr-stat-label {
   font-family: var(--ff-mono);
-  font-size: var(--fs-caption);
+  font-size: .72rem;
   letter-spacing: .08em;
   color: var(--gray-3);
 }
@@ -401,21 +415,21 @@
 
 .appr-panorama-caption-label {
   font-family: var(--ff-mono);
-  font-size: var(--fs-mono-sm);
+  font-size: .7rem;
   letter-spacing: .1em;
   color: var(--gray-2);
 }
 
 .appr-panorama-caption-sub {
   font-family: var(--ff-body);
-  font-size: var(--fs-caption);
+  font-size: .75rem;
   color: var(--gray-3);
 }
 
 /* ── Corpus: grafico barre orizzontali ─────────────────── */
 .appr-chart-label {
   font-family: var(--ff-mono);
-  font-size: var(--fs-caption);
+  font-size: .72rem;
   letter-spacing: .12em;
   color: var(--gray-3);
   margin-bottom: .5rem;
@@ -435,7 +449,7 @@
 
 .appr-bar-country {
   font-family: var(--ff-body);
-  font-size: var(--fs-body-sm);
+  font-size: .82rem;
   color: var(--ink);
   text-align: right;
 }
@@ -456,7 +470,7 @@
 
 .appr-bar-count {
   font-family: var(--ff-mono);
-  font-size: var(--fs-caption);
+  font-size: .78rem;
   color: var(--gray-3);
   min-width: 2.5rem;
 }
@@ -493,7 +507,7 @@
 
 .appr-lotto-card-title {
   font-family: var(--ff-body);
-  font-size: var(--fs-caption);
+  font-size: .8rem;
   font-weight: 500;
   color: var(--ink);
   margin-bottom: .15rem;
@@ -501,7 +515,7 @@
 
 .appr-lotto-card-sub {
   font-family: var(--ff-body);
-  font-size: var(--fs-caption);
+  font-size: .73rem;
   color: var(--gray-3);
   line-height: 1.4;
 }

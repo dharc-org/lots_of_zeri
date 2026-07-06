@@ -58,15 +58,15 @@
     {# ── TOGGLE (boolean) ─────────────────────────────────── #}
     {% elif facet.ui_widget == "toggle" %}
     <div class="facet">
+      <label class="facet-title mb-2">{{ facet.label_it }}</label>
       {% set cur = active_filters[facet.id] if facet.id in active_filters else '' %}
       {% set opt_true = facet.options | selectattr('value','equalto','true') | first %}
       <div class="form-check form-switch">
         <input class="form-check-input" type="checkbox" name="{{ facet.id }}" value="true"
-               id="toggle_{{ facet.id }}"
-               {% if cur == 'true' %}checked{% endif %}>
+              id="toggle_{{ facet.id }}"
+              {% if cur == 'true' %}checked{% endif %}>
         <label class="form-check-label" for="toggle_{{ facet.id }}">
           {{ opt_true.label if opt_true else facet.label_it }}
-          {% if opt_true and opt_true.count %}<span class="facet-count">{{ opt_true.count }}</span>{% endif %}
         </label>
       </div>
     </div>
@@ -89,7 +89,7 @@
                    {% if is_checked %}checked{% endif %}>
             <label class="form-check-label d-flex justify-content-between w-100"
                    for="chk_{{ facet.id }}_{{ loop.index }}">
-              <span>{{ item.value }}</span>
+              <span>{{ item.value | lingua_estesa if facet.id == 'lingua' else item.value }}</span>
               <span class="text-muted ms-1 {% if item.count == 0 %}opacity-25{% endif %}">{{ item.count }}</span>
             </label>
           </div>
@@ -104,7 +104,7 @@
   {# ── Bottone Cerca — sticky in fondo al pannello, sempre visibile ── #}
   <div class="sidebar-cta">
     <button type="submit" class="btn btn-dark btn-sm w-100">
-      <i class="bi bi-search me-1"></i>Cerca
+      Cerca<i class="ph ph-magnifying-glass ms-2"></i>
     </button>
   </div>
 

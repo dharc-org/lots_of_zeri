@@ -49,7 +49,7 @@ catalogo:
   sections:
     - { anchor: "viewer",  label_it: "Sfoglia il catalogo" }
     - { anchor: "scheda",  label_it: "Scheda catalografica" }
-    - { anchor: "lotti",   label_it: "Lotti correlati" }
+    - { anchor: "lotti",   label_it: "Lotti nel catalogo" }
     - { anchor: "related", label_it: "Cataloghi correlati" }
 
   fields:
@@ -75,12 +75,12 @@ catalogo:
     - id: "catalogo_lotti"
       title_it: "Lotti nel catalogo"
       card: "lotto"
-      count_label_it: "lotti nel catalogo"
+      count_label_it: "lotti totali in vendita"
       placeholder: true
     - id: "catalogo_related_year"
       title_it: "Altri cataloghi dello stesso anno"
       card: "catalogo"
-      count_label_it: "cataloghi dello stesso anno"
+      count_label_it: "cataloghi"
 
   # Quali query lanciare e come (lette dal router generico)
   query_blocks:

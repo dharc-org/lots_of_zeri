@@ -36,34 +36,23 @@
       </button>
     </div>
     <a href="/guida-alla-ricerca" class="search-help">
-      Guida alla ricerca <i class="bi bi-arrow-right"></i>
+      Guida alla ricerca <i class="ph ph-arrow-right"></i>
     </a>
   </div>
 </div>
 
 {# ── Action bar: count + pill + sort + viste ────────────── #}
-{# namespace() necessario: {% set %} dentro un for-loop Jinja2 non persiste fuori dal loop #}
-{% set ns = namespace(has_any_active=false) %}
-{% if active_filters.get('q') %}{% set ns.has_any_active = true %}{% endif %}
-{% for facet in facet_defs %}
-  {% if facet.type == 'range' %}
-    {% if active_filters.get(facet.id ~ '_is_set') %}
-      {% set ns.has_any_active = true %}
-    {% endif %}
-  {% elif facet.type == 'multiselect' %}
-    {% if active_filters.get(facet.id) %}{% set ns.has_any_active = true %}{% endif %}
-  {% elif facet.type in ['text_search', 'boolean'] %}
-    {% if active_filters.get(facet.id) %}{% set ns.has_any_active = true %}{% endif %}
-  {% endif %}
-{% endfor %}
-
 <div class="zac-action-bar">
 
   <div class="action-left">
     <span class="result-count"><strong>{{ total }}</strong> Risultati</span>
 
+    {# namespace() necessario: {% set %} dentro un for-loop Jinja2 non persiste fuori dal loop #}
+    {% set ns = namespace(has_any_active=false) %}
+
     {# Pill ricerca per parola chiave #}
     {% if active_filters.get('q') %}
+      {% set ns.has_any_active = true %}
       <span class="active-pill" data-facet="q" data-type="text">
         “{{ active_filters['q'] }}”
         <button type="button" class="pill-remove" aria-label="Rimuovi">×</button>
@@ -74,6 +63,7 @@
     {% for facet in facet_defs %}
       {% if facet.type == 'range' %}
         {% if active_filters.get(facet.id ~ '_is_set') %}
+          {% set ns.has_any_active = true %}
           <span class="active-pill" data-facet="{{ facet.id }}" data-type="range">
             {{ active_filters[facet.id ~ '_from'] }} — {{ active_filters[facet.id ~ '_to'] }}
             <button type="button" class="pill-remove" aria-label="Rimuovi">×</button>
@@ -82,8 +72,10 @@
 
       {% elif facet.type == 'multiselect' %}
         {% for v in active_filters.get(facet.id, []) %}
+          {% set ns.has_any_active = true %}
           {# Lookup URI → label nelle options della faccetta; fallback all'URI se assente #}
-          {% set pill_label = (facet.options | selectattr('uri', 'equalto', v) | map(attribute='value') | first) or v %}      
+          {% set pill_label = (facet.options | selectattr('uri', 'equalto', v) | map(attribute='value') | first) or v %}
+          {% set pill_label = pill_label | lingua_estesa if facet.id == 'lingua' else pill_label %}
           <span class="active-pill" data-facet="{{ facet.id }}" data-type="multi" data-value="{{ v }}">
             {{ pill_label }}
             <button type="button" class="pill-remove" aria-label="Rimuovi">×</button>
@@ -92,6 +84,7 @@
 
       {% elif facet.type == 'text_search' %}
         {% if active_filters.get(facet.id) %}
+          {% set ns.has_any_active = true %}
           <span class="active-pill" data-facet="{{ facet.id }}" data-type="text">
             {{ active_filters[facet.id] }}
             <button type="button" class="pill-remove" aria-label="Rimuovi">×</button>
@@ -100,6 +93,7 @@
 
       {% elif facet.type == 'boolean' %}
         {% if active_filters.get(facet.id) in ['true', 'false'] %}
+          {% set ns.has_any_active = true %}
           <span class="active-pill" data-facet="{{ facet.id }}" data-type="bool">
             {{ facet.label_it }}: {{ 'Sì' if active_filters[facet.id] == 'true' else 'No' }}
             <button type="button" class="pill-remove" aria-label="Rimuovi">×</button>
@@ -168,40 +162,50 @@
       {% if items %}
       <div id="zac-catalogue-results-list" data-view="list">
 
-        {# ── LISTA ── #}
-        <div class="results-list">
-          {% for item in items %}
-          <a href="{{ tab_route }}/{{ item.slug or item.doc_id or item.uri.split('/')[-1] }}"
-            class="result-row">
-            <div class="row-thumb">
-              {% if item.thumb %}
-                <img src="{{ item.thumb }}" alt="" loading="lazy" class="thumb-img">
-              {% else %}
-                <div class="thumb-placeholder"></div>
-              {% endif %}
-            </div>
-            <div class="row-body">
-              <div class="row-title">{{ item.title or item.label or item.slug }}</div>
-              <div class="row-meta">
-                {% if item.house %}{{ item.house }}{% endif %}
-                {% if item.place %} · {{ item.place }}{% endif %}
-                {% if item.year  %} · {{ item.year }}{% endif %}
-              </div>
-              <div class="row-badges">
-                {% if item.language %}
-                  <span class="badge-pill">{{ item.language }}</span>
-                {% endif %}
-                {% if item.illustrated %}
-                  <span class="badge-pill badge-pill-accent">Illustrato</span>
-                {% endif %}
-              </div>
-            </div>
-            <div class="row-actions">
-              <span class="btn-apri">Apri →</span>
-            </div>
-          </a>
-          {% endfor %}
+      {# ── LISTA ── #}
+<div class="results-list {% if active_tab == 'aste' %}results-list-aste{% endif %}">
+  {% for item in items %}
+  <div class="result-row">
+    <a href="{{ tab_route }}/{{ item.slug or item.doc_id or item.uri.split('/')[-1] }}" class="row-link">
+      <div class="row-thumb">
+        {% if item.thumb %}
+          <img src="{{ item.thumb }}" alt="" loading="lazy" class="thumb-img">
+        {% else %}
+          <div class="thumb-placeholder"></div>
+        {% endif %}
+      </div>
+      <div class="row-body">
+        <div class="row-title">{{ item.title or item.label or item.slug }}</div>
+      {% if active_tab == 'aste' %}
+        <div class="row-meta">
+          {% if item.house %}<span class="row-meta-org">{{ item.house }}</span>{% endif %}
+          {% if item.year %}<span class="row-meta-date">{{ item.year }}</span>{% endif %}
         </div>
+      {% else %}
+        <div class="row-meta">
+          {% if item.house %}{{ item.house }}{% endif %}
+          {% if item.year  %} · {{ item.year }}{% endif %}
+        </div>
+      {% endif %}
+        <div class="row-badges">
+          {% if item.language %}
+            <span class="badge-pill">{{ item.language | lingua_estesa }}</span>
+          {% endif %}
+          {% if item.illustrated %}
+            <span class="badge-pill badge-pill-accent">Illustrato</span>
+          {% endif %}
+        </div>
+      </div>
+    </a>
+    <div class="row-actions">
+      <a href="{{ tab_route }}/{{ item.slug or item.doc_id or item.uri.split('/')[-1] }}" class="btn-apri">Apri →</a>
+      <a href="{{ item.zeri_url or '#' }}" target="_blank" rel="noopener" class="row-zeri-link">
+        <i class="ph ph-link"></i> Scheda Zeri
+      </a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
 
         {# ── GRIGLIA ── #}
         <div class="results-grid">
@@ -222,13 +226,13 @@
               </div>
               <div class="card-badges">
                 {% if item.language %}
-                  <span class="badge-pill">{{ item.language }}</span>
+                  <span class="badge-pill">{{ item.language | lingua_estesa }}</span>
                 {% endif %}
                 {% if item.illustrated %}
                   <span class="badge-pill badge-pill-accent">Illustrato</span>
                 {% endif %}
               </div>
-              <span class="btn-apri-mini">Apri →</span>
+              <span class="btn-apri-mini">Apri <i class="ph ph-arrow-right"></i></span>
             </div>
           </a>
           {% endfor %}

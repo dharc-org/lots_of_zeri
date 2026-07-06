@@ -36,6 +36,19 @@ templates = Jinja2Templates(directory=BASE / "frontend" / "templates")
 browse.setup(templates)
 browse.register_tab_routes(_cfg)          # routes added to router BEFORE include_router
 
+LINGUE_ESTESE = {
+    "it": "Italiano", "fr": "Francese", "de": "Tedesco",
+    "en": "Inglese", "nl": "Olandese", "es": "Spagnolo",
+    "la": "Latino", "pt": "Portoghese", "ru": "Russo",
+}
+
+def lingua_estesa(codice: str) -> str:
+    if not codice:
+        return codice
+    return LINGUE_ESTESE.get(codice.strip().lower(), codice)
+
+templates.env.filters["lingua_estesa"] = lingua_estesa
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
