@@ -1,0 +1,681 @@
+{
+  "all": [
+    {
+      "n": "Lair-Dubreuil, Fernand",
+      "t": 239,
+      "rel": true
+    },
+    {
+      "n": "Baudoin, Henri",
+      "t": 139,
+      "rel": true
+    },
+    {
+      "n": "Chevallier, Paul",
+      "t": 130,
+      "rel": true
+    },
+    {
+      "n": "Maurer, Carl",
+      "t": 12,
+      "rel": false
+    },
+    {
+      "n": "Sangiorgi, Giuseppe",
+      "t": 11,
+      "rel": false
+    },
+    {
+      "n": "Couturier, André",
+      "t": 10,
+      "rel": true
+    },
+    {
+      "n": "Geri, Alfredo",
+      "t": 8,
+      "rel": false
+    },
+    {
+      "n": "Desvouges, André",
+      "t": 6,
+      "rel": true
+    },
+    {
+      "n": "Tual, Léon",
+      "t": 5,
+      "rel": true
+    },
+    {
+      "n": "Saulpic, Henri",
+      "t": 5,
+      "rel": true
+    },
+    {
+      "n": "Mauger, Henri",
+      "t": 5,
+      "rel": true
+    },
+    {
+      "n": "Delestre, Maurice",
+      "t": 4,
+      "rel": true
+    },
+    {
+      "n": "Duchesne, Georges",
+      "t": 4,
+      "rel": false
+    },
+    {
+      "n": "Doublot, Camille",
+      "t": 4,
+      "rel": true
+    },
+    {
+      "n": "Bricout, Henry",
+      "t": 4,
+      "rel": false
+    },
+    {
+      "n": "Boudin, Émile",
+      "t": 4,
+      "rel": true
+    },
+    {
+      "n": "Hanstein, Peter",
+      "t": 4,
+      "rel": true
+    },
+    {
+      "n": "Fournier, Édouard",
+      "t": 4,
+      "rel": false
+    },
+    {
+      "n": "Pesaro, Lino",
+      "t": 4,
+      "rel": false
+    },
+    {
+      "n": "Bignon, Robert",
+      "t": 4,
+      "rel": true
+    },
+    {
+      "n": "Pillet, Charles",
+      "t": 3,
+      "rel": false
+    },
+    {
+      "n": "Trouillet, Hippolyte",
+      "t": 3,
+      "rel": true
+    },
+    {
+      "n": "Coulon, Gustave",
+      "t": 3,
+      "rel": false
+    },
+    {
+      "n": "Aulard, Paul",
+      "t": 3,
+      "rel": true
+    },
+    {
+      "n": "Bernier, Henri",
+      "t": 3,
+      "rel": true
+    },
+    {
+      "n": "Silvestri, Alfredo",
+      "t": 3,
+      "rel": false
+    },
+    {
+      "n": "Hémard, René",
+      "t": 3,
+      "rel": true
+    },
+    {
+      "n": "Dubourg, Charles",
+      "t": 3,
+      "rel": false
+    },
+    {
+      "n": "Capobianchi, Vincenzo",
+      "t": 2,
+      "rel": false
+    },
+    {
+      "n": "Lyon, René",
+      "t": 2,
+      "rel": false
+    },
+    {
+      "n": "Léon, André",
+      "t": 2,
+      "rel": false
+    },
+    {
+      "n": "Scoté, Paul",
+      "t": 2,
+      "rel": false
+    },
+    {
+      "n": "François, Gaston",
+      "t": 2,
+      "rel": false
+    },
+    {
+      "n": "Origet, E.",
+      "t": 2,
+      "rel": false
+    },
+    {
+      "n": "Helbing, Hugo",
+      "t": 2,
+      "rel": false
+    },
+    {
+      "n": "Fleischhauer, Felix",
+      "t": 2,
+      "rel": false
+    },
+    {
+      "n": "Valentin",
+      "t": 2,
+      "rel": false
+    },
+    {
+      "n": "Canessa, Ercole",
+      "t": 2,
+      "rel": false
+    },
+    {
+      "n": "Canetta, Gino",
+      "t": 2,
+      "rel": false
+    },
+    {
+      "n": "Piceller, Alessandro",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Förster, Carl",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Boulland, Georges",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Weissweiler, F.J.",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Steuber, Josef",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Riegner, Albert",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Fontaine, Léon",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Geffroy, Gustave",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Véron, Lucien",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Désaubliaux, L.",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Vivarez, Hilaire",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Schulman, Jacques",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Huchez, Charle",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Aureau, André Adolphe Gustave",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Guidou, Georges",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Couturier, Maurice",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Normand, Georges",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Brodu, Jules",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Guillemot, Maurice",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Appert, J.",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Riff",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Bizouard, Paul",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Désaubliaux, G.",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Tavazzi, Filippo",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Bondu, Hippolyte",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Lemoine, Paul",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Bailly, Eugène",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Appert, Ed.",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Tizzoni, C.",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Warin, Raymond",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Huguet, Jules",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Moitsier",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Commissaires-priseurs des ville et arrondissement du Mans",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Triger, Robert",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Pecquet, Maurice",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Larbepenet, Gustave",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Bivort, Léon",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Petit, Georges",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Roger-Miles, L.",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Widmer, Johannes",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Gagliardi, Gustave",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Rossi, Dario G.",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Engelmann, J.",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Cassirer, Paul",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Bangel, Rudolf",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Albinet, Georges",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Bellier, Alphonse",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Schmidt-Bangel, Ludwig",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Auboyer-Treuille, J.",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Schürmayer, W.",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Innocenti, Oreste",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Buzzi, Riccardo",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Terris, Jean-Joseph",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Dernis, Maxime",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Pruvost, Étienne",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Dru, Robert",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Kronthal, Peter",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Tavazzi, Guido",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Sestieri, Ettore",
+      "t": 1,
+      "rel": false
+    },
+    {
+      "n": "Brasini, Armando",
+      "t": 1,
+      "rel": false
+    }
+  ],
+  "top_band": [
+    {
+      "n": "Lair-Dubreuil, Fernand",
+      "t": 239
+    },
+    {
+      "n": "Baudoin, Henri",
+      "t": 139
+    },
+    {
+      "n": "Chevallier, Paul",
+      "t": 130
+    },
+    {
+      "n": "Couturier, André",
+      "t": 10
+    },
+    {
+      "n": "Desvouges, André",
+      "t": 6
+    },
+    {
+      "n": "Tual, Léon",
+      "t": 5
+    },
+    {
+      "n": "Saulpic, Henri",
+      "t": 5
+    },
+    {
+      "n": "Mauger, Henri",
+      "t": 5
+    },
+    {
+      "n": "Delestre, Maurice",
+      "t": 4
+    },
+    {
+      "n": "Doublot, Camille",
+      "t": 4
+    },
+    {
+      "n": "Boudin, Émile",
+      "t": 4
+    },
+    {
+      "n": "Hanstein, Peter",
+      "t": 4
+    },
+    {
+      "n": "Bignon, Robert",
+      "t": 4
+    },
+    {
+      "n": "Trouillet, Hippolyte",
+      "t": 3
+    },
+    {
+      "n": "Aulard, Paul",
+      "t": 3
+    },
+    {
+      "n": "Bernier, Henri",
+      "t": 3
+    },
+    {
+      "n": "Hémard, René",
+      "t": 3
+    }
+  ],
+  "case": [
+    "Hôtel Drouot",
+    "Hugo Helbing",
+    "Rudolf Bangel",
+    "Rudolph Lepke's Kunst-Auctions-Haus",
+    "Galerie Georges Petit",
+    "Heberle H. Lempertz' Söhne",
+    "Hanstein M. Lempertz' Antiquariat",
+    "Christie, Manson & Woods"
+  ],
+  "edges": [
+    [
+      0,
+      0,
+      134
+    ],
+    [
+      0,
+      4,
+      97
+    ],
+    [
+      1,
+      0,
+      66
+    ],
+    [
+      1,
+      4,
+      69
+    ],
+    [
+      2,
+      0,
+      76
+    ],
+    [
+      2,
+      4,
+      47
+    ],
+    [
+      3,
+      0,
+      10
+    ],
+    [
+      4,
+      0,
+      4
+    ],
+    [
+      5,
+      0,
+      5
+    ],
+    [
+      6,
+      0,
+      5
+    ],
+    [
+      7,
+      4,
+      3
+    ],
+    [
+      8,
+      0,
+      3
+    ],
+    [
+      9,
+      0,
+      4
+    ],
+    [
+      10,
+      0,
+      4
+    ],
+    [
+      11,
+      6,
+      4
+    ],
+    [
+      12,
+      0,
+      3
+    ],
+    [
+      13,
+      0,
+      3
+    ],
+    [
+      14,
+      0,
+      3
+    ],
+    [
+      15,
+      0,
+      3
+    ],
+    [
+      16,
+      0,
+      3
+    ]
+  ]
+}

@@ -229,7 +229,7 @@ async function loadAndRenderBanditori() {
   thRight.innerHTML = `
     <div>
       <div style="display:flex;align-items:center;gap:.4rem;">
-        <div style="font-family:var(--ff-body);font-size:.8rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--gray-3);">Relazioni banditori — case d'asta</div>
+        <div style="font-family:var(--ff-body);font-size:.8rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--gray-3);">Banditori con relazioni ricorrenti</div>
         <div id="band-info-btn" style="width:15px;height:15px;border-radius:50%;border:1.5px solid var(--gray-2);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-family:var(--ff-mono);font-size:.62rem;color:var(--gray-2);position:relative;" title="Come funziona">i
           <div id="band-info-tooltip" style="display:none;position:absolute;top:calc(100% + 6px);left:0;background:var(--ink);color:var(--paper-light);font-family:var(--ff-body);font-size:.75rem;line-height:1.55;padding:.6rem .85rem;border-radius:3px;width:260px;z-index:50;pointer-events:none;">Clicca un nome nella lista o un nodo nel grafico per isolare i legami. Clicca di nuovo per tornare alla vista completa.</div>
         </div>
@@ -287,12 +287,9 @@ async function loadAndRenderBanditori() {
         row.querySelector('span').style.color='var(--terra)';
         selBand = topIdx;
         hint.style.color='var(--terra)'; hint.textContent = b.n + ' — ' + b.t + ' aste documentate';
-        /* Porta il nodo selezionato in vista nel grafo scrollabile */
-        const scale = svg.clientWidth / 400;
-        grafDiv.scrollTop = Math.max(0, ly(topIdx) * scale - grafDiv.clientHeight / 2);
       } else {
         selBand = -1;
-        hint.style.color='var(--terra)'; hint.innerHTML = b.n + ' — ' + b.t + (b.t===1?' asta':' aste') + ', nessuna casa d\'asta documentata nel <em>corpus</em>';
+        hint.style.color='var(--terra)'; hint.innerHTML = b.n + ' — ' + b.t + (b.t===1?' asta':' aste') + ', nessuna relazione ricorrente con le case d\'asta nel <em>corpus</em>';
       }
       render();
     });
@@ -300,24 +297,20 @@ async function loadAndRenderBanditori() {
     rows.push(row);
   });
 
-  /* Grafico — scrollabile, altezza SVG proporzionale al numero di nodi */
+  /* Grafico */
   const grafDiv = document.createElement('div');
-  grafDiv.style.cssText = 'padding:.75rem 1rem;background:var(--paper);overflow-y:auto;max-height:900px;scrollbar-width:thin;scrollbar-color:var(--gray-1) var(--paper-dark);';
+  grafDiv.style.cssText = 'display:flex;flex-direction:column;padding:.75rem 1rem;background:var(--paper);';
   tbody.appendChild(grafDiv);
 
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('viewBox', '0 0 400 480');
+  svg.style.cssText = 'width:100%;flex:1;display:block;';
+  grafDiv.appendChild(svg);
+
   /* SVG bipartito */
-  const NODE_GAP = 13;   /* spazio verticale minimo tra nodi banditore (unità viewBox) */
-  const T0 = 20;
-  const T1 = T0 + Math.max(B.top_band.length - 1, 1) * NODE_GAP;
-  const H  = T1 + 30;
-  const LX = 130, RX = 270;
+  const LX=130, RX=270, T0=20, T1=450;
   const ly = i => T0 + i*(T1-T0)/Math.max(B.top_band.length-1,1);
   const ry = i => T0 + i*(T1-T0)/Math.max(B.case.length-1,1);
-
-  const svg = document.createElementNS(NS, 'svg');
-  svg.setAttribute('viewBox', `0 0 400 ${H}`);
-  svg.style.cssText = 'width:100%;display:block;';
-  grafDiv.appendChild(svg);
   const eEls=[], lEls=[], rEls=[];
 
   function svgEl(tag, attrs) {

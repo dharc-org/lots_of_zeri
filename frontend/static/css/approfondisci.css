@@ -198,6 +198,25 @@
   margin: .35rem 0 0.5rem;
 }
 
+/* ── Variante chiara della sezione ──────────────────────── */
+.appr-dark-section--light {
+  background: transparent;
+  padding: 1.5rem 0 2rem;
+  box-shadow: 0 12px 16px -12px rgba(0, 0, 0, 0.3);
+}
+.appr-dark-section--light .appr-dark-label {
+  color: var(--ink);
+}
+.appr-dark-section--light .appr-dark-sublabel {
+  color: var(--ink-light);
+}
+.appr-dark-section--light .appr-dark-rule {
+  border-top-color: var(--gray-1);
+}
+.appr-dark-section--light .appr-img-caption-sub {
+  color: var(--gray-3);
+}
+
 /* ── Griglia immagini scura (5 colonne) ─────────────────── */
 .appr-img-grid-5 {
   display: grid;
