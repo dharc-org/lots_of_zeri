@@ -1,0 +1,114 @@
+{
+ "period": "1890–1929",
+ "scale_max": 233,
+ "decades": [
+  {
+   "label": "1890–99",
+   "tot": 152,
+   "top": [
+    {
+     "n": "Colonia",
+     "v": 49
+    },
+    {
+     "n": "Parigi",
+     "v": 28
+    },
+    {
+     "n": "Monaco di Baviera",
+     "v": 24
+    },
+    {
+     "n": "Berlino",
+     "v": 14
+    },
+    {
+     "n": "Bonn",
+     "v": 9
+    }
+   ],
+   "altre": 28
+  },
+  {
+   "label": "1900–09",
+   "tot": 511,
+   "top": [
+    {
+     "n": "Parigi",
+     "v": 233
+    },
+    {
+     "n": "Berlino",
+     "v": 75
+    },
+    {
+     "n": "Monaco di Baviera",
+     "v": 68
+    },
+    {
+     "n": "Colonia",
+     "v": 56
+    },
+    {
+     "n": "Roma",
+     "v": 22
+    }
+   ],
+   "altre": 57
+  },
+  {
+   "label": "1910–19",
+   "tot": 598,
+   "top": [
+    {
+     "n": "Parigi",
+     "v": 170
+    },
+    {
+     "n": "Francoforte sul Meno",
+     "v": 115
+    },
+    {
+     "n": "Monaco di Baviera",
+     "v": 96
+    },
+    {
+     "n": "Berlino",
+     "v": 80
+    },
+    {
+     "n": "Colonia",
+     "v": 28
+    }
+   ],
+   "altre": 109
+  },
+  {
+   "label": "1920–29",
+   "tot": 555,
+   "top": [
+    {
+     "n": "Berlino",
+     "v": 127
+    },
+    {
+     "n": "Parigi",
+     "v": 94
+    },
+    {
+     "n": "Monaco di Baviera",
+     "v": 82
+    },
+    {
+     "n": "Francoforte sul Meno",
+     "v": 65
+    },
+    {
+     "n": "Milano",
+     "v": 23
+    }
+   ],
+   "altre": 164
+  }
+ ]
+}

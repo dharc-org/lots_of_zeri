@@ -3,596 +3,497 @@
     {
       "n": "Lair-Dubreuil, Fernand",
       "t": 239,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Baudoin, Henri",
       "t": 139,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Chevallier, Paul",
       "t": 130,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Maurer, Carl",
       "t": 12,
-      "rel": false,
-      "status": "autorganizzato"
+      "rel": false
     },
     {
       "n": "Sangiorgi, Giuseppe",
       "t": 11,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Couturier, André",
       "t": 10,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Geri, Alfredo",
       "t": 8,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Desvouges, André",
       "t": 6,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Mauger, Henri",
       "t": 5,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Saulpic, Henri",
       "t": 5,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Tual, Léon",
       "t": 5,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Bignon, Robert",
       "t": 4,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Boudin, Émile",
       "t": 4,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Bricout, Henry",
       "t": 4,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Delestre, Maurice",
       "t": 4,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Doublot, Camille",
       "t": 4,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Duchesne, Georges",
       "t": 4,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Fournier, Édouard",
       "t": 4,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Hanstein, Peter",
       "t": 4,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Pesaro, Lino",
       "t": 4,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Aulard, Paul",
       "t": 3,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Bernier, Henri",
       "t": 3,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Coulon, Gustave",
       "t": 3,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Dubourg, Charles",
       "t": 3,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Hémard, René",
       "t": 3,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Pillet, Charles",
       "t": 3,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Silvestri, Alfredo",
       "t": 3,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Trouillet, Hippolyte",
       "t": 3,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Canessa, Ercole",
       "t": 2,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Canetta, Gino",
       "t": 2,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Capobianchi, Vincenzo",
       "t": 2,
-      "rel": false,
-      "status": "autorganizzato"
+      "rel": false
     },
     {
       "n": "Fleischhauer, Felix",
       "t": 2,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "François, Gaston",
       "t": 2,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Helbing, Hugo",
       "t": 2,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Lyon, René",
       "t": 2,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Léon, André",
       "t": 2,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Origet, E.",
       "t": 2,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Scoté, Paul",
       "t": 2,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Valentin",
       "t": 2,
-      "rel": false,
-      "status": "autorganizzato"
+      "rel": false
     },
     {
       "n": "Albinet, Georges",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Appert, Ed.",
       "t": 1,
-      "rel": false,
-      "status": "mancante"
+      "rel": false
     },
     {
       "n": "Appert, J.",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Auboyer-Treuille, J.",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Aureau, André Adolphe Gustave",
       "t": 1,
-      "rel": false,
-      "status": "autorganizzato"
+      "rel": false
     },
     {
       "n": "Bailly, Eugène",
       "t": 1,
-      "rel": false,
-      "status": "autorganizzato"
+      "rel": false
     },
     {
       "n": "Bangel, Rudolf",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Bellier, Alphonse",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Bivort, Léon",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Bizouard, Paul",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Bondu, Hippolyte",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Boulland, Georges",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Brasini, Armando",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Brodu, Jules",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Buzzi, Riccardo",
       "t": 1,
-      "rel": false,
-      "status": "autorganizzato"
+      "rel": false
     },
     {
       "n": "Cassirer, Paul",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Commissaires-priseurs des ville et arrondissement du Mans",
       "t": 1,
-      "rel": false,
-      "status": "autorganizzato"
+      "rel": false
     },
     {
       "n": "Couturier, Maurice",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Dernis, Maxime",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Dru, Robert",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Désaubliaux, G.",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Désaubliaux, L.",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Engelmann, J.",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Fontaine, Léon",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Förster, Carl",
       "t": 1,
-      "rel": false,
-      "status": "autorganizzato"
+      "rel": false
     },
     {
       "n": "Gagliardi, Gustave",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Geffroy, Gustave",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Guidou, Georges",
       "t": 1,
-      "rel": false,
-      "status": "autorganizzato"
+      "rel": false
     },
     {
       "n": "Guillemot, Maurice",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Huchez, Charle",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Huguet, Jules",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Innocenti, Oreste",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Kronthal, Peter",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Larbepenet, Gustave",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Lemoine, Paul",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Moitsier",
       "t": 1,
-      "rel": false,
-      "status": "autorganizzato"
+      "rel": false
     },
     {
       "n": "Normand, Georges",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Pecquet, Maurice",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Petit, Georges",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Piceller, Alessandro",
       "t": 1,
-      "rel": false,
-      "status": "autorganizzato"
+      "rel": false
     },
     {
       "n": "Pruvost, Étienne",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Riegner, Albert",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Riff",
       "t": 1,
-      "rel": false,
-      "status": "autorganizzato"
+      "rel": false
     },
     {
       "n": "Roger-Miles, L.",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Rossi, Dario G.",
       "t": 1,
-      "rel": false,
-      "status": "autorganizzato"
+      "rel": false
     },
     {
       "n": "Schmidt-Bangel, Ludwig",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Schulman, Jacques",
       "t": 1,
-      "rel": false,
-      "status": "autorganizzato"
+      "rel": false
     },
     {
       "n": "Schürmayer, W.",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Sestieri, Ettore",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Steuber, Josef",
       "t": 1,
-      "rel": false,
-      "status": "autorganizzato"
+      "rel": false
     },
     {
       "n": "Tavazzi, Filippo",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Tavazzi, Guido",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Terris, Jean-Joseph",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Tizzoni, C.",
       "t": 1,
-      "rel": false,
-      "status": "autorganizzato"
+      "rel": false
     },
     {
       "n": "Triger, Robert",
       "t": 1,
-      "rel": false,
-      "status": "mancante"
+      "rel": false
     },
     {
       "n": "Vivarez, Hilaire",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Véron, Lucien",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Warin, Raymond",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     },
     {
       "n": "Weissweiler, F.J.",
       "t": 1,
-      "rel": false,
-      "status": "autorganizzato"
+      "rel": false
     },
     {
       "n": "Widmer, Johannes",
       "t": 1,
-      "rel": true,
-      "status": "relazionato"
+      "rel": true
     }
   ],
   "top_band": [

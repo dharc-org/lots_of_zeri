@@ -1,0 +1,308 @@
+{
+ "stats": {
+  "totale": 1276,
+  "ricorrenti": 95,
+  "pct_ricorrenti": 7,
+  "singole": 1181
+ },
+ "max": 9,
+ "tag_labels": {
+  "anno": "stesso anno",
+  "casa": "stessa casa",
+  "diverse": "case diverse"
+ },
+ "items": [
+  {
+   "n": "Georg Hirth",
+   "c": 9,
+   "tag": "diverse",
+   "anni": [
+    1898,
+    1921
+   ],
+   "periodo": "1898–1921",
+   "case": [
+    {
+     "n": "Hugo Helbing",
+     "v": 6
+    },
+    {
+     "n": "non specificata",
+     "v": 1
+    },
+    {
+     "n": "Hugo Ruef",
+     "v": 1
+    },
+    {
+     "n": "Rudolf Bangel",
+     "v": 1
+    }
+   ]
+  },
+  {
+   "n": "Christian Hammer",
+   "c": 8,
+   "tag": "casa",
+   "anni": [
+    1893,
+    1895
+   ],
+   "periodo": "1893–1895",
+   "case": [
+    {
+     "n": "Heberle H. Lempertz' Söhne",
+     "v": 8
+    }
+   ]
+  },
+  {
+   "n": "Raoul Heilbronner",
+   "c": 7,
+   "tag": "diverse",
+   "anni": [
+    1921,
+    1924
+   ],
+   "periodo": "1921–1924",
+   "case": [
+    {
+     "n": "Hôtel Drouot",
+     "v": 4
+    },
+    {
+     "n": "non specificata",
+     "v": 2
+    },
+    {
+     "n": "Galerie Georges Petit",
+     "v": 1
+    }
+   ]
+  },
+  {
+   "n": "Jean Dollfus",
+   "c": 5,
+   "tag": "anno",
+   "anni": [
+    1912,
+    1912
+   ],
+   "periodo": "1912",
+   "case": [
+    {
+     "n": "Hôtel Drouot",
+     "v": 3
+    },
+    {
+     "n": "Galerie Georges Petit",
+     "v": 2
+    }
+   ]
+  },
+  {
+   "n": "Edouard Chappey",
+   "c": 5,
+   "tag": "anno",
+   "anni": [
+    1907,
+    1907
+   ],
+   "periodo": "1907",
+   "case": [
+    {
+     "n": "Galerie Georges Petit",
+     "v": 4
+    },
+    {
+     "n": "Hôtel Drouot",
+     "v": 1
+    }
+   ]
+  },
+  {
+   "n": "Barrett Browning",
+   "c": 4,
+   "tag": "anno",
+   "anni": [
+    1913,
+    1913
+   ],
+   "periodo": "1913",
+   "case": [
+    {
+     "n": "Sotheby, Wilkinson & Hodge",
+     "v": 4
+    }
+   ]
+  },
+  {
+   "n": "Engel-Gros",
+   "c": 4,
+   "tag": "diverse",
+   "anni": [
+    1921,
+    1922
+   ],
+   "periodo": "1921–1922",
+   "case": [
+    {
+     "n": "Hôtel Drouot",
+     "v": 3
+    },
+    {
+     "n": "Galerie Georges Petit",
+     "v": 1
+    }
+   ]
+  },
+  {
+   "n": "Felix Doistau",
+   "c": 4,
+   "tag": "anno",
+   "anni": [
+    1909,
+    1909
+   ],
+   "periodo": "1909",
+   "case": [
+    {
+     "n": "Hôtel Drouot",
+     "v": 2
+    },
+    {
+     "n": "Galerie Georges Petit",
+     "v": 1
+    },
+    {
+     "n": "non specificata",
+     "v": 1
+    }
+   ]
+  },
+  {
+   "n": "Eduard Simon",
+   "c": 4,
+   "tag": "anno",
+   "anni": [
+    1929,
+    1929
+   ],
+   "periodo": "1929",
+   "case": [
+    {
+     "n": "Paul Cassirer||Hugo Helbing",
+     "v": 4
+    }
+   ]
+  },
+  {
+   "n": "Achillito Chiesa",
+   "c": 4,
+   "tag": "casa",
+   "anni": [
+    1925,
+    1927
+   ],
+   "periodo": "1925–1927",
+   "case": [
+    {
+     "n": "American Art Galleries",
+     "v": 4
+    }
+   ]
+  },
+  {
+   "n": "Lehmann",
+   "c": 4,
+   "tag": "anno",
+   "anni": [
+    1925,
+    1925
+   ],
+   "periodo": "1925",
+   "case": [
+    {
+     "n": "Galerie Georges Petit",
+     "v": 3
+    },
+    {
+     "n": "Hôtel Drouot",
+     "v": 1
+    }
+   ]
+  },
+  {
+   "n": "Sedelmeyer",
+   "c": 4,
+   "tag": "anno",
+   "anni": [
+    1907,
+    1907
+   ],
+   "periodo": "1907",
+   "case": [
+    {
+     "n": "Galerie Sedelmeyer",
+     "v": 4
+    }
+   ]
+  },
+  {
+   "n": "Edouard Aynard",
+   "c": 3,
+   "tag": "anno",
+   "anni": [
+    1913,
+    1913
+   ],
+   "periodo": "1913",
+   "case": [
+    {
+     "n": "Galerie Georges Petit",
+     "v": 2
+    },
+    {
+     "n": "Hôtel Drouot",
+     "v": 1
+    }
+   ]
+  },
+  {
+   "n": "Eugene Kraemer",
+   "c": 3,
+   "tag": "anno",
+   "anni": [
+    1913,
+    1913
+   ],
+   "periodo": "1913",
+   "case": [
+    {
+     "n": "Galerie Georges Petit",
+     "v": 3
+    }
+   ]
+  },
+  {
+   "n": "Gustave Cahen",
+   "c": 3,
+   "tag": "anno",
+   "anni": [
+    1929,
+    1929
+   ],
+   "periodo": "1929",
+   "case": [
+    {
+     "n": "Hôtel Drouot",
+     "v": 2
+    },
+    {
+     "n": "Galerie Georges Petit",
+     "v": 1
+    }
+   ]
+  }
+ ]
+}

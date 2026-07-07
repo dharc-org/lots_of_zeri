@@ -240,39 +240,37 @@
 }
 
 .expl-tl-track {
-  position: relative;
+  display: block;
+  width: 100%;
   height: 28px;
   background: var(--paper-dark);
   border-radius: 3px;
   overflow: hidden;
-  cursor: col-resize;
 }
 
-.expl-tl-track canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-}
-
-.expl-tl-brush {
-  position: absolute;
-  top: 0; bottom: 0;
-  background: rgba(217,64,16,.18);
-  border-left:  2px solid var(--terra);
-  border-right: 2px solid var(--terra);
-}
-
-.expl-tl-handle {
-  position: absolute;
-  top: 0; bottom: 0;
-  width: 10px;
+/* Il brush (selezione, maniglie) è disegnato da d3-brush via JS:
+   colori impostati direttamente sugli elementi SVG generati, non qui. */
+.tl-brush-g .handle {
   cursor: ew-resize;
 }
+.tl-brush-g .selection {
+  cursor: grab;
+}
+.tl-brush-g .selection:active {
+  cursor: grabbing;
+}
 
-#tl-h-left  { left:  -6px; }
-#tl-h-right { right: -6px; }
+#tl-play-btn:hover,
+#tm-zoom-in:hover,
+#tm-zoom-out:hover,
+#tm-zoom-reset:hover {
+  background: var(--terra) !important;
+  color: var(--paper-light) !important;
+}
+
+#trend-map:active {
+  cursor: grabbing !important;
+}
 
 /* Mappa */
 .expl-map-wrap {

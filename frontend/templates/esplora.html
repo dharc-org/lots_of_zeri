@@ -28,11 +28,23 @@
         <button class="expl-tab" data-tab="banditori" role="tab" aria-selected="false">
           <span class="expl-tab-num">02</span><span class="expl-tab-label">Banditori</span>
         </button>
+        <button class="expl-tab" data-tab="banditori2" role="tab" aria-selected="false">
+          <span class="expl-tab-num">02b</span><span class="expl-tab-label">Banditori 2 (test)</span>
+        </button>
         <button class="expl-tab" data-tab="tipologie" role="tab" aria-selected="false">
           <span class="expl-tab-num">03</span><span class="expl-tab-label">Tipologie di oggetti</span>
         </button>
         <button class="expl-tab" data-tab="trend" role="tab" aria-selected="false">
           <span class="expl-tab-num">04</span><span class="expl-tab-label">Trend di mercato</span>
+        </button>
+        <button class="expl-tab" data-tab="stagionalita" role="tab" aria-selected="false">
+          <span class="expl-tab-num">05</span><span class="expl-tab-label">Stagionalità</span>
+        </button>
+        <button class="expl-tab" data-tab="geografia" role="tab" aria-selected="false">
+          <span class="expl-tab-num">06</span><span class="expl-tab-label">Geografia del mercato</span>
+        </button>
+        <button class="expl-tab" data-tab="collezioni" role="tab" aria-selected="false">
+          <span class="expl-tab-num">07</span><span class="expl-tab-label">Collezioni</span>
         </button>
       </nav>
     </div>
@@ -61,6 +73,13 @@ L'intensità del colore è calcolata in modo relativo per ciascuna casa: il tono
       <div class="expl-chart-wrap" id="band-wrap"></div>
     </div>
 
+    {# ════ 02b — Banditori 2 (versione test) ════ #}
+    <div class="expl-panel" id="panel-banditori2" role="tabpanel">
+      <p class="expl-metanote-label">Nota metodologica — versione test</p>
+      <p class="expl-metanote">Versione sperimentale del grafico banditori, con tutte le relazioni documentate nel <em>corpus</em> (non solo i più attivi). Ordinamento per numero di aste, raggio del nodo proporzionale all'attività, archi visibili solo alla selezione di un banditore per ridurre la sovrapposizione visiva con 99 nodi.</p>
+      <div class="expl-chart-wrap" id="band-wrap2"></div>
+    </div>
+
     {# ════ 03 — Tipologie ════ #}
     <div class="expl-panel" id="panel-tipologie" role="tabpanel">
       <p class="expl-metanote-label">Nota metodologica</p>
@@ -76,25 +95,68 @@ Sono rappresentate le sei tipologie più ricorrenti — Dipinti, Mobili, Disegni
     <div class="expl-panel" id="panel-trend" role="tabpanel">
       <div class="expl-chart-wrap expl-chart-wrap--map">
         <div class="expl-trend-timeline">
-          <div class="expl-tl-labels">
-            <span id="tl-from" class="expl-tl-year">1879</span>
-            <span class="expl-tl-range-label">trascina per filtrare</span>
-            <span id="tl-to" class="expl-tl-year">1939</span>
-          </div>
-          <div class="expl-tl-track" id="tl-track">
-            <canvas id="tl-hist" height="28"></canvas>
-            <div class="expl-tl-brush" id="tl-brush">
-              <div class="expl-tl-handle" id="tl-h-left"></div>
-              <div class="expl-tl-handle" id="tl-h-right"></div>
+          <div class="expl-tl-labels" style="display:flex;align-items:center;gap:10px;">
+            <button id="tl-play-btn" type="button" title="Avvia autoplay" aria-label="Avvia autoplay"
+              style="width:22px;height:22px;border-radius:50%;border:1px solid var(--terra);background:none;color:var(--terra);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;padding:0;">
+              <i class="ph ph-play" id="tl-play-icon" style="font-size:11px;"></i>
+            </button>
+            <div style="display:flex;flex:1;justify-content:space-between;align-items:baseline;">
+              <span id="tl-from" class="expl-tl-year">1879</span>
+              <span class="expl-tl-range-label" id="tl-range-label">trascina per filtrare</span>
+              <span id="tl-to" class="expl-tl-year">1939</span>
             </div>
           </div>
+          <svg class="expl-tl-track" id="tl-track" height="28"></svg>
         </div>
         <div class="expl-map-wrap">
-          <svg id="trend-map" style="width:100%;display:block;"></svg>
+          <svg id="trend-map" style="width:100%;display:block;cursor:grab;"></svg>
+          <div id="trend-map-controls" style="position:absolute;top:10px;right:10px;display:flex;flex-direction:column;gap:5px;">
+            <button id="tm-zoom-in" type="button" title="Zoom avanti" aria-label="Zoom avanti"
+              style="width:22px;height:22px;border-radius:50%;border:1px solid var(--terra);background:var(--paper-light);color:var(--terra);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;font-family:var(--ff-mono);font-size:13px;line-height:1;">+</button>
+            <button id="tm-zoom-out" type="button" title="Zoom indietro" aria-label="Zoom indietro"
+              style="width:22px;height:22px;border-radius:50%;border:1px solid var(--terra);background:var(--paper-light);color:var(--terra);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;font-family:var(--ff-mono);font-size:13px;line-height:1;">–</button>
+            <button id="tm-zoom-reset" type="button" title="Torna alla vista Europa" aria-label="Torna alla vista Europa"
+              style="height:22px;border-radius:11px;border:1px solid var(--terra);background:var(--paper-light);color:var(--terra);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0 8px;font-family:var(--ff-mono);font-size:9.5px;line-height:1;white-space:nowrap;">Europa</button>
+          </div>
           <div id="trend-tooltip" class="expl-tooltip" style="display:none;"></div>
         </div>
       </div>
+      <p class="expl-note" style="margin-bottom:.35rem;">Trascina la mappa o usa la rotellina per esplorarla oltre l'Europa — include gli eventi documentati a New York, fuori dall'inquadratura iniziale.</p>
       <p class="expl-note"><span id="trend-note-count">—</span> eventi georeferenziati su <span id="trend-note-tot">—</span> totali nel periodo selezionato.</p>
+    </div>
+
+    {# ════ 05 — Stagionalità ════ #}
+    <div class="expl-panel" id="panel-stagionalita" role="tabpanel">
+      <p class="expl-metanote-label">Nota metodologica</p>
+      <p class="expl-metanote">Il grafico mostra la distribuzione mensile delle aste per Germania, Francia e Italia — i tre fondi che coprono insieme circa il 95% del corpus nel periodo 1879–1929 (Inghilterra, Paesi Bassi, Stati Uniti, Belgio e Svizzera restano fuori: con 2-44 aste in cinquant'anni il pattern stagionale non sarebbe affidabile). I mesi sono aggregati su tutto il periodo, non riferiti a un anno specifico: "maggio" somma le aste di maggio di qualsiasi anno tra il 1879 e il 1929. Ogni valore è la quota di aste del mese sul totale annuo del paese — non sul totale complessivo — così le curve restano confrontabili anche se i volumi assoluti sono molto diversi (1.065 aste tedesche contro 532 francesi e 173 italiane). Passa il mouse su un punto per vedere il calcolo per esteso.</p>
+      <div class="expl-chart-wrap">
+        <div id="stag-legend"></div>
+        <div id="stag-calc" style="background:var(--paper-dark);border-radius:3px;padding:6px 10px;margin:10px 0 12px;font-family:var(--ff-mono);font-size:11px;color:var(--ink);"></div>
+        <svg id="stag-svg" viewBox="0 0 600 250" style="width:100%;display:block;"></svg>
+      </div>
+    </div>
+
+    {# ════ 06 — Geografia del mercato ════ #}
+    <div class="expl-panel" id="panel-geografia" role="tabpanel">
+      <p class="expl-metanote-label">Nota metodologica</p>
+      <p class="expl-metanote">Il grafico confronta le prime cinque piazze per numero di aste in ciascun decennio dal 1890 al 1929, su una scala condivisa fra tutti i pannelli (la barra piena corrisponde al massimo assoluto: Parigi, 233 aste, nel 1900-09). La barra evidenziata è la piazza leader del decennio. La voce «altre città» somma il residuo rispetto alle prime cinque — tra le 20 e le 27 città con almeno un'asta documentata in ciascun decennio, per un totale di 52 città nel periodo — e include anche segnali minori ma non trascurabili, come l'ingresso di New York negli anni '20.</p>
+      <div class="expl-chart-wrap">
+        <div id="geo-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:22px 28px;"></div>
+      </div>
+    </div>
+
+    {# ════ 07 — Collezioni ════ #}
+    <div class="expl-panel" id="panel-collezioni" role="tabpanel">
+      <p class="expl-metanote-label">Nota metodologica</p>
+      <p class="expl-metanote">Il grafico conta quante volte il nome di una collezione ricompare nel campo che documenta le collezioni messe in vendita, sulle 1.276 collezioni nominate nel corpus. La ricomparsa non equivale sempre a dispersione nel tempo: il criterio incrocia l'arco di anni coperto dalle vendite con il numero di case d'asta coinvolte. Se tutti gli eventi cadono nello stesso anno («stesso anno»), è quasi certamente un'unica vendita catalogata in più sessioni — non una collezione dispersa. Se gli eventi si estendono su più anni ma presso la stessa casa («stessa casa»), è più probabile una liquidazione concordata a tranche con un solo operatore. Solo quando anni e case sono entrambi diversi («case diverse») si può parlare di dispersione reale sul mercato secondario. È un'euristica basata solo su anno e casa d'asta, non sui motivi della rivendita (eredità, fallimento, speculazione): resta un punto di partenza da verificare sui singoli cataloghi, non una conclusione. Clicca una collezione per il dettaglio di periodo e case d'asta.</p>
+      <div class="expl-chart-wrap">
+        <div id="coll-stats" style="display:flex;gap:14px;margin-bottom:14px;"></div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;flex-wrap:wrap;gap:6px;">
+          <div style="font-family:var(--ff-mono);font-size:10.5px;color:var(--gray-2);">le 15 collezioni ricomparse più spesso, per n. di eventi d'asta</div>
+          <div id="coll-legend" style="display:flex;gap:10px;font-family:var(--ff-mono);font-size:9.5px;"></div>
+        </div>
+        <div id="coll-list"></div>
+      </div>
     </div>
 
   </div>
