@@ -93,6 +93,14 @@ async def esplora(request: Request):
         "active_page": "esplora",
     })
 
+@app.get("/esplora-racconto", response_class=HTMLResponse)
+async def esplora_racconto(request: Request):
+    return templates.TemplateResponse("esplora_racconto.html", {
+        "request": request,
+        "active_tab": None,
+        "active_page": "esplora",
+    })
+
 @app.get("/approfondisci", response_class=HTMLResponse)
 async def approfondisci(request: Request):
     return templates.TemplateResponse("approfondisci.html", {

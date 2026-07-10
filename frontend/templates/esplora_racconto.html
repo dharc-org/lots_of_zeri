@@ -1,0 +1,362 @@
+{% extends "base.html" %}
+{% block title %}Esplora — ZAC{% endblock %}
+
+{% block styles %}
+<link href="/static/css/esplora_racconto.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="racc-layout">
+
+  {# ── Sidebar di navigazione ─────────────────────────────── #}
+  <aside class="racc-sidebar">
+    <nav class="racc-toc" aria-label="Indice del racconto">
+      <ol class="racc-toc-list">
+        <li><a href="#sec-intro" class="racc-toc-link" data-target="sec-intro">Mercato dell'arte · 01</a></li>
+        <li><a href="#sec-case" class="racc-toc-link" data-target="sec-case">Case d'asta · 02</a></li>
+        <li><a href="#sec-geografia" class="racc-toc-link" data-target="sec-geografia">Piazze del mercato · 03</a></li>
+        <li><a href="#sec-trend" class="racc-toc-link" data-target="sec-trend">Mercato nel tempo e nello spazio · 04</a></li>
+        <li><a href="#sec-stagionalita" class="racc-toc-link" data-target="sec-stagionalita">Stagioni dell'incanto · 05</a></li>
+        <li><a href="#sec-banditori" class="racc-toc-link" data-target="sec-banditori">Banditori · 06</a></li>
+        <li><a href="#sec-collezioni" class="racc-toc-link" data-target="sec-collezioni">Collezioni ricorrenti · 07</a></li>
+        <li><a href="#sec-tipologie" class="racc-toc-link" data-target="sec-tipologie">Tipologie di oggetti · 08</a></li>
+      </ol>
+    </nav>
+  </aside>
+
+  {# ── Contenuto: racconto a scorrimento unico ─────────────── #}
+  <main class="racc-main">
+
+    {# ════ 01 — Prologo ════ #}
+    <section class="racc-section" id="sec-intro">
+      <div class="racc-eyebrow">ESPLORA IL <em>CORPUS</em></div>
+      <h1 class="racc-section-title racc-section-title--h1">Il mercato dell'arte, 1879–1929</h1>
+      <hr class="racc-title-rule">
+      <p class="racc-lead">Tra il 1879 e il 1929, il mercato dell'arte europeo prendeva forma nelle sale delle grandi case di vendita. Le tracce che ci restano ne restituiscono alcune dimensioni principali: dalle <strong>case d'asta</strong> che lo hanno dominato alle <strong>piazze</strong> dove si è svolto, dai <strong>ritmi</strong> — annuali e stagionali — che lo hanno scandito ai <strong>banditori</strong> che lo hanno animato, fino alle <strong>collezioni</strong> e agli <strong>oggetti</strong> che vi sono passati.</p>
+    </section>
+
+    {# ════ 02 — Case d'asta (funzionante) ════ #}
+    <section class="racc-section" id="sec-case">
+      <h2 class="racc-section-title">Case d'asta</h2>
+      <hr class="racc-title-rule">
+
+      <div class="racc-cols">
+        
+          <p>Una casa d'asta è l'organizzatrice della vendita pubblica all'incanto: raccoglie i lotti, ne cura le stime — spesso insieme a periti ed esperti esterni — e trattiene una percentuale sul ricavato. Ha un ruolo centrale nel mercato dell'arte da secoli: la pratica si standardizza tra XVII e XVIII secolo in Inghilterra, patria di case storiche come Sotheby's e Christie's. Ma nel periodo qui documentato, 1879–1929, il panorama è molto più frammentato di quello che conosciamo oggi: decine di case d'asta, spesso legate a una sola piazza o a un singolo antiquario, si contendono un mercato ancora privo dei grandi player globali.
+          Messe una sotto l'altra e <strong>ordinate per volume</strong>, le righe rivelano qualcosa che sfogliare i singoli cataloghi non mostrerebbe: la <strong>distribuzione nel tempo</strong> dell'attività di ciascuna casa. L'estensione delle celle colorate lungo ogni riga segnala il tipo di presenza sul mercato: quando si concentrano in pochi anni consecutivi, indicano un'attività intensa ma circoscritta; quando si distribuiscono su più decenni, indicano una presenza più costante nel tempo.</p>
+        </div>
+
+      {# Nota metodologica: resta nel DOM ma esce dal flusso — si sposta nel modale all'apertura #}
+      <div class="expl-meta-slot" id="case-metanote-slot" hidden>
+        <p class="expl-metanote-label">Note sulla visualizzazione</p>
+        <p class="expl-metanote"> ll grafico presenta tutte le case d'asta documentate nel <em>corpus</em> dei cataloghi digitalizzati, ordinate per numero di eventi che hanno organizzato durante la loro attività. Sulla <strong>barra temporale</strong> sono visualizzate le vendite a cui si riferiscono i cataloghi.  Ogni <strong>cella</strong> colorata rappresenta un anno di attività documentata; il colore più o meno intenso indica la <strong>frequenza di vendite</strong> in quell'anno, calcolata in modo relativo per ciascuna casa d’asta: il tono più scuro segna l'anno di maggiore attività di quella specifica organizzazione, e non è confrontabile tra case d'asta diverse. Cliccando su una cella è possibile ottenere informazioni in più sul numero esatto di aste di quell’anno, mentre cliccando sul <strong>numero di aste totali</strong> per quella specifica casa d’asta è possibile visualizzare le vendite corrispondenti.</p>
+      </div>
+
+      {# Anteprima scalata — click per aprire il grafico a tutto schermo #}
+      <div class="expl-preview" id="case-preview" data-title="Case d'asta"
+           data-meta-slot="case-metanote-slot" tabindex="0" role="button"
+           aria-label="Apri il grafico Case d'asta a schermo intero">
+        <div class="expl-preview-stage">
+          <div class="expl-chart-wrap">
+            <div id="case-rows"></div>
+          </div>
+        </div>
+        <div class="expl-preview-cta">
+          <span class="expl-preview-cta-label"><i class="ph ph-arrows-out"></i> Espandi</span>
+        </div>
+      </div>
+
+      <div class="racc-cta">
+        <a href="/approfondisci#asta">Cos'è un'asta <i class="ph ph-arrow-right"></i></a>
+      </div>
+    </section>
+
+    {# ════ 03 — Geografia del mercato (funzionante) ════ #}
+    <section class="racc-section" id="sec-geografia">
+      <h2 class="racc-section-title">Piazze del mercato</h2>
+      <hr class="racc-title-rule">
+
+      <div class="racc-cols">
+        
+          <p> Nell'ambito del mercato dell'arte, una piazza è una città che funge da polo per il commercio dei beni artistici: vi si concentrano case d'asta, mercanti e collezionisti, e il numero di vendite organizzate ne segnala il peso. Tra la fine dell'Ottocento e gli anni '20 l'attività commerciale non si è distribuita in modo omogeneo tra le piazze: sono poche le città che concentrano la maggior parte delle aste documentate nel <em>corpus</em>, mentre la maggioranza delle altre città è rimasta sullo sfondo. Analizzando la <strong>timeline dei dati </strong> per decennio, emerge che la piazza con il maggior numero di aste cambia tre volte tra il 1879 e il 1929: è Colonia nei primi due intervalli, poi Parigi nel pieno Novecento, poi Berlino negli anni '20. Il dato rilevante non è la posizione occupata in un singolo momento, ma il cambiamento stesso segnala uno spostamento nel baricentro geografico del mercato, non la crescita continua di un'unica piazza.</p>
+        </div>
+
+      {# Nota metodologica: resta nel DOM ma esce dal flusso — si sposta nel modale all'apertura #}
+      <div class="expl-meta-slot" id="geo-metanote-slot" hidden>
+        <p class="expl-metanote-label">Note sulla visualizzazione</p>
+        <p class="expl-metanote">Il grafico presenta le prime dieci piazze per numero di aste in ciascuno dei cinque intervalli del <em>corpus</em>: 1879-89 (11 anni), poi i quattro decenni pieni fino al 1929 su una scala condivisa fra tutti i pannelli. La barra piena corrisponde al massimo assoluto: Parigi, 233 aste, nel 1900-09. Le prime dieci posizioni sono in larga parte occupate da città tedesche, coerentemente con la composizione del <em>corpus</em> (il fondo tedesco copre da solo 1.065 aste su 1.863, il 57% del periodo). Nel periodo in esame compaiono 55 città distinte; oltre la decima posizione il residuo è aggregato nella voce «altre città», consultabile cliccandoci sopra.</p>
+      </div>
+
+      {# Anteprima scalata — click per aprire il grafico a tutto schermo #}
+      <div class="expl-preview" id="geo-preview" data-title="Piazze del mercato"
+           data-meta-slot="geo-metanote-slot" tabindex="0" role="button"
+           aria-label="Apri il grafico Piazze del mercato a schermo intero">
+        <div class="expl-preview-stage">
+          <div class="expl-chart-wrap">
+            <div class="geo-head">
+              <span class="geo-head-label">Piazze del mercato</span>
+              <span id="geo-year" class="geo-year">1879-89</span>
+            </div>
+            <div class="geo-plot">
+              <div id="geo-gridlines" class="geo-gridlines"></div>
+              <div class="geo-col-label">aste</div>
+              <div id="geo-rows" class="geo-rows"></div>
+            </div>
+            <div class="geo-scrub">
+              <button id="geo-play-btn" type="button" class="geo-play-btn" title="Avvia autoplay" aria-label="Avvia autoplay">
+                <i class="ph ph-play" id="geo-play-icon"></i>
+              </button>
+              <div id="geo-track" class="geo-track">
+                <div class="geo-track-base"></div>
+                <div id="geo-ticks" class="geo-ticks"></div>
+                <div id="geo-fill" class="geo-fill"></div>
+                <div id="geo-handle" class="geo-handle"></div>
+              </div>
+            </div>
+            <div id="geo-ticklabels" class="geo-ticklabels"></div>
+          </div>
+        </div>
+        <div class="expl-preview-cta">
+          <span class="expl-preview-cta-label"><i class="ph ph-arrows-out"></i> Espandi</span>
+        </div>
+      </div>
+    </section>
+
+    {# ════ 04 — Trend di mercato (funzionante) ════ #}
+    <section class="racc-section" id="sec-trend">
+      <h2 class="racc-section-title">Mercato nel tempo e nello spazio</h2>
+      <hr class="racc-title-rule">
+
+      <div class="racc-cols">
+        
+          <p>Il peso delle piazze del mercato non è mai stato costante: cresce e declina nel tempo, seguendo le vicende economiche e politiche del periodo. La mappa restituisce questo movimento con una risoluzione fine: ogni evento d'asta geolocalizzato nel <em>corpus</em> è associato a una città e a un anno preciso, non a un intervallo aggregato. L'<strong>andamento generale nel tempo</strong>  e la <strong>distribuzione geografica</strong> in un dato momento raccontano storie diverse, che non sempre coincidono: un periodo di intensa attività complessiva può concentrarsi in poche piazze, mentre un periodo più modesto può distribuirsi su più città. È nel confronto tra le due letture che emerge la reale traiettoria geografica del mercato.</p>
+        </div>
+
+      {# Nota metodologica: resta nel DOM ma esce dal flusso — si sposta nel modale all'apertura #}
+      <div class="expl-meta-slot" id="trend-metanote-slot" hidden>
+        <p class="expl-metanote-label">Note sulla visualizzazione</p>
+        <p class="expl-metanote">La mappa mostra gli <strong>eventi d'asta georeferenziati per città</strong>, nel periodo selezionato sulla timeline sottostante. Ogni cerchio rappresenta una città con almeno un evento in quel periodo, con dimensione proporzionale al numero di eventi. La curva nella timeline mostra invece il <strong>numero di eventi per anno</strong> sommato su tutte le città, sempre riferita all'intero arco 1879-1929, ed è utile per individuare a colpo d'occhio i momenti di maggiore o minore attività. Trascinando la mappa o usando la rotellina è possibile esplorarla oltre l'inquadratura europea iniziale, che include anche gli eventi documentati a New York. Passando il mouse su una città si vede il totale dei suoi eventi nel periodo selezionato; cliccandoci sopra compare il conteggio anno per anno, sempre riferito allo stesso periodo.</p>
+      </div>
+
+      {# Anteprima scalata — click per aprire il grafico a tutto schermo #}
+      <div class="expl-preview" id="trend-preview" data-title="Mercato nel tempo e nello spazio"
+           data-meta-slot="trend-metanote-slot" tabindex="0" role="button"
+           aria-label="Apri il grafico Mercato nel tempo e nello spazio a schermo intero">
+        <div class="expl-preview-stage">
+          <div class="expl-chart-wrap expl-chart-wrap--map">
+            <div class="expl-trend-timeline">
+              <div class="expl-tl-labels" style="display:flex;align-items:center;gap:10px;">
+                <button id="tl-play-btn" type="button" title="Avvia autoplay" aria-label="Avvia autoplay"
+                  style="width:22px;height:22px;border-radius:50%;border:1px solid var(--terra);background:none;color:var(--terra);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;padding:0;">
+                  <i class="ph ph-play" id="tl-play-icon" style="font-size:11px;"></i>
+                </button>
+                <div style="display:flex;flex:1;justify-content:space-between;align-items:baseline;">
+                  <span id="tl-from" class="expl-tl-year">1879</span>
+                  <span class="expl-tl-range-label" id="tl-range-label">trascina per filtrare</span>
+                  <span id="tl-to" class="expl-tl-year">1929</span>
+                </div>
+              </div>
+              <svg class="expl-tl-track" id="tl-track" height="44"></svg>
+              <div id="tl-ticklabels" class="tl-ticklabels"></div>
+            </div>
+            <div class="expl-map-wrap">
+              <svg id="trend-map" style="width:100%;display:block;cursor:grab;"></svg>
+              <div id="trend-map-controls" style="position:absolute;top:10px;right:10px;display:flex;flex-direction:column;gap:5px;">
+                <button id="tm-zoom-in" type="button" title="Zoom avanti" aria-label="Zoom avanti"
+                  style="width:22px;height:22px;border-radius:50%;border:1px solid var(--terra);background:var(--paper-light);color:var(--terra);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;font-family:var(--ff-mono);font-size:13px;line-height:1;">+</button>
+                <button id="tm-zoom-out" type="button" title="Zoom indietro" aria-label="Zoom indietro"
+                  style="width:22px;height:22px;border-radius:50%;border:1px solid var(--terra);background:var(--paper-light);color:var(--terra);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;font-family:var(--ff-mono);font-size:13px;line-height:1;">–</button>
+                <button id="tm-zoom-reset" type="button" title="Torna alla vista Europa" aria-label="Torna alla vista Europa"
+                  style="height:22px;border-radius:11px;border:1px solid var(--terra);background:var(--paper-light);color:var(--terra);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0 8px;font-family:var(--ff-mono);font-size:9.5px;line-height:1;white-space:nowrap;">Europa</button>
+              </div>
+              <div id="trend-tooltip" class="expl-tooltip" style="display:none;"></div>
+            </div>
+          </div>
+        </div>
+        <div class="expl-preview-cta">
+          <span class="expl-preview-cta-label"><i class="ph ph-arrows-out"></i> Espandi</span>
+        </div>
+      </div>
+    </section>
+
+    {# ════ 05 — Stagionalità (placeholder) ════ #}
+    <section class="racc-section" id="sec-stagionalita">
+      <h2 class="racc-section-title">Stagioni dell'incanto</h2>
+      <hr class="racc-title-rule">
+
+      <div class="racc-cols">
+          <p> Il mercato dell'arte aveva anche un proprio <strong> calendario stagionale </strong>, legato ai ritmi della vita sociale ed economica dell'epoca: le grandi vendite si concentravano in certi periodi dell'anno, seguendo i movimenti di collezionisti e mercanti. Il grafico rivela un calendario che i tre paesi condividono solo in parte: tutti e tre sospendono quasi del tutto l'attività ad agosto, ma il resto dell'anno diverge nettamente. La Germania concentra le vendite in autunno - ottobre, novembre e dicembre coprono insieme oltre il 40% del totale annuo - mentre Francia e Italia si spostano in primavera: in Francia il picco è particolarmente marcato, con maggio e giugno da soli pari a quasi la metà delle aste dell'intero anno.</p>
+      </div>
+
+      {# Nota metodologica: resta nel DOM ma esce dal flusso — si sposta nel modale all'apertura #}
+      <div class="expl-meta-slot" id="stag-metanote-slot" hidden>
+        <p class="expl-metanote-label">Note sulla visualizzazione</p>
+        <p class="expl-metanote">Germania, Francia e Italia - i tre fondi che coprono insieme circa il 95% del <em>corpus</em> nel periodo 1879–1929 - sono le uniche nazionalità qui rappresentate: Inghilterra, Paesi Bassi, Stati Uniti, Belgio e Svizzera sono escluse, perché con 2-44 aste in cinquant'anni un pattern stagionale non sarebbe affidabile. I mesi sono aggregati su tutto il periodo, non riferiti a un anno specifico: "maggio" somma le aste di maggio di qualsiasi anno tra il 1879 e il 1929. Passa il mouse su un punto per vedere il valore esatto: numero di aste in quel mese, totale annuo del paese e percentuale corrispondente.</p>
+      </div>
+
+      {# Anteprima scalata — click per aprire il grafico a tutto schermo #}
+      <div class="expl-preview" id="stag-preview" data-title="Stagioni dell'incanto"
+           data-meta-slot="stag-metanote-slot" tabindex="0" role="button"
+           aria-label="Apri il grafico Stagioni dell'incanto a schermo intero">
+        <div class="expl-preview-stage">
+          <div class="expl-chart-wrap">
+            <div class="stag-head">
+              <div id="stag-legend"></div>
+              <button id="stag-info-btn" class="stag-info-btn" type="button" aria-label="Come si legge un punto del grafico" aria-describedby="stag-info-popover">i</button>
+              <div id="stag-info-popover" class="stag-info-popover" role="tooltip"></div>
+            </div>
+            <svg id="stag-svg" viewBox="0 0 600 250" style="width:100%;display:block;"></svg>
+          </div>
+        </div>
+        <div class="expl-preview-cta">
+          <span class="expl-preview-cta-label"><i class="ph ph-arrows-out"></i> Espandi</span>
+        </div>
+      </div>
+    </section>
+
+    {# ════ 06 — Banditori (placeholder — versione Banditori 2) ════ #}
+    <section class="racc-section" id="sec-banditori">
+      <h2 class="racc-section-title">Banditori</h2>
+      <hr class="racc-title-rule">
+
+      <div class="racc-cols">
+        <p>Il banditore è la figura che conduce fisicamente la <strong>vendita all'incanto</strong>, presentando i lotti al pubblico e aggiudicandoli al miglior offerente. In Francia il ruolo aveva uno statuto particolare: il <em>commissaire-priseur</em> era una figura istituzionale, così centrale e identificativa della vendita stessa da comparire sempre sul frontespizio dei cataloghi.</p>
+        <p>Quasi tutti i legami documentati appartengono al mercato parigino, non perché altrove mancassero i banditori, ma perché la prassi catalografica francese ne registrava sistematicamente il nome, un'usanza che i cataloghi tedeschi e italiani non condividevano allo stesso modo.</p>
+      </div>
+
+      {# Nota metodologica: resta nel DOM ma esce dal flusso — si sposta nel modale all'apertura #}
+      <div class="expl-meta-slot" id="band2-metanote-slot" hidden>
+        <p class="expl-metanote-label">Note sulla visualizzazione</p>
+        <p class="expl-metanote">Il grafico presenta due elementi distinti: a sinistra un <strong>elenco di tutti i banditori</strong> documentati nel <em>corpus</em>, distinti per stato tramite la legenda (con casa d'asta nota, senza casa d'asta ma verosimilmente in proprio, senza casa d'asta e non documentato); a destra la <strong>relazione</strong> — ove presente — tra <strong>banditori e case d'asta</strong>. Solo i banditori con almeno una casa d'asta nota compaiono come nodi collegati nel grafo, gli altri restano visibili solo nell'elenco. Lo spessore di ogni linea è proporzionale al numero di aste condotte da quel banditore presso quella specifica casa. Nel <em>corpus</em> il banditore è documentato solo nel 30% degli eventi — 604 su 1.895 — con una forte concentrazione nelle vendite parigine.</p>
+      </div>
+
+      {# Anteprima scalata — click per aprire il grafico a tutto schermo #}
+      <div class="expl-preview" id="band2-preview" data-title="Banditori"
+           data-meta-slot="band2-metanote-slot" tabindex="0" role="button"
+           aria-label="Apri il grafico Banditori a schermo intero">
+        <div class="expl-preview-stage">
+          <div id="band-wrap2"></div>
+        </div>
+        <div class="expl-preview-cta">
+          <span class="expl-preview-cta-label"><i class="ph ph-arrows-out"></i> Espandi</span>
+        </div>
+      </div>
+    </section>
+
+    {# ════ 07 — Collezioni (placeholder) ════ #}
+    <section class="racc-section" id="sec-collezioni">
+      <h2 class="racc-section-title">Collezioni ricorrenti</h2>
+      <hr class="racc-title-rule">
+
+      <div class="racc-cols">
+        <p>Una collezione d'arte raramente resta intatta nel tempo: eredità, fallimenti, cambi di gusto o semplice speculazione la riportano sul mercato, a volte tutta insieme, a volte pezzo per pezzo, a distanza di anni. Quando il nome di una collezione ricompare più volte nel <em>corpus</em>, quella ricorrenza racconta qualcosa sul destino dell'insieme che ne portava il nome.
+Nel <em>corpus</em>, appena il 7% delle collezioni nominate ricompare in più di un'asta; tutte le altre vi compaiono una volta sola. Anche tra queste ricorrenze, la dispersione reale è il caso meno frequente: si riconosce quando una collezione ritorna sul mercato a distanza di anni e presso case d'asta diverse, segno che i suoi pezzi si sono separati nel tempo invece di essere venduti tutti insieme.
+</p>
+      </div>
+
+      {# Nota metodologica: resta nel DOM ma esce dal flusso — si sposta nel modale all'apertura #}
+      <div class="expl-meta-slot" id="coll-metanote-slot" hidden>
+        <p class="expl-metanote-label">Note sulla visualizzazione</p>
+        <p class="expl-metanote"> Il grafico, sulle 1.276 collezioni nominate nel <em>corpus</em>, mostra quante volte il nome di una collezione ricompare nel campo che ne documenta la provenienza: solo 95 (il 7%) ricompaiono in due o più aste, mentre le restanti 1.181 ricompaiono una sola volta. Per le collezioni ricorrenti, la classificazione guarda a due elementi: l'<strong>arco di anni delle vendite</strong> e il <strong>numero di case d'asta coinvolte</strong>. Se tutti gli eventi cadono nello stesso anno, è probabile un'unica vendita catalogata in più sessioni. Se si estendono su più anni ma presso la stessa casa d’asta, è più probabile una liquidazione a <em>tranche</em> con un solo operatore. Solo quando cambiano sia gli anni sia le case d’asta si parla di dispersione reale sul mercato secondario. Clicca su una collezione per vedere il periodo delle vendite e le case d'asta coinvolte.</p>
+      </div>
+
+      {# Anteprima scalata — click per aprire il grafico a tutto schermo #}
+      <div class="expl-preview" id="coll-preview" data-title="Collezioni ricorrenti"
+           data-meta-slot="coll-metanote-slot" tabindex="0" role="button"
+           aria-label="Apri il grafico Collezioni ricorrenti a schermo intero">
+        <div class="expl-preview-stage">
+          <div class="expl-chart-wrap">
+            <div class="coll-stats-label">Le collezioni in numeri</div>
+            <div id="coll-stats" style="display:flex;gap:14px;margin-bottom:18px;"></div>
+            <div class="coll-list-header">
+              <div class="coll-list-title">Le 15 collezioni ricomparse più spesso, per numero di eventi d'asta</div>
+              <div style="display:flex;align-items:center;gap:8px;position:relative;">
+                <div id="coll-legend" class="coll-legend"></div>
+                <button id="coll-info-btn" class="stag-info-btn" type="button" aria-label="Cosa significa il secondo pallino" aria-describedby="coll-info-popover" style="position:static;">i</button>
+                <div id="coll-info-popover" class="stag-info-popover" role="tooltip" style="top:calc(100% + 8px); right:0;"></div>
+              </div>
+            </div>
+            <div id="coll-list"></div>
+          </div>
+        </div>
+        <div class="expl-preview-cta">
+          <span class="expl-preview-cta-label"><i class="ph ph-arrows-out"></i> Espandi</span>
+        </div>
+      </div>
+    </section>
+
+    {# ════ 08 — Tipologie di oggetti (placeholder) ════ #}
+    <section class="racc-section" id="sec-tipologie">
+      <h2 class="racc-section-title">Tipologie di oggetti</h2>
+      <hr class="racc-title-rule">
+
+      <div class="racc-cols">
+        <p>All'incanto può passare qualsiasi genere di manufatto: dipinti, mobili, disegni, ceramiche, stampe, e molto altro ancora — la varietà è, da sempre, uno dei tratti caratteristici del mercato d'asta.</p>
+        <p>Il grafico visualizza la distribuzione delle tipologie vendute nel <em>corpus</em>, anno per anno, dalle sei categorie più ricorrenti — dai Dipinti alle Stampe — fino a una voce residuale «Altre», che riunisce 68 voci di vocabolario diverse. È stata esclusa solo «Oggetti d'arte»: presente in 982 eventi, ma troppo generica — nella prassi catalografica ottocentesca indicava un insieme eterogeneo senza distinzione di materiale o tecnica.</p>
+      </div>
+
+      {# Nota metodologica: resta nel DOM ma esce dal flusso — si sposta nel modale all'apertura #}
+      <div class="expl-meta-slot" id="tip-metanote-slot" hidden>
+        <p class="expl-metanote-label">Note sulla visualizzazione</p>
+        <p class="expl-metanote">Il grafico visualizza la distribuzione delle tipologie di oggetti venduti all'asta negli eventi documentati nel <em>corpus</em>, anno per anno. Il conteggio registra le presenze: un evento che mette in vendita più tipologie compare in ciascuna di esse, quindi i totali per anno sono superiori al numero di aste.
+Sono rappresentate le sei tipologie più ricorrenti — Dipinti, Mobili, Disegni, Acquerelli, Porcellane, Stampe — più una categoria residuale «Altre» che include 68 voci del vocabolario, consultabili espandendo la sezione corrispondente. È stata esclusa la categoria «Oggetti d'arte», presente in 982 eventi, perché troppo generica per essere informativa: nella prassi catalografica ottocentesca designava un insieme eterogeneo di manufatti decorativi senza distinzione di materiale o tecnica.</p>
+      </div>
+
+      {# Anteprima scalata — click per aprire il grafico a tutto schermo #}
+      <div class="expl-preview" id="tip-preview" data-title="Tipologie di oggetti"
+           data-meta-slot="tip-metanote-slot" tabindex="0" role="button"
+           aria-label="Apri il grafico Tipologie di oggetti a schermo intero">
+        <div class="expl-preview-stage">
+          <div class="expl-chart-wrap">
+            <div id="tip-chips" class="expl-chips"></div>
+            <svg id="tip-svg" viewBox="0 0 660 252" style="width:100%;display:block;margin-top:10px;"></svg>
+          </div>
+        </div>
+        <div class="expl-preview-cta">
+          <span class="expl-preview-cta-label"><i class="ph ph-arrows-out"></i> Espandi</span>
+        </div>
+      </div>
+
+      <div class="racc-cta">
+        <a href="/approfondisci#lotto">Cos'è un lotto <i class="ph ph-arrow-right"></i></a>
+      </div>
+    </section>
+
+  </main>
+
+  {# ── Modale grafico a tutto schermo (riutilizzabile per tutti i pannelli) ── #}
+  <div class="expl-modal" id="expl-modal" aria-hidden="true">
+    <div class="expl-modal-backdrop" id="expl-modal-backdrop"></div>
+    <div class="expl-modal-panel" role="dialog" aria-modal="true" aria-labelledby="expl-modal-title">
+      <div class="expl-modal-head">
+        <div class="expl-modal-head-inner">
+        <span class="expl-modal-title" id="expl-modal-title"></span>
+        <div class="expl-modal-actions">
+          <button class="expl-modal-fullscreen" id="expl-modal-fullscreen" type="button" aria-label="Schermo intero">
+            <i class="ph ph-arrows-out-simple" id="expl-modal-fullscreen-icon"></i>
+          </button>
+          <button class="expl-modal-close" id="expl-modal-close" type="button" aria-label="Chiudi">
+            <i class="ph ph-x"></i>
+          </button>
+          </div>
+        </div>
+      </div>
+      <div class="expl-modal-note" id="expl-modal-note">
+        <div class="expl-modal-note-content">
+          <div class="expl-modal-note-inner" id="expl-modal-note-inner"></div>
+          <button class="expl-modal-note-toggle" id="expl-modal-note-toggle" type="button">Leggi la nota completa</button>
+        </div>
+      </div>
+      <div class="expl-modal-body" id="expl-modal-body">
+        <div class="expl-modal-body-content" id="expl-modal-body-content"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script src="/static/js/esplora_racconto.js"></script>
+{% endblock %}

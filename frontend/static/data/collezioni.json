@@ -81,6 +81,26 @@
    ]
   },
   {
+   "n": "Edouard Chappey",
+   "c": 5,
+   "tag": "anno",
+   "anni": [
+    1907,
+    1907
+   ],
+   "periodo": "1907",
+   "case": [
+    {
+     "n": "Galerie Georges Petit",
+     "v": 4
+    },
+    {
+     "n": "Hôtel Drouot",
+     "v": 1
+    }
+   ]
+  },
+  {
    "n": "Jean Dollfus",
    "c": 5,
    "tag": "anno",
@@ -101,8 +121,8 @@
    ]
   },
   {
-   "n": "Edouard Chappey",
-   "c": 5,
+   "n": "Sedelmeyer",
+   "c": 4,
    "tag": "anno",
    "anni": [
     1907,
@@ -111,11 +131,31 @@
    "periodo": "1907",
    "case": [
     {
-     "n": "Galerie Georges Petit",
+     "n": "Galerie Sedelmeyer",
      "v": 4
-    },
+    }
+   ]
+  },
+  {
+   "n": "Felix Doistau",
+   "c": 4,
+   "tag": "anno",
+   "anni": [
+    1909,
+    1909
+   ],
+   "periodo": "1909",
+   "case": [
     {
      "n": "Hôtel Drouot",
+     "v": 2
+    },
+    {
+     "n": "Galerie Georges Petit",
+     "v": 1
+    },
+    {
+     "n": "non specificata",
      "v": 1
     }
    ]
@@ -157,62 +197,6 @@
    ]
   },
   {
-   "n": "Felix Doistau",
-   "c": 4,
-   "tag": "anno",
-   "anni": [
-    1909,
-    1909
-   ],
-   "periodo": "1909",
-   "case": [
-    {
-     "n": "Hôtel Drouot",
-     "v": 2
-    },
-    {
-     "n": "Galerie Georges Petit",
-     "v": 1
-    },
-    {
-     "n": "non specificata",
-     "v": 1
-    }
-   ]
-  },
-  {
-   "n": "Eduard Simon",
-   "c": 4,
-   "tag": "anno",
-   "anni": [
-    1929,
-    1929
-   ],
-   "periodo": "1929",
-   "case": [
-    {
-     "n": "Paul Cassirer||Hugo Helbing",
-     "v": 4
-    }
-   ]
-  },
-  {
-   "n": "Achillito Chiesa",
-   "c": 4,
-   "tag": "casa",
-   "anni": [
-    1925,
-    1927
-   ],
-   "periodo": "1925–1927",
-   "case": [
-    {
-     "n": "American Art Galleries",
-     "v": 4
-    }
-   ]
-  },
-  {
    "n": "Lehmann",
    "c": 4,
    "tag": "anno",
@@ -233,60 +217,24 @@
    ]
   },
   {
-   "n": "Sedelmeyer",
+   "n": "Achillito Chiesa",
    "c": 4,
-   "tag": "anno",
+   "tag": "casa",
    "anni": [
-    1907,
-    1907
+    1925,
+    1927
    ],
-   "periodo": "1907",
+   "periodo": "1925–1927",
    "case": [
     {
-     "n": "Galerie Sedelmeyer",
+     "n": "American Art Galleries",
      "v": 4
     }
    ]
   },
   {
-   "n": "Edouard Aynard",
-   "c": 3,
-   "tag": "anno",
-   "anni": [
-    1913,
-    1913
-   ],
-   "periodo": "1913",
-   "case": [
-    {
-     "n": "Galerie Georges Petit",
-     "v": 2
-    },
-    {
-     "n": "Hôtel Drouot",
-     "v": 1
-    }
-   ]
-  },
-  {
-   "n": "Eugene Kraemer",
-   "c": 3,
-   "tag": "anno",
-   "anni": [
-    1913,
-    1913
-   ],
-   "periodo": "1913",
-   "case": [
-    {
-     "n": "Galerie Georges Petit",
-     "v": 3
-    }
-   ]
-  },
-  {
-   "n": "Gustave Cahen",
-   "c": 3,
+   "n": "Eduard Simon",
+   "c": 4,
    "tag": "anno",
    "anni": [
     1929,
@@ -295,12 +243,68 @@
    "periodo": "1929",
    "case": [
     {
-     "n": "Hôtel Drouot",
+     "n": "Paul Cassirer||Hugo Helbing",
+     "v": 4
+    }
+   ]
+  },
+  {
+   "n": "Albert Jaffé",
+   "c": 3,
+   "tag": "diverse",
+   "anni": [
+    1900,
+    1905
+   ],
+   "periodo": "1900–1905",
+   "case": [
+    {
+     "n": "Heberle H. Lempertz' Söhne",
      "v": 2
     },
     {
-     "n": "Galerie Georges Petit",
+     "n": "Hugo Helbing",
      "v": 1
+    }
+   ]
+  },
+  {
+   "n": "Guidi",
+   "c": 3,
+   "tag": "diverse",
+   "anni": [
+    1902,
+    1910
+   ],
+   "periodo": "1902–1910",
+   "case": [
+    {
+     "n": "Galleria Sangiorgi",
+     "v": 1
+    },
+    {
+     "n": "Gesellschaft für Kunst und Litteratur",
+     "v": 1
+    },
+    {
+     "n": "Impresa di vendite Galardelli e Mazzoni",
+     "v": 1
+    }
+   ]
+  },
+  {
+   "n": "Otto Seitz",
+   "c": 3,
+   "tag": "casa",
+   "anni": [
+    1904,
+    1913
+   ],
+   "periodo": "1904–1913",
+   "case": [
+    {
+     "n": "Hugo Helbing",
+     "v": 3
     }
    ]
   }

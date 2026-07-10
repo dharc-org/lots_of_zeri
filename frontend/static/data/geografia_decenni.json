@@ -1,7 +1,60 @@
 {
- "period": "1890–1929",
+ "period": "1879–1929",
  "scale_max": 233,
  "decades": [
+  {
+   "label": "1879–89",
+   "tot": 47,
+   "top": [
+    {
+     "n": "Colonia",
+     "v": 24
+    },
+    {
+     "n": "Monaco di Baviera",
+     "v": 4
+    },
+    {
+     "n": "Stoccarda",
+     "v": 3
+    },
+    {
+     "n": "Milano",
+     "v": 3
+    },
+    {
+     "n": "Bonn",
+     "v": 3
+    },
+    {
+     "n": "Parigi",
+     "v": 2
+    },
+    {
+     "n": "Firenze",
+     "v": 2
+    },
+    {
+     "n": "Roma",
+     "v": 2
+    },
+    {
+     "n": "Würzburg",
+     "v": 2
+    },
+    {
+     "n": "Gubbio",
+     "v": 1
+    }
+   ],
+   "altre": 1,
+   "resto": [
+    {
+     "n": "Geisenheim",
+     "v": 1
+    }
+   ]
+  },
   {
    "label": "1890–99",
    "tot": 152,
@@ -25,9 +78,71 @@
     {
      "n": "Bonn",
      "v": 9
+    },
+    {
+     "n": "Francoforte sul Meno",
+     "v": 5
+    },
+    {
+     "n": "Milano",
+     "v": 5
+    },
+    {
+     "n": "Roma",
+     "v": 4
+    },
+    {
+     "n": "Firenze",
+     "v": 2
+    },
+    {
+     "n": "Amsterdam",
+     "v": 2
     }
    ],
-   "altre": 28
+   "altre": 10,
+   "resto": [
+    {
+     "n": "Braunschweig",
+     "v": 1
+    },
+    {
+     "n": "Costanza",
+     "v": 1
+    },
+    {
+     "n": "Napoli",
+     "v": 1
+    },
+    {
+     "n": "Zurigo",
+     "v": 1
+    },
+    {
+     "n": "Venezia",
+     "v": 1
+    },
+    {
+     "n": "Losanna",
+     "v": 1
+    },
+    {
+     "n": "Bruxelles",
+     "v": 1
+    },
+    {
+     "n": "Govone",
+     "v": 1
+    },
+    {
+     "n": "Torino",
+     "v": 1
+    },
+    {
+     "n": "Genova",
+     "v": 1
+    }
+   ]
   },
   {
    "label": "1900–09",
@@ -52,9 +167,79 @@
     {
      "n": "Roma",
      "v": 22
+    },
+    {
+     "n": "Francoforte sul Meno",
+     "v": 21
+    },
+    {
+     "n": "Milano",
+     "v": 10
+    },
+    {
+     "n": "Firenze",
+     "v": 8
+    },
+    {
+     "n": "Amsterdam",
+     "v": 2
+    },
+    {
+     "n": "Napoli",
+     "v": 2
     }
    ],
-   "altre": 57
+   "altre": 14,
+   "resto": [
+    {
+     "n": "Bonn",
+     "v": 2
+    },
+    {
+     "n": "Bologna",
+     "v": 2
+    },
+    {
+     "n": "Magdeburgo",
+     "v": 1
+    },
+    {
+     "n": "L'Aja",
+     "v": 1
+    },
+    {
+     "n": "Hannover",
+     "v": 1
+    },
+    {
+     "n": "Aquisgrana",
+     "v": 1
+    },
+    {
+     "n": "Wiesbaden",
+     "v": 1
+    },
+    {
+     "n": "Strasburgo",
+     "v": 1
+    },
+    {
+     "n": "Genova",
+     "v": 1
+    },
+    {
+     "n": "Venezia",
+     "v": 1
+    },
+    {
+     "n": "Pantin",
+     "v": 1
+    },
+    {
+     "n": "Zurigo",
+     "v": 1
+    }
+   ]
   },
   {
    "label": "1910–19",
@@ -79,9 +264,99 @@
     {
      "n": "Colonia",
      "v": 28
+    },
+    {
+     "n": "Milano",
+     "v": 19
+    },
+    {
+     "n": "Aquisgrana",
+     "v": 14
+    },
+    {
+     "n": "Firenze",
+     "v": 13
+    },
+    {
+     "n": "Roma",
+     "v": 13
+    },
+    {
+     "n": "Londra",
+     "v": 10
     }
    ],
-   "altre": 109
+   "altre": 40,
+   "resto": [
+    {
+     "n": "Stoccarda",
+     "v": 10
+    },
+    {
+     "n": "Napoli",
+     "v": 5
+    },
+    {
+     "n": "Amsterdam",
+     "v": 4
+    },
+    {
+     "n": "Lubecca",
+     "v": 4
+    },
+    {
+     "n": "Finedon Hall",
+     "v": 2
+    },
+    {
+     "n": "Venezia",
+     "v": 2
+    },
+    {
+     "n": "Lipsia",
+     "v": 2
+    },
+    {
+     "n": "Livorno",
+     "v": 2
+    },
+    {
+     "n": "Hereford",
+     "v": 1
+    },
+    {
+     "n": "Pisa",
+     "v": 1
+    },
+    {
+     "n": "Nancy",
+     "v": 1
+    },
+    {
+     "n": "Le Mans",
+     "v": 1
+    },
+    {
+     "n": "Bonn",
+     "v": 1
+    },
+    {
+     "n": "St. Moritz",
+     "v": 1
+    },
+    {
+     "n": "Eggesford House",
+     "v": 1
+    },
+    {
+     "n": "Lucca",
+     "v": 1
+    },
+    {
+     "n": "Swansea",
+     "v": 1
+    }
+   ]
   },
   {
    "label": "1920–29",
@@ -106,9 +381,95 @@
     {
      "n": "Milano",
      "v": 23
+    },
+    {
+     "n": "Colonia",
+     "v": 20
+    },
+    {
+     "n": "Amburgo",
+     "v": 20
+    },
+    {
+     "n": "Stoccarda",
+     "v": 17
+    },
+    {
+     "n": "Amsterdam",
+     "v": 15
+    },
+    {
+     "n": "New York",
+     "v": 14
     }
    ],
-   "altre": 164
+   "altre": 78,
+   "resto": [
+    {
+     "n": "Firenze",
+     "v": 11
+    },
+    {
+     "n": "Aquisgrana",
+     "v": 8
+    },
+    {
+     "n": "Napoli",
+     "v": 6
+    },
+    {
+     "n": "Roma",
+     "v": 5
+    },
+    {
+     "n": "Dresda",
+     "v": 4
+    },
+    {
+     "n": "Bruxelles",
+     "v": 4
+    },
+    {
+     "n": "Londra",
+     "v": 3
+    },
+    {
+     "n": "Genova",
+     "v": 2
+    },
+    {
+     "n": "Venezia",
+     "v": 1
+    },
+    {
+     "n": "Schloss Rosenstein",
+     "v": 1
+    },
+    {
+     "n": "Darmstadt",
+     "v": 1
+    },
+    {
+     "n": "Lucerna",
+     "v": 1
+    },
+    {
+     "n": "Palermo",
+     "v": 1
+    },
+    {
+     "n": "Spoleto",
+     "v": 1
+    },
+    {
+     "n": "Friburgo in Brisgovia",
+     "v": 1
+    },
+    {
+     "n": "Marsiglia",
+     "v": 1
+    }
+   ]
   }
  ]
 }

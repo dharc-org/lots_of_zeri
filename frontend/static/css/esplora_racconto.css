@@ -150,7 +150,7 @@
 .expl-metanote-label {
   font-family: var(--ff-mono);
   font-size: var(--fs-caption);
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: .1em;
   color: var(--gray-2);
   text-transform: uppercase;
@@ -277,8 +277,7 @@
 #tl-play-btn:hover,
 #tm-zoom-in:hover,
 #tm-zoom-out:hover,
-#tm-zoom-reset:hover,
-#geo-play-btn:hover {
+#tm-zoom-reset:hover {
   background: var(--terra) !important;
   color: var(--paper-light) !important;
 }
@@ -355,13 +354,394 @@
 #band-wrap div::-webkit-scrollbar-thumb { background: var(--gray-1); border-radius: 6px; }
 
 /* ══════════════════════════════════════════════════════════
+   ANTEPRIMA SCALATA + MODALE ESPANDI
+   ══════════════════════════════════════════════════════════ */
+.expl-preview {
+  position: relative;
+  max-width: 480px;
+  height: 220px;
+  margin: 0 auto 1.5rem;
+  overflow: hidden;
+  border: 1px solid var(--gray-1);
+  border-radius: 4px;
+  background: var(--paper);
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(26,20,16,.06);
+  transition: box-shadow .15s, border-color .15s;
+}
+.expl-preview:hover,
+.expl-preview:focus-visible {
+  border-color: var(--terra);
+  box-shadow: 0 4px 16px rgba(26,20,16,.12);
+}
+
+/* Velo arancio chiarissimo sopra il grafico, sotto la CTA */
+.expl-preview::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--terra);
+  opacity: 0;
+  transition: opacity .15s;
+  z-index: 1;
+  pointer-events: none;
+}
+.expl-preview:hover::before,
+.expl-preview:focus-visible::before { opacity: .1; }
+
+.expl-preview-stage {
+  position: absolute;
+  top: 0; left: 0;
+  width: 1040px;              /* larghezza "naturale" di riferimento del grafico */
+  transform-origin: top left;
+  pointer-events: none;       /* niente hover/click nella miniatura */
+}
+
+.expl-preview-cta {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: .8rem;
+  opacity: 0;
+  transition: opacity .15s;
+  z-index: 2;
+}
+.expl-preview:hover .expl-preview-cta,
+.expl-preview:focus-visible .expl-preview-cta { opacity: 1; }
+
+.expl-preview-cta-label {
+  font-family: var(--ff-mono);
+  font-size: var(--fs-mono-sm);
+  letter-spacing: .08em;
+  color: var(--paper-light);
+  background: var(--terra);
+  padding: .3rem .7rem;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+}
+
+/* ── Modale ─────────────────────────────────────────────── */
+.expl-modal { position: fixed; inset: 0; z-index: 2000; display: none; }
+.expl-modal.is-open { display: block; }
+
+.expl-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(26,20,16,.55);
+}
+
+.expl-modal-panel {
+  position: relative;
+  margin: 4vh auto;
+  width: min(92vw, 1180px);
+  max-height: 92vh;
+  overflow-y: auto;
+  background: var(--ink-light);
+  border-radius: 6px;
+  box-shadow: 0 12px 40px rgba(26,20,16,.35);
+  display: flex;
+  flex-direction: column;
+  transition: width .18s ease, max-height .18s ease, margin .18s ease, border-radius .18s ease;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gray-1) var(--paper-dark);
+}
+.expl-modal-panel::-webkit-scrollbar { width: 9px; }
+.expl-modal-panel::-webkit-scrollbar-track { background: var(--paper-dark); }
+.expl-modal-panel::-webkit-scrollbar-thumb { background: var(--gray-1); border-radius: 6px; }
+
+.expl-modal-panel.is-fullscreen {
+  margin: 0;
+  width: 100vw;
+  max-height: 100vh;
+  height: 100vh;
+  border-radius: 0;
+}
+
+.expl-modal-head {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(253,246,228,.15);
+  position: sticky;
+  top: 0;
+  background: var(--ink-light);
+  z-index: 2;
+}
+.expl-modal-head-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1080px;
+  margin: 0 auto;
+}
+.expl-modal-title {
+  font-family: var(--ff-head);
+  font-size: var(--fs-h4, 1.3rem);
+  color: var(--paper);
+}
+.expl-modal-actions {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+.expl-modal-fullscreen,
+.expl-modal-close {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(253,246,228,.3);
+  background: none;
+  color: var(--paper-light);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.expl-modal-fullscreen:hover,
+.expl-modal-close:hover {
+  background: var(--terra);
+  border-color: var(--terra);
+  color: var(--paper-light);
+}
+
+/* ── Nota metodologica: fascia collassata sopra il grafico ─ */
+.expl-modal-note {
+  padding: .75rem 1.5rem .85rem;
+  border-bottom: 1px solid rgba(253,246,228,.15);
+  background: var(--ink-light);
+}
+.expl-modal-note-content {
+  max-width: 1080px;    /* stessa larghezza "di progetto" del grafico — non segue la cornice del modale */
+  margin: 0 auto;
+}
+.expl-modal-note .expl-metanote-label { margin-top: 0; color: var(--paper); }
+.expl-modal-note .expl-metanote { margin-bottom: 0; color: var(--paper-light); }
+
+.expl-modal-note-inner {
+  position: relative;
+  max-height: 4.6em;   /* ~2 righe visibili su ciascuna delle 2 colonne */
+  overflow: hidden;
+  transition: max-height .2s ease;
+}
+.expl-modal-note.is-expanded .expl-modal-note-inner {
+  max-height: 600px;
+}
+.expl-modal-note:not(.is-expanded) .expl-modal-note-inner::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 1.5em;
+  background: linear-gradient(to bottom, transparent, var(--ink-light));
+}
+
+.expl-modal-note-toggle {
+  display: inline-block;
+  margin-top: .45rem;
+  font-family: var(--ff-mono);
+  font-size: var(--fs-mono-sm);
+  letter-spacing: .04em;
+  color: var(--terra-muted);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.expl-modal-body {
+  padding: 1.5rem 1.5rem 0;
+  display: flex;
+  justify-content: center;
+}
+.expl-modal-body-content {
+  max-width: 1080px;    /* stessa larghezza "di progetto" della miniatura — resta fissa anche a schermo intero */
+  width: 100%;
+}
+
+body.expl-modal-open { overflow: hidden; }
+
+/* ══════════════════════════════════════════════════════════
+   RACCONTO — griglia sidebar + contenuto (come Approfondisci)
+   ══════════════════════════════════════════════════════════ */
+.racc-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 2.5rem;
+  min-height: calc(100vh - 6rem);
+  padding-left: 1.5rem;
+}
+
+/* ── Sidebar TOC — elenco piatto ─────────────────────────── */
+.racc-sidebar {
+  position: sticky;
+  top: 6rem;
+  height: fit-content;
+  padding: 2.5rem 0;
+}
+
+.racc-toc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.racc-toc-list li {
+  padding: .6rem 0;
+  border-bottom: 1px solid var(--gray-1);
+}
+.racc-toc-list li:last-child {
+  border-bottom: none;
+}
+
+.racc-toc-link {
+  display: block;
+  text-align: right;
+  text-decoration: none !important;
+  font-family: var(--ff-body);
+  font-size: var(--fs-body-sm);
+  color: var(--gray-3) !important;
+  line-height: 1.4;
+  transition: color .15s ease;
+}
+.racc-toc-link:hover,
+.racc-toc-link.active { color: var(--terra) !important; }
+
+/* ── Contenuto principale ───────────────────────────────── */
+.racc-main {
+  padding: 3rem 1.5rem 5rem 5rem;
+  max-width: 860px;
+}
+
+.racc-section {
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  scroll-margin-top: 7rem;
+}
+
+/* ── Eyebrow + titolo prologo ────────────────────────────── */
+.racc-eyebrow {
+  font-family: var(--ff-mono);
+  font-size: var(--fs-caption);
+  letter-spacing: .14em;
+  color: var(--gray-2);
+  font-weight: 500;
+  text-align: right;
+  margin-bottom: .5rem;
+}
+
+.racc-lead {
+  font-family: var(--ff-body);
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: var(--ink);
+  font-weight: 475;
+  margin-bottom: 1.75rem;
+}
+.racc-lead strong { font-weight: 600; color: var(--terra); }
+
+/* ── Titolo sezione ──────────────────────────────────────── */
+.racc-section-title {
+  font-family: var(--ff-head);
+  font-size: 2rem;
+  font-weight: 400;
+  text-align: right;
+  margin: 0 0 .5rem;
+  line-height: 1.15;
+}
+.racc-section-title--h1 {
+  font-size: var(--fs-h2, 2.6rem);
+}
+
+.racc-title-rule {
+  border: none;
+  border-top: 1px solid var(--gray-1);
+  margin: 0 0 1.75rem;
+  opacity: 1;
+}
+
+/* ── Corpo testo a due colonne ───────────────────────────── */
+.racc-cols {
+  columns: 2;
+  column-gap: 2rem;
+  margin-bottom: 1.75rem;
+  font-family: var(--ff-body);
+  font-size: .92rem;
+  line-height: 1.7;
+  color: var(--ink-light);
+}
+.racc-cols p { margin: 0 0 1rem; }
+.racc-cols p:last-child { margin-bottom: 0; }
+
+/* ── Link CTA fine sezione ───────────────────────────────── */
+.racc-cta {
+  text-align: right;
+  padding-top: 0.5rem;
+  padding-bottom: 1remS;
+}
+.racc-cta a {
+  font-family: var(--ff-body);
+  font-size: .9rem;
+  font-weight: 500;
+  color: var(--terra) !important;
+  text-decoration: none !important;
+  padding-bottom: 1px;
+}
+.racc-cta a:hover {
+  color: var(--terra-dark) !important;
+  border-color: var(--terra-dark);
+}
+
+/* ── Placeholder grafici in attesa ──────────────────────── */
+.racc-placeholder {
+  max-width: 480px;
+  height: 220px;
+  margin: 0 auto;
+  border: 1.5px dashed var(--gray-1);
+  border-radius: 4px;
+  background: var(--paper);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .4rem;
+  text-align: center;
+  padding: 0 1.5rem;
+}
+.racc-placeholder i {
+  font-size: 1.7rem;
+  color: var(--gray-1);
+  margin-bottom: .2rem;
+}
+.racc-placeholder-label {
+  font-family: var(--ff-mono);
+  font-size: var(--fs-mono-sm);
+  font-weight: 500;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--gray-3);
+}
+.racc-placeholder-sub {
+  font-family: var(--ff-body);
+  font-size: var(--fs-caption);
+  color: var(--gray-2);
+}
+
+/* ── Responsive ─────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .racc-layout { grid-template-columns: 1fr; padding-left: 0; }
+  .racc-sidebar { display: none; }
+  .racc-main { padding: 2rem 1.5rem 4rem; max-width: none; }
+  .racc-cols { columns: 1; }
+}
+
+/* ══════════════════════════════════════════════════════════
    GEOGRAFIA — classifica animata delle piazze
    ══════════════════════════════════════════════════════════ */
 .geo-head {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  margin-bottom: 14px;
+  margin-bottom: 20px;
 }
 .geo-head-label {
   font-family: var(--ff-mono);
@@ -377,6 +757,18 @@
   color: var(--terra);
 }
 .geo-plot { position: relative; }
+.geo-col-label {
+  position: absolute;
+  top: -16px;
+  right: 0;
+  width: 36px;
+  text-align: right;
+  font-family: var(--ff-mono);
+  font-size: 11px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--gray-2);
+}
 .geo-gridlines {
   position: absolute;
   top: 0; bottom: 0;
@@ -443,8 +835,19 @@
 .geo-row-val {
   font-family: var(--ff-mono);
   font-size: 10.5px;
-  color: var(--gray-3);
+  color: var(--gray-3) !important;
   text-align: right;
+  text-decoration: none !important;
+  cursor: default;
+}
+.geo-row-val--link {
+  color: var(--terra) !important;
+  cursor: pointer;
+  text-decoration: underline !important;
+  text-decoration-color: rgba(217,64,16,.35) !important;
+}
+.geo-row-val--link:hover {
+  text-decoration-color: var(--terra) !important;
 }
 .geo-scrub {
   display: flex;
@@ -462,6 +865,10 @@
   cursor: pointer;
   padding: 0;
   flex-shrink: 0;
+}
+.geo-play-btn:hover {
+  background: var(--terra);
+  color: var(--paper-light);
 }
 .geo-track {
   position: relative;
@@ -566,6 +973,11 @@
 }
 .stag-info-popover.is-open { display: block; }
 
+/* Scrollbar Banditori 2 (Chrome/Safari — Firefox già coperto via JS inline) */
+#band-wrap2 div::-webkit-scrollbar { width: 9px; }
+#band-wrap2 div::-webkit-scrollbar-track { background: var(--paper-dark); }
+#band-wrap2 div::-webkit-scrollbar-thumb { background: var(--gray-1); border-radius: 6px; }
+
 /* ══════════════════════════════════════════════════════════
    COLLEZIONI — titoli statistiche/lista + legenda
    ══════════════════════════════════════════════════════════ */
@@ -602,3 +1014,10 @@
   color: var(--gray-3);
 }
 
+/* Freccia del chip "Altre" — più visibile del testo circostante */
+.chip-arrow {
+  font-size: 12px;
+  font-weight: 700;
+  margin-left: 2px;
+  display: inline-block;
+}

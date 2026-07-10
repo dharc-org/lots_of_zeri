@@ -14,13 +14,17 @@ Produce in --out (default: ./data/):
     collezioni.json
 
 Note metodologiche incorporate nello script (vedi commenti inline):
-  - Il periodo di riferimento è sempre 1879-1929 (corpus digitalizzato):
-    i residui post-1929 vengono esclusi da tutti e tre i grafici.
+  - Il periodo di riferimento è 1879-1929 (corpus digitalizzato). ATTENZIONE:
+    il file sorgente contiene in realtà eventi fino al 1939 (32 eventi,
+    l'1,7% del totale) che questo filtro esclude di proposito per restare
+    coerenti con la data usata nel resto del sito. Da riverificare se si
+    decide di estendere il periodo ovunque.
   - Stagionalità: solo Germania, Francia, Italia (i tre fondi che coprono
     circa il 95% del corpus); percentuali calcolate sul totale annuo di
     ciascun paese, non sul totale complessivo.
-  - Geografia: top 5 città per decennio (1890-1929) + bucket residuale
-    "altre città"; scala condivisa fra tutti i decenni.
+  - Geografia: top 10 città per decennio (1879-1929, con il bucket
+    1879-89 trattato come decennio incompleto da 11 anni) + bucket
+    residuale "altre città"; scala condivisa fra tutti i decenni.
   - Collezioni: classifica delle 15 collezioni più ricorrenti, con
     etichetta "stesso anno" / "stessa casa" / "case diverse" calcolata
     incrociando l'arco di anni e il numero di case d'asta distinte.
@@ -48,8 +52,12 @@ def carica_eventi(xlsx_path):
 
 
 # ──────────────────────────────────────────────────────────────
-# 1. STAGIONALITÀ — distribuzione mensile per Germania/Francia/Italia
+# 1. STAGIONALITÀ — distribuzione mensile per tutti i fondi con
+#    almeno MIN_ASTE_STAGIONALITA aste documentate nel periodo
 # ──────────────────────────────────────────────────────────────
+MIN_ASTE_STAGIONALITA = 10
+
+
 def genera_stagionalita(df):
     dfm = df.copy()
     dfm["d0"] = pd.to_datetime(dfm["DATA INIZIO"].astype(str), format="%Y%m%d", errors="coerce")
@@ -64,32 +72,39 @@ def genera_stagionalita(df):
         .reindex(columns=range(1, 13), fill_value=0)
     )
 
-    # Solo i tre fondi con volume sufficiente per un pattern stagionale
-    # affidabile (gli altri: Inghilterra 44, Paesi Bassi 26, Stati Uniti 14,
-    # Belgio 3, Svizzera 2 — troppo pochi in 50 anni).
-    paesi = ["Germania", "Francia", "Italia"]
+    totals = by_country.sum(axis=1).sort_values(ascending=False)
     countries = []
-    for nome in paesi:
-        if nome not in by_country.index:
+    for nome, tot in totals.items():
+        if tot < MIN_ASTE_STAGIONALITA:
             continue
         row = by_country.loc[nome]
-        countries.append({"n": nome, "tot": int(row.sum()), "m": [int(v) for v in row.tolist()]})
+        countries.append({"n": nome, "tot": int(tot), "m": [int(v) for v in row.tolist()]})
 
     return {
         "period": f"{ANNO_MIN}–{ANNO_MAX}",
         "months": ["gen", "feb", "mar", "apr", "mag", "giu", "lug", "ago", "set", "ott", "nov", "dic"],
+        "min_aste": MIN_ASTE_STAGIONALITA,
         "countries": countries,
     }
 
 
 # ──────────────────────────────────────────────────────────────
-# 2. GEOGRAFIA DEL MERCATO — top 5 città + "altre" per decennio
+# 2. GEOGRAFIA DEL MERCATO — top 10 città + "altre" per decennio
 # ──────────────────────────────────────────────────────────────
-def genera_geografia(df, anno_min_decadi=1890):
+def _decade_bucket(year):
+    """1879-1889 è un bucket unico da 11 anni (il corpus parte nel 1879,
+    troppo poco per un decennio pieno); dal 1890 in poi decenni standard."""
+    if ANNO_MIN <= year <= 1889:
+        return 1879
+    return (year // 10) * 10
+
+
+def genera_geografia(df, anno_min_decadi=ANNO_MIN, top_n=10):
     d = df[(df["year"] >= anno_min_decadi) & (df["year"] <= ANNO_MAX)].copy()
-    d["decade"] = (d["year"] // 10) * 10
+    d["decade"] = d["year"].apply(_decade_bucket)
 
     decadi_label = [
+        (1879, "1879–89"),
         (1890, "1890–99"),
         (1900, "1900–09"),
         (1910, "1910–19"),
@@ -100,15 +115,17 @@ def genera_geografia(df, anno_min_decadi=1890):
     for dec, label in decadi_label:
         sub = d[d["decade"] == dec]
         vc = sub["LUOGO"].value_counts()
-        top5 = vc.head(5)
+        top = vc.head(top_n)
+        resto = vc.iloc[top_n:]
         tot = int(len(sub))
-        top_sum = int(top5.sum())
+        top_sum = int(top.sum())
         decades_out.append(
             {
                 "label": label,
                 "tot": tot,
-                "top": [{"n": n, "v": int(v)} for n, v in top5.items()],
+                "top": [{"n": n, "v": int(v)} for n, v in top.items()],
                 "altre": tot - top_sum,
+                "resto": [{"n": n, "v": int(v)} for n, v in resto.items()],
             }
         )
 
@@ -125,16 +142,6 @@ def genera_geografia(df, anno_min_decadi=1890):
 # 3. COLLEZIONI — ricomparse in più eventi d'asta
 # ──────────────────────────────────────────────────────────────
 def _classifica_tag(years, houses_counter):
-    """Criterio di classificazione (euristico, non una conclusione):
-      - tutti gli eventi nello stesso anno            -> 'anno'
-        (quasi certamente un'unica vendita catalogata in più sessioni)
-      - anni diversi ma sempre la stessa casa d'asta  -> 'casa'
-        (probabile liquidazione a tranche con un solo operatore)
-      - anni diversi e case d'asta diverse            -> 'diverse'
-        (dispersione reale sul mercato secondario)
-    "non specificata" (organizzatore mancante nel dato) non conta come
-    una casa d'asta distinta ai fini del criterio.
-    """
     n_years = len(set(years))
     n_houses = len([k for k in houses_counter if k != "non specificata"])
     if n_years == 1:
@@ -195,7 +202,6 @@ def genera_collezioni(df, top_n=15):
     }
 
 
-# ──────────────────────────────────────────────────────────────
 def main():
     parser = argparse.ArgumentParser(description="Genera i JSON per Esplora (stagionalità, geografia, collezioni).")
     parser.add_argument("xlsx", help="Percorso del file METADATI-ZERI-*.xlsx")
@@ -219,14 +225,13 @@ def main():
             json.dump(payload, f, ensure_ascii=False, indent=1)
         print(f"scritto {path}")
 
-    # Riepilogo di controllo
     s = dataset["stagionalita.json"]
     g = dataset["geografia_decenni.json"]
     c = dataset["collezioni.json"]
     print()
     print("── riepilogo ──")
     print("stagionalita:", ", ".join(f"{p['n']} ({p['tot']} aste)" for p in s["countries"]))
-    print("geografia: scale_max =", g["scale_max"], "-", ", ".join(d["label"] for d in g["decades"]))
+    print("geografia: scale_max =", g["scale_max"], "-", ", ".join(f"{d['label']} (tot {d['tot']}, leader {d['top'][0]['n']})" for d in g["decades"]))
     print("collezioni:", c["stats"], "- top:", c["items"][0]["n"], c["items"][0]["c"])
 
 

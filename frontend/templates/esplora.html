@@ -29,22 +29,22 @@
           <span class="expl-tab-num">02</span><span class="expl-tab-label">Banditori</span>
         </button>
         <button class="expl-tab" data-tab="banditori2" role="tab" aria-selected="false">
-          <span class="expl-tab-num">02b</span><span class="expl-tab-label">Banditori 2 (test)</span>
+          <span class="expl-tab-num">02b</span><span class="expl-tab-label">Banditori 2</span>
         </button>
         <button class="expl-tab" data-tab="tipologie" role="tab" aria-selected="false">
           <span class="expl-tab-num">03</span><span class="expl-tab-label">Tipologie di oggetti</span>
         </button>
         <button class="expl-tab" data-tab="trend" role="tab" aria-selected="false">
-          <span class="expl-tab-num">04</span><span class="expl-tab-label">Trend di mercato</span>
+          <span class="expl-tab-num">04</span><span class="expl-tab-label">Mercato nel tempo </span>
         </button>
         <button class="expl-tab" data-tab="stagionalita" role="tab" aria-selected="false">
-          <span class="expl-tab-num">05</span><span class="expl-tab-label">Stagionalità</span>
+          <span class="expl-tab-num">05</span><span class="expl-tab-label">Stagioni dell'incanto</span>
         </button>
         <button class="expl-tab" data-tab="geografia" role="tab" aria-selected="false">
-          <span class="expl-tab-num">06</span><span class="expl-tab-label">Geografia del mercato</span>
+          <span class="expl-tab-num">06</span><span class="expl-tab-label">Piazze del mercato</span>
         </button>
         <button class="expl-tab" data-tab="collezioni" role="tab" aria-selected="false">
-          <span class="expl-tab-num">07</span><span class="expl-tab-label">Collezioni</span>
+          <span class="expl-tab-num">07</span><span class="expl-tab-label">Collezioni ricorrenti</span>
         </button>
       </nav>
     </div>
@@ -75,8 +75,8 @@ L'intensità del colore è calcolata in modo relativo per ciascuna casa: il tono
 
     {# ════ 02b — Banditori 2 (versione test) ════ #}
     <div class="expl-panel" id="panel-banditori2" role="tabpanel">
-      <p class="expl-metanote-label">Nota metodologica — versione test</p>
-      <p class="expl-metanote">Versione sperimentale del grafico banditori, con tutte le relazioni documentate nel <em>corpus</em> (non solo i più attivi). Ordinamento per numero di aste, raggio del nodo proporzionale all'attività, archi visibili solo alla selezione di un banditore per ridurre la sovrapposizione visiva con 99 nodi.</p>
+      <p class="expl-metanote-label">Nota metodologica</p>
+      <p class="expl-metanote"> Il grafico visualizza le relazioni tra i banditori documentati nel corpus e le case d'asta presso cui hanno operato. Lo spessore della linea è proporzionale al numero di aste condotte con quella casa d'asta. Nei dati del corpus il banditore è documentato solo nel 30% degli eventi — 604 su 1.895 — con una forte concentrazione nelle vendite parigine, dove il commissaire-priseur era una figura istituzionale del sistema d'asta francese. L'assenza del banditore nei cataloghi tedeschi e italiani non indica assenza del ruolo, ma una diversa prassi documentaria. La lista offre una panoramica di tutti i banditori documentati nel corpus; il grafico rappresenta tutte le relazioni documentate tra banditori e case d'asta, anche quando limitate a una sola vendita. Un banditore può comparire in lista senza legami visibili nel grafico solo quando, per le aste da lui condotte, il catalogo non documenta alcuna casa d'asta organizzatrice. Clicca un nome nella lista o un nodo nel grafico per isolare i legami; clicca di nuovo per tornare alla vista completa.</p>
       <div class="expl-chart-wrap" id="band-wrap2"></div>
     </div>
 
@@ -103,10 +103,11 @@ Sono rappresentate le sei tipologie più ricorrenti — Dipinti, Mobili, Disegni
             <div style="display:flex;flex:1;justify-content:space-between;align-items:baseline;">
               <span id="tl-from" class="expl-tl-year">1879</span>
               <span class="expl-tl-range-label" id="tl-range-label">trascina per filtrare</span>
-              <span id="tl-to" class="expl-tl-year">1939</span>
+              <span id="tl-to" class="expl-tl-year">1929</span>
             </div>
           </div>
-          <svg class="expl-tl-track" id="tl-track" height="28"></svg>
+          <svg class="expl-tl-track" id="tl-track" height="44"></svg>
+          <div id="tl-ticklabels" class="tl-ticklabels"></div>
         </div>
         <div class="expl-map-wrap">
           <svg id="trend-map" style="width:100%;display:block;cursor:grab;"></svg>
@@ -129,19 +130,41 @@ Sono rappresentate le sei tipologie più ricorrenti — Dipinti, Mobili, Disegni
     <div class="expl-panel" id="panel-stagionalita" role="tabpanel">
       <p class="expl-metanote-label">Nota metodologica</p>
       <p class="expl-metanote">Il grafico mostra la distribuzione mensile delle aste per Germania, Francia e Italia — i tre fondi che coprono insieme circa il 95% del corpus nel periodo 1879–1929 (Inghilterra, Paesi Bassi, Stati Uniti, Belgio e Svizzera restano fuori: con 2-44 aste in cinquant'anni il pattern stagionale non sarebbe affidabile). I mesi sono aggregati su tutto il periodo, non riferiti a un anno specifico: "maggio" somma le aste di maggio di qualsiasi anno tra il 1879 e il 1929. Ogni valore è la quota di aste del mese sul totale annuo del paese — non sul totale complessivo — così le curve restano confrontabili anche se i volumi assoluti sono molto diversi (1.065 aste tedesche contro 532 francesi e 173 italiane). Passa il mouse su un punto per vedere il calcolo per esteso.</p>
-      <div class="expl-chart-wrap">
-        <div id="stag-legend"></div>
-        <div id="stag-calc" style="background:var(--paper-dark);border-radius:3px;padding:6px 10px;margin:10px 0 12px;font-family:var(--ff-mono);font-size:11px;color:var(--ink);"></div>
-        <svg id="stag-svg" viewBox="0 0 600 250" style="width:100%;display:block;"></svg>
-      </div>
+        <div class="expl-chart-wrap">
+          <div class="stag-head">
+            <div id="stag-legend"></div>
+            <button id="stag-info-btn" class="stag-info-btn" type="button" aria-label="Come si legge un punto del grafico" aria-describedby="stag-info-popover">i</button>
+            <div id="stag-info-popover" class="stag-info-popover" role="tooltip"></div>
+          </div>
+          <svg id="stag-svg" viewBox="0 0 600 250" style="width:100%;display:block;"></svg>
+        </div>
     </div>
 
     {# ════ 06 — Geografia del mercato ════ #}
     <div class="expl-panel" id="panel-geografia" role="tabpanel">
       <p class="expl-metanote-label">Nota metodologica</p>
-      <p class="expl-metanote">Il grafico confronta le prime cinque piazze per numero di aste in ciascun decennio dal 1890 al 1929, su una scala condivisa fra tutti i pannelli (la barra piena corrisponde al massimo assoluto: Parigi, 233 aste, nel 1900-09). La barra evidenziata è la piazza leader del decennio. La voce «altre città» somma il residuo rispetto alle prime cinque — tra le 20 e le 27 città con almeno un'asta documentata in ciascun decennio, per un totale di 52 città nel periodo — e include anche segnali minori ma non trascurabili, come l'ingresso di New York negli anni '20.</p>
+      <p class="expl-metanote">Il grafico anima le prime dieci piazze per numero di aste in ciascuno dei cinque intervalli del corpus (1879-89, un decennio incompleto da 11 anni, seguito dai quattro decenni pieni fino al 1929), su una scala condivisa fra tutti i pannelli — la barra piena corrisponde al massimo assoluto: Parigi, 233 aste, nel 1900-09. Trascinando il cursore il movimento fra un intervallo e il successivo è continuo, ma i valori intermedi sono interpolati a scopo illustrativo: non corrispondono ad aste realmente avvenute in quell'anno preciso. Le prime posizioni sono in larga parte città tedesche, coerentemente con la composizione del corpus (il fondo Germania copre da solo 1.065 aste su 1.863, il 57% del periodo): la classifica riflette quali fondi sono stati digitalizzati, non necessariamente il peso reale che quelle piazze avevano nel mercato internazionale dell'arte. 55 città distinte compaiono nel periodo; oltre la decima posizione il residuo è aggregato nella voce «altre città».</p>
       <div class="expl-chart-wrap">
-        <div id="geo-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:22px 28px;"></div>
+        <div class="geo-head">
+          <span class="geo-head-label">Piazze del mercato</span>
+          <span id="geo-year" class="geo-year">1879-89</span>
+        </div>
+        <div class="geo-plot">
+          <div id="geo-gridlines" class="geo-gridlines"></div>
+          <div id="geo-rows" class="geo-rows"></div>
+        </div>
+        <div class="geo-scrub">
+          <button id="geo-play-btn" type="button" class="geo-play-btn" title="Avvia autoplay" aria-label="Avvia autoplay">
+            <i class="ph ph-play" id="geo-play-icon"></i>
+          </button>
+          <div id="geo-track" class="geo-track">
+            <div class="geo-track-base"></div>
+            <div id="geo-ticks" class="geo-ticks"></div>
+            <div id="geo-fill" class="geo-fill"></div>
+            <div id="geo-handle" class="geo-handle"></div>
+          </div>
+        </div>
+        <div id="geo-ticklabels" class="geo-ticklabels"></div>
       </div>
     </div>
 
@@ -150,10 +173,15 @@ Sono rappresentate le sei tipologie più ricorrenti — Dipinti, Mobili, Disegni
       <p class="expl-metanote-label">Nota metodologica</p>
       <p class="expl-metanote">Il grafico conta quante volte il nome di una collezione ricompare nel campo che documenta le collezioni messe in vendita, sulle 1.276 collezioni nominate nel corpus. La ricomparsa non equivale sempre a dispersione nel tempo: il criterio incrocia l'arco di anni coperto dalle vendite con il numero di case d'asta coinvolte. Se tutti gli eventi cadono nello stesso anno («stesso anno»), è quasi certamente un'unica vendita catalogata in più sessioni — non una collezione dispersa. Se gli eventi si estendono su più anni ma presso la stessa casa («stessa casa»), è più probabile una liquidazione concordata a tranche con un solo operatore. Solo quando anni e case sono entrambi diversi («case diverse») si può parlare di dispersione reale sul mercato secondario. È un'euristica basata solo su anno e casa d'asta, non sui motivi della rivendita (eredità, fallimento, speculazione): resta un punto di partenza da verificare sui singoli cataloghi, non una conclusione. Clicca una collezione per il dettaglio di periodo e case d'asta.</p>
       <div class="expl-chart-wrap">
-        <div id="coll-stats" style="display:flex;gap:14px;margin-bottom:14px;"></div>
-        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;flex-wrap:wrap;gap:6px;">
-          <div style="font-family:var(--ff-mono);font-size:10.5px;color:var(--gray-2);">le 15 collezioni ricomparse più spesso, per n. di eventi d'asta</div>
-          <div id="coll-legend" style="display:flex;gap:10px;font-family:var(--ff-mono);font-size:9.5px;"></div>
+        <div class="coll-stats-label">Le collezioni in numeri</div>
+        <div id="coll-stats" style="display:flex;gap:14px;margin-bottom:18px;"></div>
+        <div class="coll-list-header">
+          <div class="coll-list-title">Le 15 collezioni ricomparse più spesso, per numero di eventi d'asta</div>
+          <div style="display:flex;align-items:center;gap:8px;position:relative;">
+            <div id="coll-legend" class="coll-legend"></div>
+            <button id="coll-info-btn" class="stag-info-btn" type="button" aria-label="Cosa significa il secondo pallino" aria-describedby="coll-info-popover" style="position:static;">i</button>
+            <div id="coll-info-popover" class="stag-info-popover" role="tooltip" style="top:calc(100% + 8px); right:0;"></div>
+          </div>
         </div>
         <div id="coll-list"></div>
       </div>

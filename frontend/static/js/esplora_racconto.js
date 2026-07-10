@@ -10,50 +10,171 @@
 const DATA_BASE = '/static/data/';
 
 /* ══════════════════════════════════════════════════════════
-   1. SISTEMA TAB
+   0. MODALE ESPANDI — sposta il grafico reale dentro/fuori
+      dal modale (nessuna doppia istanza, nessun ricalcolo)
    ══════════════════════════════════════════════════════════ */
-(function initTabs() {
-  const tabs   = document.querySelectorAll('.expl-tab');
-  const panels = document.querySelectorAll('.expl-panel');
+(function initExpandModal() {
+  const modal       = document.getElementById('expl-modal');
+  const panelEl      = modal.querySelector('.expl-modal-panel');
+  const backdrop     = document.getElementById('expl-modal-backdrop');
+  const titleEl      = document.getElementById('expl-modal-title');
+  const bodyEl       = document.getElementById('expl-modal-body-content');
+  const noteEl       = document.getElementById('expl-modal-note');
+  const noteInnerEl  = document.getElementById('expl-modal-note-inner');
+  const noteToggle   = document.getElementById('expl-modal-note-toggle');
+  const closeBtn     = document.getElementById('expl-modal-close');
+  const fsBtn        = document.getElementById('expl-modal-fullscreen');
+  const fsIcon       = document.getElementById('expl-modal-fullscreen-icon');
 
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      const id = tab.dataset.tab;
+  let current = null; // { preview, stage, wrapNode, metaSlot }
 
-      tabs.forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
-      panels.forEach(p => p.classList.remove('active'));
+  function scalePreview(preview) {
+    const stage = preview.querySelector('.expl-preview-stage');
+    if (!stage.firstElementChild) return; // grafico attualmente nel modale
+    const scale = preview.clientWidth / stage.offsetWidth;
+    stage.style.transform = `scale(${scale})`;
+  }
 
+  function setFullscreen(on) {
+    panelEl.classList.toggle('is-fullscreen', on);
+    fsIcon.className = on ? 'ph ph-arrows-in-simple' : 'ph ph-arrows-out-simple';
+    fsBtn.setAttribute('aria-label', on ? 'Esci da schermo intero' : 'Schermo intero');
+  }
 
-      tab.classList.add('active');
-      tab.setAttribute('aria-selected', 'true');
-      document.getElementById('panel-' + id).classList.add('active');
+  function openFor(preview) {
+    const stage    = preview.querySelector('.expl-preview-stage');
+    const wrapNode = stage.firstElementChild;
+    const metaSlot = document.getElementById(preview.dataset.metaSlot);
 
+    current = { preview, stage, wrapNode, metaSlot };
 
-      /* Inizializza il grafico la prima volta che la tab viene aperta */
-      if (!tab.dataset.loaded) {
-        tab.dataset.loaded = '1';
-        initChart(id);
-      }
+    titleEl.textContent = preview.dataset.title || '';
+    bodyEl.appendChild(wrapNode); // stessa istanza, ora a dimensione naturale
+
+    noteInnerEl.innerHTML = '';
+    if (metaSlot) {
+      while (metaSlot.firstChild) noteInnerEl.appendChild(metaSlot.firstChild);
+      noteEl.style.display = '';
+    } else {
+      noteEl.style.display = 'none';
+    }
+    noteEl.classList.remove('is-expanded');
+    noteToggle.textContent = 'Leggi la nota completa';
+
+    setFullscreen(false);
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('expl-modal-open');
+
+    if (typeof preview._onExpand === 'function') preview._onExpand();
+  }
+
+  function close() {
+    if (!current) return;
+    const { preview, stage, wrapNode, metaSlot } = current;
+
+    if (typeof preview._onCollapse === 'function') preview._onCollapse();
+
+    /* Se un elemento dentro il modale ha ancora il focus (es. il
+       pulsante chiudi appena cliccato), il browser rifiuta di
+       applicare aria-hidden="true" e segnala un avviso — bisogna
+       togliere il focus prima di nascondere il modale. */
+    if (modal.contains(document.activeElement)) {
+      document.activeElement.blur();
+    }
+
+    stage.appendChild(wrapNode);
+    scalePreview(preview);
+    if (metaSlot) { while (noteInnerEl.firstChild) metaSlot.appendChild(noteInnerEl.firstChild); }
+
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('expl-modal-open');
+    current = null;
+  }
+
+  document.querySelectorAll('.expl-preview').forEach(preview => {
+    scalePreview(preview);
+    preview.addEventListener('click', () => openFor(preview));
+    preview.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openFor(preview); }
     });
   });
 
-  /* Prima tab attiva subito */
-  initChart('case');
-  tabs[0].dataset.loaded = '1';
+  window.addEventListener('resize', () => {
+    if (current) return;
+    document.querySelectorAll('.expl-preview').forEach(scalePreview);
+  });
+
+  noteToggle.addEventListener('click', () => {
+    const expanded = noteEl.classList.toggle('is-expanded');
+    noteToggle.textContent = expanded ? 'Comprimi' : 'Leggi la nota completa';
+  });
+
+  fsBtn.addEventListener('click', () => setFullscreen(!panelEl.classList.contains('is-fullscreen')));
+
+  backdrop.addEventListener('click', close);
+  closeBtn.addEventListener('click', close);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
 })();
+
+/* ══════════════════════════════════════════════════════════
+   1. RACCONTO — inizializzazione grafici + scrollspy sidebar
+   ══════════════════════════════════════════════════════════ */
+
+/* Tutte e sette le sezioni con grafico sono ormai agganciate e si
+   caricano subito all'apertura della pagina. */
+loadAndRenderCase();
+loadAndRenderGeografia();
+loadAndRenderTrend();
+loadAndRenderStagionalita();
+loadAndRenderBanditori2();
+loadAndRenderCollezioni();
+loadAndRenderTipologie();
 
 function initChart(id) {
   switch (id) {
-    case 'case':      loadAndRenderCase();      break;
-    case 'banditori': loadAndRenderBanditori(); break;
-    case 'banditori2': loadAndRenderBanditori2(); break;
-    case 'tipologie': loadAndRenderTipologie(); break;
-    case 'trend':     loadAndRenderTrend();     break;
-    case 'stagionalita': loadAndRenderStagionalita(); break;
-    case 'geografia':    loadAndRenderGeografia();    break;
-    case 'collezioni':   loadAndRenderCollezioni();   break;
+    case 'case':         loadAndRenderCase();       break;
+    case 'banditori':    loadAndRenderBanditori();  break;
+    case 'banditori2':   loadAndRenderBanditori2(); break;
+    case 'tipologie':    loadAndRenderTipologie();  break;
+    case 'trend':        loadAndRenderTrend();      break;
+    case 'stagionalita': loadAndRenderStagionalita();break;
+    case 'geografia':    loadAndRenderGeografia();  break;
+    case 'collezioni':   loadAndRenderCollezioni(); break;
   }
 }
+
+/* ── Scrollspy: evidenzia la voce attiva nella sidebar ──── */
+(function initScrollspy() {
+  const links    = document.querySelectorAll('.racc-toc-link');
+  const sections = document.querySelectorAll('.racc-section');
+  if (!links.length || !sections.length) return;
+
+  const linkFor = id => document.querySelector(`.racc-toc-link[data-target="${id}"]`);
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      links.forEach(l => l.classList.remove('active'));
+      const link = linkFor(entry.target.id);
+      if (link) link.classList.add('active');
+    });
+  }, { rootMargin: '-20% 0px -70% 0px', threshold: 0 });
+
+  sections.forEach(s => observer.observe(s));
+
+  /* Sezione attiva subito all'apertura della pagina */
+  const first = linkFor(sections[0].id);
+  if (first) first.classList.add('active');
+
+  links.forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      document.getElementById(link.dataset.target).scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+})();
 
 /* ── Utility fetch JSON ─────────────────────────────────── */
 async function fetchJSON(file) {
@@ -68,8 +189,7 @@ async function fetchJSON(file) {
    ══════════════════════════════════════════════════════════ */
 async function loadAndRenderCase() {
   const C = await fetchJSON('case_dasta.json');
-  const panel = document.getElementById('panel-case');
-  const wrap  = panel.querySelector('.expl-chart-wrap');
+  const wrap  = document.getElementById('case-rows').closest('.expl-chart-wrap');
   const NS = 'http://www.w3.org/2000/svg';
   const N  = C.ymax - C.ymin + 1;
 
@@ -99,7 +219,7 @@ async function loadAndRenderCase() {
 
   /* Tooltip condiviso */
   const tipEl = document.createElement('div');
-  tipEl.style.cssText = 'position:fixed;background:var(--ink);color:var(--paper-light);font:11px var(--ff-mono);padding:3px 7px;border-radius:2px;pointer-events:none;display:none;z-index:200;white-space:nowrap;';
+  tipEl.style.cssText = 'position:fixed;background:var(--ink);color:var(--paper-light);font:11px var(--ff-mono);padding:3px 7px;border-radius:2px;pointer-events:none;display:none;z-index:2100;white-space:nowrap;';
   document.body.appendChild(tipEl);
   let tipTimer = null;
 
@@ -143,6 +263,7 @@ async function loadAndRenderCase() {
       rect.setAttribute('fill-opacity', o.toFixed(2));
       rect.style.cursor = 'pointer';
       rect.addEventListener('click', e => {
+        e.stopPropagation();
         showTip(`${yr}: ${v} aste`, e.clientX, e.clientY);
       });
       svg.appendChild(rect);
@@ -465,7 +586,6 @@ async function loadAndRenderBanditori2() {
   }
 
   const NS = 'http://www.w3.org/2000/svg';
-  const panel = document.getElementById('panel-banditori2');
   const wrap  = document.getElementById('band-wrap2');
 
   wrap.style.cssText = 'background:var(--paper);border:1px solid var(--gray-1);border-radius:4px;margin-bottom:.75rem;overflow:hidden;';
@@ -485,14 +605,14 @@ thLeft.innerHTML = `
   <div id="band2-legend-items" style="display:none;gap:9px;flex-wrap:wrap;margin-top:.4rem;font-family:var(--ff-mono);font-size:.62rem;color:var(--gray-2);">
     <span style="display:inline-flex;align-items:center;gap:3px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--terra);display:inline-block;"></span>Con casa d'asta nota</span>
     <span style="display:inline-flex;align-items:center;gap:3px;"><span style="width:6px;height:6px;border-radius:50%;border:1.2px solid var(--terra);display:inline-block;"></span>Senza casa d'asta — verosimilmente in proprio</span>
-    <span style="display:inline-flex;align-items:center;gap:3px;"><span style="width:6px;height:1.2px;background:var(--gray-2);display:inline-block;"></span>Senza casa d'asta — non documentato</span>
   </div>
 `;
 
 const band2LegendToggle = thLeft.querySelector('#band2-legend-toggle');
 const band2LegendItems  = thLeft.querySelector('#band2-legend-items');
 const band2LegendCaret  = thLeft.querySelector('#band2-legend-caret');
-band2LegendToggle.addEventListener('click', () => {
+band2LegendToggle.addEventListener('click', e => {
+  e.stopPropagation();
   const isOpen = band2LegendItems.style.display === 'flex';
   band2LegendItems.style.display = isOpen ? 'none' : 'flex';
   band2LegendCaret.style.transform = isOpen ? '' : 'rotate(180deg)';
@@ -531,17 +651,18 @@ band2LegendToggle.addEventListener('click', () => {
   const rows = [];
   const hint = document.getElementById('band-hint2');
 
-  /* Simbolo di stato per riga: pieno = relazionato, contorno = auto-organizzato, trattino = mancante */
+  /* Simbolo di stato per riga: pieno = relazionato, contorno = senza casa
+     d'asta (auto-organizzato o non documentato — trattate come un'unica
+     categoria, "verosimilmente in proprio") */
   function dotHtml(status) {
-    if (status === 'relazionato')    return '<span style="width:7px;height:7px;border-radius:50%;background:var(--terra);display:inline-block;"></span>';
-    if (status === 'autorganizzato') return '<span style="width:7px;height:7px;border-radius:50%;border:1.3px solid var(--terra);display:inline-block;"></span>';
-    return '<span style="width:7px;height:1.3px;background:var(--gray-2);display:inline-block;"></span>';
+    if (status === 'relazionato') return '<span style="width:7px;height:7px;border-radius:50%;background:var(--terra);display:inline-block;"></span>';
+    return '<span style="width:7px;height:7px;border-radius:50%;border:1.3px solid var(--terra);display:inline-block;"></span>';
   }
 
   B.all.forEach(b => {
     const row = document.createElement('div');
     row.style.cssText = 'display:grid;grid-template-columns:14px 1fr auto;gap:6px;padding:5px 10px;border-bottom:0.5px solid rgba(192,175,152,.35);cursor:pointer;align-items:center;transition:background .1s;background:var(--paper);';
-    const nameColor = b.status === 'mancante' ? 'var(--gray-2)' : 'var(--ink)';
+    const nameColor = 'var(--ink)';
     row._nameColor = nameColor;
     row.innerHTML = `
       ${dotHtml(b.status)}
@@ -550,7 +671,8 @@ band2LegendToggle.addEventListener('click', () => {
     `;
     row.addEventListener('mouseover', () => { if(!row.dataset.sel) row.style.background='rgba(217,64,16,.05)'; });
     row.addEventListener('mouseout',  () => { if(!row.dataset.sel) row.style.background='var(--paper)'; });
-    row.addEventListener('click', () => {
+    row.addEventListener('click', e => {
+      e.stopPropagation();
       /* secondo click → reset */
       if (row.dataset.sel) {
         selBand = null;
@@ -662,7 +784,8 @@ band2LegendToggle.addEventListener('click', () => {
     t.textContent = band.n.length>28 ? band.n.slice(0,27)+'…' : band.n;
 
     /* Click sul nodo → seleziona e rispecchia in lista */
-    [c,t].forEach(el => el.addEventListener('click', () => {
+    [c,t].forEach(el => el.addEventListener('click', e => {
+      e.stopPropagation();
       if (selBand === i) {
         /* secondo click → reset */
         selBand = null;
@@ -697,6 +820,7 @@ band2LegendToggle.addEventListener('click', () => {
 
   /* Click sull'SVG in area vuota → reset */
   svg.addEventListener('click', e => {
+    e.stopPropagation();
     if (e.target === svg) {
       selBand = null;
       resetLista();
@@ -739,7 +863,9 @@ band2LegendToggle.addEventListener('click', () => {
      alla vista libera. Non si ripete al resize o ad altre interazioni,
      solo al primo caricamento del grafico. */
   (function autoTour() {
-    const reps = B.top_band.slice(0, 3);
+    const couturierIdx = B.top_band.findIndex(b => b.n === 'Couturier, André');
+    const tourEnd = couturierIdx >= 0 ? couturierIdx + 1 : 3;
+    const reps = B.top_band.slice(0, tourEnd);
     if (!reps.length) return;
 
     reps.forEach((b, i) => {
@@ -755,14 +881,28 @@ band2LegendToggle.addEventListener('click', () => {
       render();
     }, 900 + reps.length * 2200);
   })();
-}
 
+  /* Alla chiusura del modale: riporta selezione e legenda allo stato
+     iniziale, così l'anteprima non resta "sporca" con l'ultima
+     interazione fatta dentro il modale. */
+  const band2PreviewEl = document.getElementById('band2-preview');
+  if (band2PreviewEl) {
+    band2PreviewEl._onCollapse = () => {
+      selBand = null;
+      resetLista();
+      render();
+      if (band2LegendItems.style.display === 'flex') {
+        band2LegendItems.style.display = 'none';
+        band2LegendCaret.style.transform = '';
+      }
+    };
+  }
+}
 
 async function loadAndRenderTipologie() {
   const T     = await fetchJSON('tipologie_oggetti.json');
   const svgEl = document.getElementById('tip-svg');
   const chips = document.getElementById('tip-chips');
-  const panel = document.getElementById('panel-tipologie');
   const NS    = 'http://www.w3.org/2000/svg';
 
   /* Palette 1 — Terra bruciata */
@@ -794,7 +934,7 @@ async function loadAndRenderTipologie() {
 
   /* Tooltip */
   const tip = document.createElement('div');
-  tip.style.cssText = 'position:fixed;background:var(--ink);color:var(--paper-light);font:11px var(--ff-mono);padding:4px 8px;border-radius:2px;pointer-events:none;display:none;z-index:200;white-space:nowrap;line-height:1.6;';
+  tip.style.cssText = 'position:fixed;background:var(--ink);color:var(--paper-light);font:11px var(--ff-mono);padding:4px 8px;border-radius:2px;pointer-events:none;display:none;z-index:2100;white-space:nowrap;line-height:1.6;';
   document.body.appendChild(tip);
 
   /* Pannello Altre */
@@ -803,7 +943,7 @@ async function loadAndRenderTipologie() {
 
   const altreTitle = document.createElement('div');
   altreTitle.style.cssText = 'font-family:var(--ff-mono);font-size:.7rem;letter-spacing:.1em;color:var(--gray-3);text-transform:uppercase;margin-bottom:.75rem;padding-bottom:.4rem;border-bottom:1px solid var(--gray-1);';
-  altreTitle.textContent = `La categoria «Altre» include ${T.altre_voci.length} voci`;
+  altreTitle.textContent = 'Il resto degli oggetti all\'incanto';
   altrePanel.appendChild(altreTitle);
 
   const altreGrid = document.createElement('div');
@@ -824,8 +964,8 @@ async function loadAndRenderTipologie() {
   altrePanel.appendChild(altreGrid);
 
   /* Inserisco il pannello dopo il chart-wrap */
-  const chartWrap = panel.querySelector('.expl-chart-wrap');
-  chartWrap.after(altrePanel);
+  const chartWrap = document.getElementById('tip-svg').closest('.expl-chart-wrap');
+  chartWrap.appendChild(altrePanel);
 
   /* Chips */
   const allBtn = makeChip('Tutte', null, -1);
@@ -843,7 +983,8 @@ async function loadAndRenderTipologie() {
     b.innerHTML = isAltre ? label + ' <span class="chip-arrow">▾</span>' : label;
     b.style.color = color || 'var(--ink)';
     b.style.borderColor = color || 'var(--ink)';
-    b.addEventListener('click', () => {
+    b.addEventListener('click', e => {
+      e.stopPropagation();
       if (isAltre) {
         altreOpen = !altreOpen;
         altrePanel.style.display = altreOpen ? 'block' : 'none';
@@ -864,12 +1005,15 @@ async function loadAndRenderTipologie() {
     const vals = T.m.map(r => mode < 0 ? r.reduce((s,v) => s+v, 0) : r[mode]);
     const vmax = Math.max(...vals) || 1;
 
-    [0.2, 0.4, 0.6, 0.8, 1].forEach(f => {
-      const y = PT + CH - f * CH;
+    const step = 50;
+    const niceMax = Math.max(step, Math.ceil(vmax / step) * step);
+
+    for (let v = 0; v <= niceMax; v += step) {
+      const y = PT + CH - (v / niceMax) * CH;
       mkEl('line', { x1: PL, y1: y, x2: PL+CW, y2: y, stroke: 'var(--gray-1)', 'stroke-width': .5 });
       const t = mkEl('text', { x: PL-4, y: y+4, 'text-anchor': 'end', fill: 'var(--gray-2)', style: 'font:9px var(--ff-mono)' });
-      t.textContent = Math.round(vmax * f);
-    });
+      t.textContent = v;
+    }
 
     const yLbl = mkEl('text', { x: 10, y: PT+CH/2, 'text-anchor': 'middle', fill: 'var(--gray-2)', style: 'font:9px var(--ff-mono)', transform: `rotate(-90,10,${PT+CH/2})` });
     yLbl.textContent = 'Menzioni per anno';
@@ -882,7 +1026,7 @@ async function loadAndRenderTipologie() {
         if (mode >= 0 && j !== mode) return;
         const v = row[j];
         if (!v) return;
-        const h = v / vmax * CH;
+        const h = v / niceMax * CH;
         const rect = mkEl('rect', {
           x: x + .3, y: PT+CH-accH-h,
           width: Math.max(bw-0.6, 1), height: h,
@@ -923,8 +1067,28 @@ async function loadAndRenderTipologie() {
     });
   }
   render();
-}
 
+  /* Alla chiusura del modale: torna al filtro "Tutte" e richiudi
+     il pannello "Altre" se era rimasto aperto */
+  const tipPreviewEl = document.getElementById('tip-preview');
+  if (tipPreviewEl) {
+    tipPreviewEl._onCollapse = () => {
+      mode = -1;
+      if (altreOpen) {
+        altreOpen = false;
+        altrePanel.style.display = 'none';
+        const altreIdx = T.cats.indexOf('ALTRE');
+        const altreBtn = catBtns[altreIdx];
+        if (altreBtn) {
+          altreBtn.style.background = 'none';
+          altreBtn.style.color = CL['ALTRE'];
+          altreBtn.querySelector('.chip-arrow').textContent = '▾';
+        }
+      }
+      render();
+    };
+  }
+}
 
 async function loadAndRenderTrend() {
   const [D, world] = await Promise.all([
@@ -932,11 +1096,9 @@ async function loadAndRenderTrend() {
     fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json').then(r => r.json())
   ]);
 
-  const chartWrap = document.querySelector('#panel-trend .expl-chart-wrap--map');
+  const chartWrap = document.getElementById('trend-map').closest('.expl-chart-wrap--map');
   const mapEl     = document.getElementById('trend-map');
   const tooltip   = document.getElementById('trend-tooltip');
-  const noteCount = document.getElementById('trend-note-count');
-  const noteTot   = document.getElementById('trend-note-tot');
   const lblFrom   = document.getElementById('tl-from');
   const lblTo     = document.getElementById('tl-to');
   const rangeLbl  = document.getElementById('tl-range-label');
@@ -1033,7 +1195,7 @@ async function loadAndRenderTrend() {
     const p = projection([s.lon, s.lat]);
     if (!p) return;
     seasG.append('text')
-      .attr('x', p[0]).attr('y', p[1] + (s.n === 'Mar Mediterraneo' ? 40 : 0))
+      .attr('x', p[0]).attr('y', p[1] + (s.n === 'Mar Mediterraneo' ? 12 : 0))
       .attr('text-anchor', 'middle')
       .attr('transform', `rotate(${s.rotate} ${p[0]} ${p[1]})`)
       .attr('font-family', 'var(--ff-head)')
@@ -1070,9 +1232,9 @@ async function loadAndRenderTrend() {
   g.call(zoom);
   g.call(zoom.transform, d3.zoomIdentity);
 
-  zoomInBtn.addEventListener('click', () => g.transition().duration(200).call(zoom.scaleBy, 1.4));
-  zoomOutBtn.addEventListener('click', () => g.transition().duration(200).call(zoom.scaleBy, 1 / 1.4));
-  zoomResetBtn.addEventListener('click', () => g.transition().duration(400).call(zoom.transform, d3.zoomIdentity));
+  zoomInBtn.addEventListener('click', e => { e.stopPropagation(); g.transition().duration(200).call(zoom.scaleBy, 1.4); });
+  zoomOutBtn.addEventListener('click', e => { e.stopPropagation(); g.transition().duration(200).call(zoom.scaleBy, 1 / 1.4); });
+  zoomResetBtn.addEventListener('click', e => { e.stopPropagation(); g.transition().duration(400).call(zoom.transform, d3.zoomIdentity); });
 
   /* ── Timeline — d3-brush, larghezza = W della mappa ─────── */
   const YMIN = D.ymin, YMAX = D.ymax;
@@ -1101,14 +1263,30 @@ async function loadAndRenderTrend() {
     .y1(d => areaY(d.c))
     .curve(d3.curveMonotoneX);
 
+  const densityD = areaGen(yearCounts);
+
+  trackSvg.append('defs').html(
+    `<clipPath id="tl-sel-clip"><rect id="tl-sel-clip-rect" y="0" height="${TRACK_H}" width="0"></rect></clipPath>`
+  );
+
+  /* Curva base — sempre visibile, tono neutro caldo: il contesto fisso */
   trackSvg.append('path')
     .attr('class', 'tl-density')
-    .attr('d', areaGen(yearCounts))
+    .attr('d', densityD)
+    .attr('fill', 'var(--gray-1)')
+    .attr('fill-opacity', .5)
+    .attr('stroke', 'var(--gray-2)')
+    .attr('stroke-width', 1);
+
+  /* Stessa curva, ritagliata sulla selezione corrente — terracotta pieno */
+  trackSvg.append('path')
+    .attr('class', 'tl-density-selected')
+    .attr('d', densityD)
     .attr('fill', 'var(--terra)')
-    .attr('fill-opacity', .18)
-    .attr('stroke', 'var(--terra)')
-    .attr('stroke-width', .8)
-    .attr('stroke-opacity', .35);
+    .attr('fill-opacity', .55)
+    .attr('stroke', 'var(--terra-dark)')
+    .attr('stroke-width', 1.5)
+    .attr('clip-path', 'url(#tl-sel-clip)');
 
   const brush = d3.brushX()
     .extent([[0, 0], [W, TRACK_H]])
@@ -1118,7 +1296,7 @@ async function loadAndRenderTrend() {
   const brushG = trackSvg.append('g').attr('class', 'tl-brush-g').call(brush);
 
   brushG.select('.selection')
-    .attr('fill', 'var(--terra)').attr('fill-opacity', .16)
+    .attr('fill', 'none')
     .attr('stroke', 'var(--terra)').attr('stroke-width', 1.5);
   brushG.selectAll('.handle')
     .attr('fill', 'var(--terra)').attr('stroke', 'var(--terra-dark)');
@@ -1149,6 +1327,9 @@ async function loadAndRenderTrend() {
     [yearFrom, yearTo] = selectionToYears(event.selection);
     lblFrom.textContent = yearFrom;
     lblTo.textContent   = yearTo;
+    const clipRect = document.getElementById('tl-sel-clip-rect');
+    clipRect.setAttribute('x', event.selection[0]);
+    clipRect.setAttribute('width', event.selection[1] - event.selection[0]);
     updateMap(false);
   }
 
@@ -1158,24 +1339,21 @@ async function loadAndRenderTrend() {
     updateMap(true);
   }
 
-  /* ── Autoplay — finestra scorrevole di ampiezza fissa, movimento
-     continuo frame-per-frame (stesso meccanismo di Piazze del mercato,
-     non più a scatti di un anno ogni tick) ─────────────────────── */
-  const PLAY_SPAN = 5;
-  const PLAY_DURATION_MS = 14000; // tempo per attraversare l'intero periodo
+  /* ── Autoplay — bordo sinistro ancorato al 1879, si muove solo
+     quello destro (non più una finestra di ampiezza fissa che scorre
+     come un rettangolo intero) ──────────────────────────────────── */
+  const PLAY_DURATION_MS = 14000; // tempo per coprire l'intero periodo
   let playing = false;
   let playTimer = null;
-  let playPos = 0; // 0..1, posizione continua della finestra lungo il periodo
-
-  const playRange = Math.max(1, (YMAX - YMIN + 1) - PLAY_SPAN);
+  let playPos = 0; // 0..1, posizione del bordo destro lungo il periodo
 
   function playStep(now, last) {
     const dt = now - last;
     playPos += dt / PLAY_DURATION_MS;
-    if (playPos >= 1) playPos -= 1; // riparte dall'inizio, in loop continuo
+    if (playPos >= 1) playPos -= 1; // riparte da 1879, in loop continuo
 
-    const winStart = YMIN + playPos * playRange;
-    brushG.call(brush.move, [xScale(winStart), xScale(winStart + PLAY_SPAN)]);
+    const winEnd = YMIN + playPos * (YMAX - YMIN + 1);
+    brushG.call(brush.move, [xScale(YMIN), xScale(winEnd)]);
 
     if (playing) playTimer = requestAnimationFrame(n => playStep(n, now));
   }
@@ -1185,8 +1363,8 @@ async function loadAndRenderTrend() {
     playIcon.className = 'ph ph-pause';
     playBtn.setAttribute('title', 'Ferma autoplay');
     playBtn.setAttribute('aria-label', 'Ferma autoplay');
-    rangeLbl.textContent = `scorrimento automatico · finestra temporale di ${PLAY_SPAN} anni`;
-    playPos = Math.max(0, Math.min(1, (yearFrom - YMIN) / playRange));
+    rangeLbl.textContent = 'scorrimento automatico';
+    playPos = Math.max(0, Math.min(1, (yearTo - YMIN + 1) / (YMAX - YMIN + 1)));
     playTimer = requestAnimationFrame(n => playStep(n, n));
   }
 
@@ -1200,7 +1378,7 @@ async function loadAndRenderTrend() {
     playTimer = null;
   }
 
-  playBtn.addEventListener('click', () => { playing ? stopPlay() : startPlay(); });
+  playBtn.addEventListener('click', e => { e.stopPropagation(); playing ? stopPlay() : startPlay(); });
 
 
   /* ── Aggiorna cerchi mappa ──────────────────────────────── */
@@ -1215,10 +1393,6 @@ async function loadAndRenderTrend() {
 
     const maxV = Math.max(...cityTotals.map(c => c.visible), 1);
     const rScale = v => Math.max(4, Math.sqrt(v / maxV) * 32);
-
-    const totInRange = cityTotals.reduce((s, c) => s + c.visible, 0);
-    noteCount.textContent = totInRange;
-    noteTot.textContent   = D.tot;
 
     const circles = circlesG.selectAll('circle').data(cityTotals, d => d.n);
 
@@ -1280,6 +1454,7 @@ async function loadAndRenderTrend() {
     xScale.range([0, W]);
     trackSvg.attr('viewBox', `0 0 ${W} ${TRACK_H}`);
     trackSvg.select('.tl-density').attr('d', areaGen(yearCounts));
+    trackSvg.select('.tl-density-selected').attr('d', areaGen(yearCounts));
     brush.extent([[0, 0], [W, TRACK_H]]);
     brushG.call(brush);
     brushG.call(brush.move, [xScale(yearFrom), xScale(yearTo + 1)]);
@@ -1298,7 +1473,18 @@ async function loadAndRenderTrend() {
   lblFrom.textContent = yearFrom;
   lblTo.textContent   = yearTo;
   updateMap(false);
-  startPlay();
+
+  /* Autoplay disabilitato in anteprima: parte solo all'apertura del modale */
+  const trendPreviewEl = document.getElementById('trend-preview');
+  if (trendPreviewEl) {
+    trendPreviewEl._onExpand = startPlay;
+    trendPreviewEl._onCollapse = () => {
+      stopPlay();
+      /* riporta la selezione della timeline all'intero periodo,
+         così l'anteprima torna sempre allo stesso stato iniziale */
+      brushG.call(brush.move, [xScale(YMIN), xScale(YMAX + 1)]);
+    };
+  }
 }
 
 /* ── Carica topojson se necessario ──────────────────────── */
@@ -1312,116 +1498,6 @@ if (typeof topojson === 'undefined') {
 
 /* ══════════════════════════════════════════════════════════
    5. STAGIONALITÀ — confronto mensile per paese
-   ══════════════════════════════════════════════════════════ */
-async function loadAndRenderStagionalita() {
-  const S = await fetchJSON('stagionalita.json');
-  const NS = 'http://www.w3.org/2000/svg';
-  const svg = document.getElementById('stag-svg');
-  const legendEl = document.getElementById('stag-legend');
-  const infoBtn = document.getElementById('stag-info-btn');
-  const infoPopover = document.getElementById('stag-info-popover');
-  svg.innerHTML = '';
-
-const STYLE = {
-  'Germania': { stroke: '#5C0A00',      dash: null,      label: 'Germania' },
-  'Francia':  { stroke: '#D94010',      dash: '6,3',     label: 'Francia'  },
-  'Italia':   { stroke: '#A07840',      dash: '1.5,2.5', label: 'Italia'   }
-};
-
-  legendEl.style.cssText = 'display:flex;justify-content:center;gap:16px;font-family:var(--ff-mono);font-size:11.5px;flex-wrap:wrap;';
-  legendEl.innerHTML = S.countries.map(c => {
-    const st = STYLE[c.n] || { stroke: 'var(--gray-3)', dash: null };
-    const dashAttr = st.dash ? ` stroke-dasharray="${st.dash}"` : '';
-    return `<span style="display:flex;align-items:center;gap:5px;color:${st.stroke};">
-      <svg width="14" height="8"><line x1="0" y1="4" x2="14" y2="4" stroke="${st.stroke}" stroke-width="2"${dashAttr}/></svg>
-      ${c.n} — ${c.tot.toLocaleString('it-IT')} aste
-    </span>`;
-  }).join('');
-
-  const de = S.countries.find(c => c.n === 'Germania') || S.countries[0];
-  const idxOtt = S.months.indexOf('ott');
-  infoPopover.textContent = `Ogni punto è la quota percentuale di un mese sul totale annuo del paese — non sul totale complessivo dei tre paesi. Esempio: ${de.n}, ${S.months[idxOtt]}: ${de.m[idxOtt]} ÷ ${de.tot} = ${(de.m[idxOtt]/de.tot*100).toFixed(1).replace('.', ',')}%`;
-
-  infoBtn.addEventListener('click', () => {
-    const open = infoPopover.classList.toggle('is-open');
-    infoBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
-  });
-  document.addEventListener('click', e => {
-    if (!infoBtn.contains(e.target) && !infoPopover.contains(e.target)) {
-      infoPopover.classList.remove('is-open');
-      infoBtn.setAttribute('aria-expanded', 'false');
-    }
-  });
-
-  const W = 600, H = 250, PL = 44, PR = 10, PT = 20, PB = 56;
-  const CW = W - PL - PR, CH = H - PT - PB;
-  const N = S.months.length;
-  const x = i => PL + i * (CW / (N - 1));
-
-  const allPct = S.countries.flatMap(c => c.m.map(v => v / c.tot * 100));
-  const yMax = Math.ceil(Math.max(...allPct) / 10) * 10;
-  const y = v => PT + CH - (v / yMax * CH);
-
-  function mkEl(tag, attrs) {
-    const e = document.createElementNS(NS, tag);
-    for (const k in attrs) e.setAttribute(k, attrs[k]);
-    svg.appendChild(e);
-    return e;
-  }
-
-  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
-
-  for (let g = 0; g <= yMax; g += 10) {
-    mkEl('line', { x1: PL, y1: y(g), x2: PL + CW, y2: y(g), stroke: g === 0 ? 'var(--ink)' : 'var(--gray-1)', 'stroke-width': g === 0 ? 1 : 1 });
-    const t = mkEl('text', { x: PL - 4, y: y(g) + 3, 'text-anchor': 'end', fill: 'var(--gray-2)', style: 'font:10px var(--ff-mono)' });
-    t.textContent = g + '%';
-  }
-
-  let tip = document.getElementById('stag-tooltip');
-  if (!tip) {
-    tip = document.createElement('div');
-    tip.id = 'stag-tooltip';
-    tip.style.cssText = 'position:fixed;background:var(--ink);color:var(--paper-light);font:11px var(--ff-mono);padding:4px 8px;border-radius:2px;pointer-events:none;display:none;z-index:200;white-space:nowrap;';
-    document.body.appendChild(tip);
-  }
-
-  S.countries.forEach(c => {
-    const st = STYLE[c.n] || { stroke: 'var(--gray-3)', dash: null };
-    const d = c.m.map((v, i) => `${i === 0 ? 'M' : 'L'} ${x(i).toFixed(1)} ${y(v / c.tot * 100).toFixed(1)}`).join(' ');
-    const pathAttrs = { d, fill: 'none', stroke: st.stroke, 'stroke-width': 2.5, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' };
-    if (st.dash) pathAttrs['stroke-dasharray'] = st.dash;
-    mkEl('path', pathAttrs);
-
-    c.m.forEach((v, i) => {
-      const pct = v / c.tot * 100;
-      const dot = mkEl('circle', { cx: x(i), cy: y(pct), r: 3.5, fill: st.stroke, style: 'cursor:pointer' });
-      dot.addEventListener('mousemove', e => {
-        tip.style.display = 'block';
-        tip.style.left = (e.clientX + 10) + 'px';
-        tip.style.top = (e.clientY - 28) + 'px';
-        tip.textContent = `${c.n}, ${S.months[i]}: ${v} di ${c.tot} aste = ${pct.toFixed(1).replace('.', ',')}%`;
-      });
-      dot.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
-    });
-  });
-
-S.months.forEach((m, i) => {
-  const t = mkEl('text', { x: x(i), y: H - PB + 14, 'text-anchor': 'middle', fill: 'var(--gray-2)', style: 'font:10px var(--ff-mono)' });
-  t.textContent = m;
-});
-
-/* Etichetta asse X */
-const xLbl = mkEl('text', { x: PL + CW / 2, y: H - 6, 'text-anchor': 'middle', fill: 'var(--gray-2)', style: 'font:9px var(--ff-mono)' });
-xLbl.textContent = 'Mese dell\'anno';
-
-/* Etichetta asse Y (ruotata) */
-const yLbl = mkEl('text', { x: 12, y: PT + CH / 2, 'text-anchor': 'middle', fill: 'var(--gray-2)', style: 'font:8px var(--ff-mono)', transform: `rotate(-90,12,${PT + CH / 2})` });
-yLbl.textContent = 'Aste del mese, % sul totale annuo del paese';
-}
-
-
-/* ══════════════════════════════════════════════════════════
-   6. GEOGRAFIA DEL MERCATO — piazze leader per decennio
    ══════════════════════════════════════════════════════════ */
 async function loadAndRenderGeografia() {
   const G = await fetchJSON('geografia_decenni.json');
@@ -1440,6 +1516,16 @@ async function loadAndRenderGeografia() {
 
   const allCities = [...new Set(decades.flatMap(d => d.top.map(t => t.n)))];
   const maxVal = G.scale_max;
+
+  /* Colore fisso per città (identità, non posizione in classifica) —
+     stessa città = stesso colore in ogni decennio, anche se cambia rango */
+  const cityPalette = [
+    '#5C0A00', '#380B04', '#A02800', '#6A1905', '#D94010', '#8F3109',
+    '#E86040', '#BC540F', '#C87D3E', '#D87F26', '#A07840', '#CE9D58',
+    '#7A6050', '#784E3A', '#8F6D56', '#B19C8A', '#DE947C', '#5C4223'
+  ];
+  const cityColor = {};
+  allCities.forEach((city, i) => { cityColor[city] = cityPalette[i % cityPalette.length]; });
 
   const rowsEl = document.getElementById('geo-rows');
   const gridEl = document.getElementById('geo-gridlines');
@@ -1480,7 +1566,7 @@ async function loadAndRenderGeografia() {
   allCities.forEach(city => {
     const row = document.createElement('div');
     row.className = 'geo-row';
-    row.innerHTML = '<span class="geo-row-name"></span><span class="geo-row-bar"></span><span class="geo-row-val"></span>';
+    row.innerHTML = '<span class="geo-row-name"></span><span class="geo-row-bar"></span><a class="geo-row-val"></a>';
     row.querySelector('.geo-row-name').textContent = city;
     rowsEl.appendChild(row);
     els[city] = row;
@@ -1500,14 +1586,14 @@ async function loadAndRenderGeografia() {
   const altreGrid = document.createElement('div');
   altreGrid.style.cssText = 'display:grid;grid-template-columns:repeat(3,1fr);gap:4px 2rem;';
   altrePanel.appendChild(altreGrid);
-  document.getElementById('panel-geografia').querySelector('.expl-chart-wrap').after(altrePanel);
+  document.getElementById('geo-rows').closest('.expl-chart-wrap').appendChild(altrePanel);
 
   let altreOpen = false;
   let currentLabel = decades[0].label;
 
   function renderAltrePanel(label) {
     const resto = restoByLabel[label] || [];
-    altreTitle.textContent = `«altre città» nel ${label} include ${resto.length} piazze`;
+    altreTitle.textContent = `Le «altre città» nel ${label} corrispondono a ${resto.length} piazze`;
     altreGrid.innerHTML = '';
     const maxR = resto.length ? resto[0].v : 1;
     resto.forEach(r => {
@@ -1524,7 +1610,8 @@ async function loadAndRenderGeografia() {
     });
   }
 
-  altreRow.addEventListener('click', () => {
+  altreRow.addEventListener('click', e => {
+    e.stopPropagation();
     altreOpen = !altreOpen;
     altrePanel.style.display = altreOpen ? 'block' : 'none';
     altreRow.querySelector('.geo-altre-arrow').textContent = altreOpen ? '▴' : '▾';
@@ -1554,6 +1641,22 @@ async function loadAndRenderGeografia() {
     return { values, altre, label: t < .5 ? a.label : b.label };
   }
 
+  /* Costruisce l'URL verso i risultati di ricerca filtrati per
+     luogo e per l'intervallo di anni del decennio esatto corrente.
+     Formato confermato leggendo backend/routers/browse.py
+     (_parse_params): i facet "range" come periodo si passano come
+     {facet}_from / {facet}_to, i facet "multiselect" come luogo si
+     passano come parametro semplice. */
+  function decadeEndYear(label) {
+    const [startStr, endSuffix] = label.split('–');
+    return parseInt(startStr.slice(0, 2) + endSuffix, 10);
+  }
+  function buildAsteUrl(city, decadeLabel) {
+    const startYear = parseInt(decadeLabel.split('–')[0], 10);
+    const endYear = decadeEndYear(decadeLabel);
+    return `/aste?luogo=${encodeURIComponent(city)}&periodo_from=${startYear}&periodo_to=${endYear}`;
+  }
+
   function render(pos) {
     const { values, altre, label } = stateAt(pos);
     yearEl.textContent = label;
@@ -1564,6 +1667,12 @@ async function loadAndRenderGeografia() {
       currentLabel = label;
       if (altreOpen) renderAltrePanel(currentLabel);
     }
+
+    /* Il numero è collegabile solo quando il cursore è fermo esattamente
+       su uno dei punti reali della timeline (non un valore interpolato
+       durante il trascinamento) e l'autoplay non sta girando. */
+    const scaled = pos * (decades.length - 1);
+    const isExactPoint = !timer && Math.abs(scaled - Math.round(scaled)) < 0.001;
 
     const ranked = Object.entries(values)
       .filter(([, v]) => v !== null && v !== undefined)
@@ -1577,7 +1686,16 @@ async function loadAndRenderGeografia() {
       row.style.opacity = '1';
       row.style.top = (idx * 27) + 'px';
       row.querySelector('.geo-row-bar').style.width = Math.round(ranked[idx][1] / maxVal * 100) + '%';
-      row.querySelector('.geo-row-val').textContent = Math.round(ranked[idx][1]);
+      row.querySelector('.geo-row-bar').style.background = cityColor[city];
+      const valEl = row.querySelector('.geo-row-val');
+      valEl.textContent = Math.round(ranked[idx][1]);
+      if (isExactPoint) {
+        valEl.href = buildAsteUrl(city, label);
+        valEl.classList.add('geo-row-val--link');
+      } else {
+        valEl.removeAttribute('href');
+        valEl.classList.remove('geo-row-val--link');
+      }
     });
 
     altreRow.style.opacity = '1';
@@ -1601,14 +1719,15 @@ async function loadAndRenderGeografia() {
       const dt = now - last; last = now;
       pos = Math.min(1, pos + dt / 9000);
       render(pos);
-      if (pos >= 1) { stop(); return; }
+      if (pos >= 1) { stop(); render(pos); return; }
       timer = requestAnimationFrame(step);
     }
     timer = requestAnimationFrame(step);
   }
 
-  playBtn.addEventListener('click', () => {
-    if (timer) { stop(); return; }
+  playBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    if (timer) { stop(); render(pos); return; }
     if (pos >= 1) pos = 0;
     play();
   });
@@ -1618,18 +1737,179 @@ async function loadAndRenderGeografia() {
     pos = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
     render(pos);
   }
-  trackEl.addEventListener('pointerdown', e => { stop(); dragging = true; setFromClientX(e.clientX); });
+  trackEl.addEventListener('pointerdown', e => { e.stopPropagation(); stop(); dragging = true; setFromClientX(e.clientX); });
   window.addEventListener('pointermove', e => { if (dragging) setFromClientX(e.clientX); });
-  window.addEventListener('pointerup', () => { dragging = false; });
+  window.addEventListener('pointerup', () => {
+    if (dragging) {
+      const N = decades.length - 1;
+      const nearestTick = Math.round(pos * N) / N;
+      if (Math.abs(pos - nearestTick) < 0.07) {
+        pos = nearestTick;
+        render(pos);
+      }
+    }
+    dragging = false;
+  });
 
-  render(0);
-  play();
+  /* Stato statico dell'anteprima: 1900-09 invece del primo decennio
+     (1879-89, solo 47 eventi) — più rappresentativo a colpo d'occhio */
+  const staticIdx = decades.findIndex(d => d.label.startsWith('1900'));
+  render(staticIdx >= 0 ? staticIdx / (decades.length - 1) : 0);
+
+  /* Autoplay disabilitato in anteprima: parte solo all'apertura del modale */
+  const staticPos = staticIdx >= 0 ? staticIdx / (decades.length - 1) : 0;
+  const geoPreviewEl = document.getElementById('geo-preview');
+  if (geoPreviewEl) {
+    geoPreviewEl._onExpand = () => { pos = 0; play(); };
+    geoPreviewEl._onCollapse = () => { stop(); pos = staticPos; render(staticPos); };
+  }
 }
 
+async function loadAndRenderStagionalita() {
+  const S = await fetchJSON('stagionalita.json');
+  const NS = 'http://www.w3.org/2000/svg';
+  const svg = document.getElementById('stag-svg');
+  const legendEl = document.getElementById('stag-legend');
+  const infoBtn = document.getElementById('stag-info-btn');
+  const infoPopover = document.getElementById('stag-info-popover');
+  svg.innerHTML = '';
 
-/* ══════════════════════════════════════════════════════════
-   7. COLLEZIONI — ricomparse in più eventi d'asta
-   ══════════════════════════════════════════════════════════ */
+const STYLE = {
+  'Germania':               { stroke: '#5C0A00', dash: null,          label: 'Germania' },
+  'Francia':                { stroke: '#D94010', dash: '6,3',         label: 'Francia'  },
+  'Italia':                 { stroke: '#A07840', dash: '1.5,2.5',     label: 'Italia'   },
+  'Inghilterra':            { stroke: '#E86040', dash: '4,2,1,2',     label: 'Inghilterra' },
+  'Paesi Bassi':            { stroke: '#C87D3E', dash: '8,3,2,3',     label: 'Paesi Bassi' },
+  "Stati Uniti d'America":  { stroke: '#7A6050', dash: '2,2',         label: "Stati Uniti d'America" }
+};
+
+  const pathsByCountry = {};
+
+  legendEl.style.cssText = 'display:flex;justify-content:center;gap:16px;font-family:var(--ff-mono);font-size:11.5px;flex-wrap:wrap;';
+  legendEl.innerHTML = '';
+  S.countries.forEach(c => {
+    const st = STYLE[c.n] || { stroke: 'var(--gray-3)', dash: null };
+    const dashAttr = st.dash ? ` stroke-dasharray="${st.dash}"` : '';
+    const item = document.createElement('span');
+    item.style.cssText = `display:flex;align-items:center;gap:5px;color:${st.stroke};cursor:pointer;`;
+    item.innerHTML = `<svg width="14" height="8"><line x1="0" y1="4" x2="14" y2="4" stroke="${st.stroke}" stroke-width="2"${dashAttr}/></svg>${c.n} — ${c.tot.toLocaleString('it-IT')} aste`;
+    legendEl.appendChild(item);
+
+    /* Enfasi al passaggio del mouse: la linea del paese selezionato
+       si accende, le altre sfumano — restano tutte nello stesso
+       grafico (sempre confrontabili), ma senza competere insieme
+       per l'attenzione. */
+    item.addEventListener('mouseenter', () => {
+      Object.entries(pathsByCountry).forEach(([name, g]) => {
+        const active = name === c.n;
+        g.path.style.opacity = active ? '1' : '0.12';
+        g.path.style.strokeWidth = active ? '2.5' : '1.5';
+        g.dots.forEach(d => { d.style.opacity = active ? '1' : '0.12'; });
+      });
+    });
+    item.addEventListener('mouseleave', () => {
+      Object.values(pathsByCountry).forEach(g => {
+        g.path.style.opacity = '1';
+        g.path.style.strokeWidth = '1.5';
+        g.dots.forEach(d => { d.style.opacity = '1'; });
+      });
+    });
+  });
+
+  const de = S.countries.find(c => c.n === 'Germania') || S.countries[0];
+  const idxOtt = S.months.indexOf('ott');
+  infoPopover.textContent = `Ogni punto è la quota percentuale di un mese sul totale annuo del paese — non sul totale complessivo di tutti i paesi. Esempio: ${de.n}, ${S.months[idxOtt]}: ${de.m[idxOtt]} ÷ ${de.tot} = ${(de.m[idxOtt]/de.tot*100).toFixed(1).replace('.', ',')}%`;
+
+  infoBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    const open = infoPopover.classList.toggle('is-open');
+    infoBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  document.addEventListener('click', e => {
+    if (!infoBtn.contains(e.target) && !infoPopover.contains(e.target)) {
+      infoPopover.classList.remove('is-open');
+      infoBtn.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  const W = 600, H = 250, PL = 44, PR = 10, PT = 20, PB = 56;
+  const CW = W - PL - PR, CH = H - PT - PB;
+  const N = S.months.length;
+  const x = i => PL + i * (CW / (N - 1));
+
+  const allPct = S.countries.flatMap(c => c.m.map(v => v / c.tot * 100));
+  const yMax = Math.ceil(Math.max(...allPct) / 10) * 10;
+  const y = v => PT + CH - (v / yMax * CH);
+
+  function mkEl(tag, attrs) {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    svg.appendChild(e);
+    return e;
+  }
+
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+
+  for (let g = 0; g <= yMax; g += 10) {
+    mkEl('line', { x1: PL, y1: y(g), x2: PL + CW, y2: y(g), stroke: g === 0 ? 'var(--ink)' : 'var(--gray-1)', 'stroke-width': g === 0 ? 1 : 1 });
+    const t = mkEl('text', { x: PL - 4, y: y(g) + 3, 'text-anchor': 'end', fill: 'var(--gray-2)', style: 'font:10px var(--ff-mono)' });
+    t.textContent = g + '%';
+  }
+
+  let tip = document.getElementById('stag-tooltip');
+  if (!tip) {
+    tip = document.createElement('div');
+    tip.id = 'stag-tooltip';
+    tip.style.cssText = 'position:fixed;background:var(--ink);color:var(--paper-light);font:11px var(--ff-mono);padding:4px 8px;border-radius:2px;pointer-events:none;display:none;z-index:2100;white-space:nowrap;';
+    document.body.appendChild(tip);
+  }
+
+  S.countries.forEach(c => {
+    const st = STYLE[c.n] || { stroke: 'var(--gray-3)', dash: null };
+    const d = c.m.map((v, i) => `${i === 0 ? 'M' : 'L'} ${x(i).toFixed(1)} ${y(v / c.tot * 100).toFixed(1)}`).join(' ');
+    const pathAttrs = { d, fill: 'none', stroke: st.stroke, 'stroke-width': 1.5, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' };
+    if (st.dash) pathAttrs['stroke-dasharray'] = st.dash;
+    const path = mkEl('path', pathAttrs);
+    const dots = [];
+    pathsByCountry[c.n] = { path, dots };
+
+    c.m.forEach((v, i) => {
+      const pct = v / c.tot * 100;
+      const dot = mkEl('circle', { cx: x(i), cy: y(pct), r: 3.5, fill: st.stroke, style: 'cursor:pointer' });
+      dots.push(dot);
+      dot.addEventListener('mousemove', e => {
+        tip.style.display = 'block';
+        tip.style.left = (e.clientX + 10) + 'px';
+        tip.style.top = (e.clientY - 28) + 'px';
+        tip.textContent = `${c.n}, ${S.months[i]}: ${v} di ${c.tot} aste = ${pct.toFixed(1).replace('.', ',')}%`;
+      });
+      dot.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
+    });
+  });
+
+S.months.forEach((m, i) => {
+  const t = mkEl('text', { x: x(i), y: H - PB + 14, 'text-anchor': 'middle', fill: 'var(--gray-2)', style: 'font:10px var(--ff-mono)' });
+  t.textContent = m;
+});
+
+/* Etichetta asse X */
+const xLbl = mkEl('text', { x: PL + CW / 2, y: H - 6, 'text-anchor': 'middle', fill: 'var(--gray-2)', style: 'font:9px var(--ff-mono)' });
+xLbl.textContent = 'Mese dell\'anno';
+
+/* Etichetta asse Y (ruotata) */
+const yLbl = mkEl('text', { x: 12, y: PT + CH / 2, 'text-anchor': 'middle', fill: 'var(--gray-2)', style: 'font:8px var(--ff-mono)', transform: `rotate(-90,12,${PT + CH / 2})` });
+yLbl.textContent = 'Aste del mese, % sul totale annuo del paese';
+
+/* Alla chiusura del modale: richiudi il popover info se era rimasto aperto */
+const stagPreviewEl = document.getElementById('stag-preview');
+if (stagPreviewEl) {
+  stagPreviewEl._onCollapse = () => {
+    infoPopover.classList.remove('is-open');
+    infoBtn.setAttribute('aria-expanded', 'false');
+  };
+}
+}
+
 async function loadAndRenderCollezioni() {
   const C = await fetchJSON('collezioni.json');
   const statsEl = document.getElementById('coll-stats');
@@ -1644,30 +1924,44 @@ async function loadAndRenderCollezioni() {
     { target: C.stats.ricorrenti, suffix: ` (${C.stats.pct_ricorrenti}%)`, l: 'ricompaiono in 2 o più aste' },
     { target: C.stats.singole,   suffix: '',                          l: 'compaiono una sola volta' }
   ];
+  const counters = [];
   cards.forEach(c => {
     const card = document.createElement('div');
     card.style.cssText = 'border-radius:4px;padding:.6rem .9rem;flex:1;text-align:center;';
     card.innerHTML = `<div class="coll-stat-num" style="font-size:22px;color:var(--ink);">0</div><div style="font-size:11px;color:var(--gray-3);">${c.l}</div>`;
     statsEl.appendChild(card);
-
-    /* Conteggio una tantum al caricamento — puramente decorativo,
-       non implica dati che si aggiornano in tempo reale.
-       L'istante di partenza si aggancia al primo fotogramma
-       realmente disegnato dal browser, non a un timestamp preso
-       prima del resto del lavoro sincrono della funzione (che
-       altrimenti "mangia" gran parte della durata percepita). */
-    const numEl = card.querySelector('.coll-stat-num');
-    const duration = 1400;
-    let started = null;
-    function tick(now) {
-      if (started === null) started = now;
-      const t = Math.min(1, (now - started) / duration);
-      const eased = 1 - Math.pow(1 - t, 2);
-      numEl.textContent = Math.round(c.target * eased).toLocaleString('it-IT') + c.suffix;
-      if (t < 1) requestAnimationFrame(tick);
-    }
-    requestAnimationFrame(tick);
+    counters.push({ numEl: card.querySelector('.coll-stat-num'), target: c.target, suffix: c.suffix });
   });
+
+  /* Il conteggio non parte più al caricamento (si vedrebbe già nella
+     miniatura scalata), ma solo quando il modale viene aperto —
+     stesso principio già usato per l'autoplay di Piazze e Trend. */
+  function animateCounters() {
+    counters.forEach(({ numEl, target, suffix }) => {
+      const duration = 1400;
+      let started = null;
+      function tick(now) {
+        if (started === null) started = now;
+        const t = Math.min(1, (now - started) / duration);
+        const eased = 1 - Math.pow(1 - t, 2);
+        numEl.textContent = Math.round(target * eased).toLocaleString('it-IT') + suffix;
+        if (t < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    });
+  }
+  function resetCounters() {
+    counters.forEach(({ numEl }) => { numEl.textContent = '0'; });
+  }
+  const collPreviewEl = document.getElementById('coll-preview');
+  if (collPreviewEl) {
+    collPreviewEl._onExpand = animateCounters;
+    collPreviewEl._onCollapse = () => {
+      resetCounters();
+      /* richiudi eventuali dettagli di collezione lasciati aperti */
+      listEl.querySelectorAll('[data-detail]').forEach(el => { el.style.display = 'none'; });
+    };
+  }
 
   const TAG_COLOR = {
     anno:    { bg: '#D94010' },
@@ -1733,7 +2027,8 @@ async function loadAndRenderCollezioni() {
     detail.innerHTML = `periodo: ${item.periodo}<br>case d'asta: ${houses}` +
       (showSecondary ? `<br><span style="color:#5C0A00;">tutti gli eventi nello stesso anno, ma distribuiti su ${realHouses.length} case d'asta diverse</span>` : '');
 
-    row.addEventListener('click', () => {
+    row.addEventListener('click', e => {
+      e.stopPropagation();
       const open = detail.style.display === 'block';
       listEl.querySelectorAll('[data-detail]').forEach(el => { el.style.display = 'none'; });
       detail.style.display = open ? 'none' : 'block';
