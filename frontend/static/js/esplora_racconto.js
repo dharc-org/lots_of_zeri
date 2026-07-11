@@ -93,11 +93,32 @@ const DATA_BASE = '/static/data/';
     current = null;
   }
 
+  const MOBILE_BREAKPOINT = 700;
+  const mobileToast = document.getElementById('racc-mobile-toast');
+  let toastTimer = null;
+  function showMobileToast() {
+    if (!mobileToast) return;
+    mobileToast.classList.add('is-visible');
+    mobileToast.setAttribute('aria-hidden', 'false');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      mobileToast.classList.remove('is-visible');
+      mobileToast.setAttribute('aria-hidden', 'true');
+    }, 4000);
+  }
+
   document.querySelectorAll('.expl-preview').forEach(preview => {
     scalePreview(preview);
-    preview.addEventListener('click', () => openFor(preview));
+    preview.addEventListener('click', () => {
+      if (window.innerWidth < MOBILE_BREAKPOINT) { showMobileToast(); return; }
+      openFor(preview);
+    });
     preview.addEventListener('keydown', e => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openFor(preview); }
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        if (window.innerWidth < MOBILE_BREAKPOINT) { showMobileToast(); return; }
+        openFor(preview);
+      }
     });
   });
 
@@ -193,7 +214,12 @@ async function loadAndRenderCase() {
   const NS = 'http://www.w3.org/2000/svg';
   const N  = C.ymax - C.ymin + 1;
 
-  /* Svuoto il wrap e imposto struttura a tabella */
+  /* Svuoto il wrap e imposto struttura a tabella.
+     Il limite di larghezza per le celle (preserveAspectRatio="none")
+     è gestito via CSS in una fascia di schermo intermedia — vedi
+     .case-chart-wrap nel foglio di stile — non qui, per non
+     restringere anche i laptop dove la larghezza piena andava bene. */
+  wrap.className = 'expl-chart-wrap case-chart-wrap';
   wrap.style.cssText = 'background:var(--paper);border:1px solid var(--gray-1);border-radius:4px;margin-bottom:.75rem;overflow:hidden;';
   wrap.innerHTML = '';
 
@@ -692,7 +718,7 @@ band2LegendToggle.addEventListener('click', e => {
         hint.style.color='var(--terra)'; hint.textContent = b.n + ' — ' + b.t + ' aste documentate';
         /* Porta il nodo selezionato in vista nel grafo scrollabile */
         const scale = svg.clientWidth / 460;
-        grafDiv.scrollTop = Math.max(0, ly(topIdx) * scale - grafDiv.clientHeight / 2);
+        grafDiv.scrollTo({ top: Math.max(0, ly(topIdx) * scale - grafDiv.clientHeight / 2), behavior: 'smooth' });
       } else if (b.status === 'autorganizzato') {
         selBand = -2;
         hint.style.color='var(--terra)';
@@ -1098,6 +1124,12 @@ async function loadAndRenderTrend() {
 
   const chartWrap = document.getElementById('trend-map').closest('.expl-chart-wrap--map');
   const mapEl     = document.getElementById('trend-map');
+  let tooltipPinned = false;
+  mapEl.addEventListener('click', () => {
+    tooltipPinned = false;
+    tooltip.style.pointerEvents = 'none';
+    tooltip.style.display = 'none';
+  });
   const tooltip   = document.getElementById('trend-tooltip');
   const lblFrom   = document.getElementById('tl-from');
   const lblTo     = document.getElementById('tl-to');
@@ -1408,30 +1440,50 @@ async function loadAndRenderTrend() {
       .style('cursor', 'pointer')
       .on('mouseenter', function(event, d) {
         d3.select(this).attr('fill-opacity', .85);
+        if (tooltipPinned) return; // un dettaglio è già fissato da un click, non sovrascriverlo con l'anteprima hover
+        tooltip.style.pointerEvents = 'none';
         tooltip.style.display = 'block';
         tooltip.innerHTML = `<strong>${d.n}</strong><br>${d.visible} eventi nel periodo selezionato`;
       })
       .on('mousemove', function(event) {
+        if (tooltipPinned) return; // il dettaglio fissato non segue più il mouse
         const wrap = mapEl.parentElement.getBoundingClientRect();
         tooltip.style.left = (event.clientX - wrap.left + 10) + 'px';
         tooltip.style.top  = (event.clientY - wrap.top  - 10) + 'px';
       })
       .on('click', function(event, d) {
         event.stopPropagation();
+        const wrap = mapEl.parentElement.getBoundingClientRect();
+        if (playing) {
+          tooltip.style.pointerEvents = 'none';
+          tooltip.style.display = 'block';
+          tooltip.innerHTML = `<strong>${d.n}</strong><br>Ferma l'autoplay per vedere il dettaglio`;
+          tooltip.style.left = (event.clientX - wrap.left + 10) + 'px';
+          tooltip.style.top  = (event.clientY - wrap.top  - 10) + 'px';
+          return;
+        }
+        tooltipPinned = true;
         const byYear = [];
+        let tot = 0;
         for (let y = yearFrom; y <= yearTo; y++) {
           const v = d.py[y] || 0;
-          if (v > 0) byYear.push(`${y}: ${v} event${v === 1 ? 'o' : 'i'}`);
+          if (v > 0) { byYear.push(`${y}: ${v} event${v === 1 ? 'o' : 'i'}`); tot += v; }
         }
         const detail = byYear.length ? byYear.join('<br>') : 'nessun evento in questi anni';
+        const totUrl = `/aste?luogo=${encodeURIComponent(d.n)}&periodo_from=${yearFrom}&periodo_to=${yearTo}`;
+        const totLine = tot > 0
+          ? `<a href="${totUrl}" style="color:var(--terra-muted) !important;text-decoration:underline;text-underline-offset:2px;">${tot} evento${tot === 1 ? '' : 'i'} tot${tot === 1 ? 'ale' : 'ali'} →</a><br>`
+          : '';
+        tooltip.style.pointerEvents = 'auto';
         tooltip.style.display = 'block';
-        tooltip.innerHTML = `<strong>${d.n}</strong><br>${detail}`;
-        const wrap = mapEl.parentElement.getBoundingClientRect();
+        tooltip.innerHTML = `<strong>${d.n}</strong><br>${totLine}${detail}`;
         tooltip.style.left = (event.clientX - wrap.left + 10) + 'px';
         tooltip.style.top  = (event.clientY - wrap.top  - 10) + 'px';
       })
       .on('mouseleave', function() {
         d3.select(this).attr('fill-opacity', .55);
+        if (tooltipPinned) return; // resta visibile: si chiude solo cliccando sullo sfondo della mappa
+        tooltip.style.pointerEvents = 'none';
         tooltip.style.display = 'none';
       });
 
@@ -1593,7 +1645,7 @@ async function loadAndRenderGeografia() {
 
   function renderAltrePanel(label) {
     const resto = restoByLabel[label] || [];
-    altreTitle.textContent = `Le «altre città» nel ${label} corrispondono a ${resto.length} piazze`;
+    altreTitle.textContent = `Le piazze minori del ${label}`;
     altreGrid.innerHTML = '';
     const maxR = resto.length ? resto[0].v : 1;
     resto.forEach(r => {
@@ -2024,7 +2076,7 @@ async function loadAndRenderCollezioni() {
     const detail = document.createElement('div');
     detail.style.cssText = 'display:none;margin:4px 0;padding:6px 10px;background:var(--paper-dark);border-radius:3px;font-family:var(--ff-mono);font-size:10.5px;color:var(--ink);line-height:1.6;';
     const houses = item.case.map(h => `${h.n} (${h.v})`).join(', ');
-    detail.innerHTML = `periodo: ${item.periodo}<br>case d'asta: ${houses}` +
+    detail.innerHTML = `Periodo: ${item.periodo}<br>Case d'asta coinvolte: ${houses}` +
       (showSecondary ? `<br><span style="color:#5C0A00;">tutti gli eventi nello stesso anno, ma distribuiti su ${realHouses.length} case d'asta diverse</span>` : '');
 
     row.addEventListener('click', e => {

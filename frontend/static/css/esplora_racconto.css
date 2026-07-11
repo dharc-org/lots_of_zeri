@@ -556,6 +556,7 @@
 .expl-modal-body-content {
   max-width: 1080px;    /* stessa larghezza "di progetto" della miniatura — resta fissa anche a schermo intero */
   width: 100%;
+  container-type: inline-size;
 }
 
 body.expl-modal-open { overflow: hidden; }
@@ -812,8 +813,15 @@ body.expl-modal-open { overflow: hidden; }
   border-radius: 2px;
   width: 0%;
 }
-.geo-row--altre { cursor: pointer; border-radius: 3px; transition: background .15s; }
-.geo-row--altre:hover { background: rgba(217,64,16,.06); }
+.geo-row--altre {
+  cursor: pointer;
+  border-radius: 3px;
+  background: rgba(192,175,152,.10);
+  border: 1px dashed var(--gray-1);
+  box-sizing: border-box;
+  transition: background .15s, border-color .15s;
+}
+.geo-row--altre:hover { background: rgba(217,64,16,.08); border-color: var(--terra); }
 .geo-row--altre .geo-row-bar { background: var(--gray-1); }
 .geo-row--altre .geo-row-name {
   color: var(--gray-2);
@@ -1021,3 +1029,68 @@ body.expl-modal-open { overflow: hidden; }
   margin-left: 2px;
   display: inline-block;
 }
+
+/* ══════════════════════════════════════════════════════════
+   AVVISO SCHERMI STRETTI — compare solo al click su un grafico,
+   sotto i 700px, dove alcuni grafici (colonne a larghezza fissa)
+   non sono più leggibili
+   ══════════════════════════════════════════════════════════ */
+.racc-mobile-toast {
+  display: flex;
+  align-items: flex-start;
+  gap: .6rem;
+  position: fixed;
+  left: 1rem;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 3000;
+  background: var(--ink-light);
+  border: 1px solid var(--terra-muted);
+  border-radius: 4px;
+  padding: .85rem 1rem;
+  font-family: var(--ff-body);
+  font-size: .85rem;
+  line-height: 1.5;
+  color: var(--paper-light);
+  box-shadow: 0 8px 24px rgba(26,20,16,.35);
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+  transition: opacity .2s ease, transform .2s ease;
+}
+.racc-mobile-toast.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.racc-mobile-toast i {
+  color: var(--terra-muted);
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  margin-top: .1rem;
+}
+
+@media (max-width: 700px) {
+  /* Anticipa visivamente che il grafico non è pienamente fruibile qui,
+     ma il click resta attivo — serve a far comparire il toast sopra. */
+  .expl-preview { opacity: .35; }
+}
+
+/* Case d'asta: le celle (preserveAspectRatio="none") si stirano in
+   proporzione alla larghezza del contenitore. Misuro lo spazio reale
+   disponibile al grafico (non la finestra del browser, che è solo un
+   proxy impreciso — dipende anche da sidebar, padding del modale,
+   ecc.) e applico il tetto solo quando quello spazio è nella fascia
+   intermedia problematica. Se il grafico ha già 1080px pieni a
+   disposizione (laptop/desktop) resta a piena larghezza. */
+@container (min-width: 650px) and (max-width: 1000px) {
+  .case-chart-wrap {
+    max-width: 850px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* Scrollbar lista Collezioni (Chrome/Safari — Firefox già coperto via JS inline) */
+#coll-list::-webkit-scrollbar { width: 9px; }
+#coll-list::-webkit-scrollbar-track { background: var(--paper-dark); }
+#coll-list::-webkit-scrollbar-thumb { background: var(--gray-1); border-radius: 6px; }

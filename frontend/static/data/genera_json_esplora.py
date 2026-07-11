@@ -151,7 +151,7 @@ def _classifica_tag(years, houses_counter):
     return "diverse"
 
 
-def genera_collezioni(df, top_n=15):
+def genera_collezioni(df):
     sub = df.dropna(subset=["COLLEZIONI_IN VENDITA"]).copy()
     sub["coll_list"] = sub["COLLEZIONI_IN VENDITA"].str.split(";")
     exploded = sub.explode("coll_list")
@@ -163,7 +163,9 @@ def genera_collezioni(df, top_n=15):
     singole = int((vc == 1).sum())
     pct_ricorrenti = round(ricorrenti / totale * 100)
 
-    top_names = vc.head(top_n).index.tolist()
+    # tutte le collezioni che ricompaiono almeno due volte (95 su 1.276),
+    # non solo le prime N — "vedere tutto il 7%" del corpus
+    top_names = vc[vc >= 2].index.tolist()
 
     items = []
     for name in top_names:
