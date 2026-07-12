@@ -1,0 +1,233 @@
+/* ══════════════════════════════════════════════════════════
+   progetto.html — stili page-specific
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Layout principale ─────────────────────────────────── */
+.proj-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 2.5rem;
+  min-height: calc(100vh - 6rem);
+  padding-left: 1.5rem;
+}
+
+/* ── Sidebar ───────────────────────────────────────────── */
+.proj-sidebar {
+  position: sticky;
+  top: 6rem;
+  height: fit-content;
+  padding: 2.5rem 0;
+}
+
+.proj-nav-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.proj-nav-item {
+  padding: .6rem 0;
+  border-bottom: 1px solid var(--gray-1);
+}
+
+.proj-nav-item:last-child {
+  border-bottom: none;
+}
+
+.proj-nav-link {
+  font-family: var(--ff-body);
+  font-size: var(--fs-body-sm);
+  color: var(--gray-3) !important;
+  text-decoration: none !important;
+  display: block;
+  text-align: right;
+  transition: color .15s ease;
+  line-height: 1.4;
+}
+
+.proj-nav-link:hover,
+.proj-nav-link.active {
+  color: var(--terra) !important;
+}
+
+/* ── Contenuto principale ──────────────────────────────── */
+.proj-main {
+  padding: 3rem 1.5rem 5rem 5rem;
+  max-width: 860px;
+}
+
+/* ── Sezione generica ──────────────────────────────────── */
+.proj-section {
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  scroll-margin-top: 7rem;
+}
+
+.proj-section--spaced {
+  margin-top: 3rem;
+}
+
+/* ── Titolo sezione ────────────────────────────────────── */
+.proj-section-title {
+  font-family: var(--ff-head);
+  font-size: 2rem;
+  font-weight: 400;
+  text-align: right;
+  margin: 0 0 .5rem;
+  line-height: 1.15;
+}
+
+.proj-title-rule {
+  border: none;
+  border-top: 1px solid var(--gray-1);
+  margin: 0 0 1.75rem;
+  opacity: 1;
+}
+
+/* ── Lead (testo introduttivo grande) ──────────────────── */
+.proj-lead {
+  font-family: var(--ff-body);
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: var(--ink);
+  margin-bottom: 1.75rem;
+  font-weight: 475;
+}
+
+.proj-lead strong {
+  font-weight: 600;
+  color: var(--terra);
+}
+
+/* Variante più piccola, usata come semplice riga introduttiva
+   (es. sopra l'elenco delle metodologie) */
+.proj-lead--sm {
+  font-size: .92rem;
+  font-weight: 500;
+  color: var(--ink-light);
+  margin-bottom: 1.25rem;
+}
+
+/* ── Corpo testo ────────────────────────────────────────── */
+.proj-body {
+  font-family: var(--ff-body);
+  font-size: .92rem;
+  line-height: 1.7;
+  color: var(--ink-light);
+}
+
+.proj-body p { margin-bottom: 1rem; }
+.proj-body p:last-child { margin-bottom: 0; }
+
+.proj-body strong { font-weight: 600; color: var(--ink); }
+
+/* ── Elenco metodologie ────────────────────────────────── */
+.proj-method-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.proj-method-item {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 1rem;
+  padding: 1.1rem 0;
+  border-top: 1px solid var(--gray-1);
+}
+
+.proj-method-item:last-child {
+  border-bottom: 1px solid var(--gray-1);
+}
+
+.proj-method-num {
+  font-family: var(--ff-mono);
+  font-size: .85rem;
+  color: var(--terra-muted);
+  letter-spacing: .04em;
+  padding-top: .15rem;
+}
+
+.proj-method-text {
+  font-family: var(--ff-body);
+  font-size: .92rem;
+  line-height: 1.65;
+  color: var(--ink-light);
+}
+
+.proj-method-text p { margin: 0; }
+
+.proj-method-text strong {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* ── Team di lavoro ─────────────────────────────────────── */
+.proj-team-group {
+  margin-bottom: 2rem;
+}
+
+.proj-team-group:last-child {
+  margin-bottom: 0;
+}
+
+.proj-team-org {
+  font-family: var(--ff-mono);
+  font-size: .72rem;
+  font-weight: 500;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--terra);
+  margin-bottom: .75rem;
+  padding-bottom: .5rem;
+  border-bottom: 1px solid var(--gray-1);
+}
+
+.proj-team-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.proj-team-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  padding: .55rem 0;
+  border-bottom: 1px solid rgba(192,175,152,.3);
+}
+
+.proj-team-list li:last-child {
+  border-bottom: none;
+}
+
+.proj-team-name {
+  font-family: var(--ff-body);
+  font-size: .92rem;
+  font-weight: 500;
+  color: var(--ink);
+  flex-shrink: 0;
+}
+
+.proj-team-role {
+  font-family: var(--ff-body);
+  font-size: .82rem;
+  color: var(--gray-3);
+  text-align: right;
+}
+
+.proj-team-role--tbd {
+  font-style: italic;
+  color: var(--gray-2);
+}
+
+/* ── Responsive ─────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .proj-layout { grid-template-columns: 1fr; }
+  .proj-sidebar { display: none; }
+  .proj-main { padding: 2rem 1.5rem 4rem; }
+  .proj-method-item { grid-template-columns: 32px 1fr; }
+  .proj-team-list li { flex-direction: column; align-items: flex-start; gap: .2rem; }
+  .proj-team-role { text-align: left; }
+}
