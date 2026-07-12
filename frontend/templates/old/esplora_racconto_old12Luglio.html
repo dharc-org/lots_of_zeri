@@ -12,13 +12,14 @@
   <aside class="racc-sidebar">
     <nav class="racc-toc" aria-label="Indice del racconto">
       <ol class="racc-toc-list">
-        <li><a href="#sec-case" class="racc-toc-link" data-target="sec-case">Case d'asta · 01</a></li>
-        <li><a href="#sec-geografia" class="racc-toc-link" data-target="sec-geografia">Piazze del mercato · 02</a></li>
-        <li><a href="#sec-trend" class="racc-toc-link" data-target="sec-trend">Mercato nel tempo e nello spazio · 03</a></li>
-        <li><a href="#sec-stagionalita" class="racc-toc-link" data-target="sec-stagionalita">Stagioni dell'incanto · 04</a></li>
-        <li><a href="#sec-banditori" class="racc-toc-link" data-target="sec-banditori">Banditori · 05</a></li>
-        <li><a href="#sec-collezioni" class="racc-toc-link" data-target="sec-collezioni">Collezioni ricorrenti · 06</a></li>
-        <li><a href="#sec-tipologie" class="racc-toc-link" data-target="sec-tipologie">Tipologie di oggetti · 07</a></li>
+        <li><a href="#sec-intro" class="racc-toc-link" data-target="sec-intro">Mercato dell'arte · 01</a></li>
+        <li><a href="#sec-case" class="racc-toc-link" data-target="sec-case">Case d'asta · 02</a></li>
+        <li><a href="#sec-geografia" class="racc-toc-link" data-target="sec-geografia">Piazze del mercato · 03</a></li>
+        <li><a href="#sec-trend" class="racc-toc-link" data-target="sec-trend">Mercato nel tempo e nello spazio · 04</a></li>
+        <li><a href="#sec-stagionalita" class="racc-toc-link" data-target="sec-stagionalita">Stagioni dell'incanto · 05</a></li>
+        <li><a href="#sec-banditori" class="racc-toc-link" data-target="sec-banditori">Banditori · 06</a></li>
+        <li><a href="#sec-collezioni" class="racc-toc-link" data-target="sec-collezioni">Collezioni ricorrenti · 07</a></li>
+        <li><a href="#sec-tipologie" class="racc-toc-link" data-target="sec-tipologie">Tipologie di oggetti · 08</a></li>
       </ol>
     </nav>
   </aside>
@@ -265,11 +266,13 @@ Nel <em>corpus</em>, appena il 7% delle collezioni nominate ricompare in più di
            aria-label="Apri il grafico Collezioni ricorrenti a schermo intero">
         <div class="expl-preview-stage">
           <div class="expl-chart-wrap">
+            <div class="coll-stats-label">Le collezioni in numeri</div>
+            <div id="coll-stats" style="display:flex;gap:14px;margin-bottom:18px;"></div>
             <div class="coll-list-header">
               <div class="coll-list-title">Tutte le collezioni ricomparse in più di un'asta, per numero di eventi d'asta</div>
               <div style="display:flex;align-items:center;gap:8px;position:relative;">
                 <div id="coll-legend" class="coll-legend"></div>
-                <button id="coll-info-btn" class="stag-info-btn" type="button" aria-label="Cosa significano i pallini" aria-describedby="coll-info-popover" style="position:static;">i</button>
+                <button id="coll-info-btn" class="stag-info-btn" type="button" aria-label="Cosa significa il secondo pallino" aria-describedby="coll-info-popover" style="position:static;">i</button>
                 <div id="coll-info-popover" class="stag-info-popover" role="tooltip" style="top:calc(100% + 8px); right:0;"></div>
               </div>
             </div>
@@ -288,14 +291,15 @@ Nel <em>corpus</em>, appena il 7% delle collezioni nominate ricompare in più di
       <hr class="racc-title-rule">
 
       <div class="racc-cols">
-        <p>All'incanto può passare qualsiasi genere di manufatto: dipinti, mobili, disegni, ceramiche, stampe, e molto altro ancora. La varietà è, da sempre, uno dei tratti caratteristici del mercato d'asta.</p>
-        <p>Osservare come questa varietà si distribuisce nel tempo racconta il carattere del mercato più di un singolo anno isolato: alcune tipologie restano una costante della vita d'asta per tutto il periodo, altre emergono o si affievoliscono, riflettendo mode e cambiamenti nel gusto collezionistico tra Otto e Novecento.</p>
+        <p>All'incanto può passare qualsiasi genere di manufatto: dipinti, mobili, disegni, ceramiche, stampe, e molto altro ancora — la varietà è, da sempre, uno dei tratti caratteristici del mercato d'asta.</p>
+        <p>Il grafico visualizza la distribuzione delle tipologie vendute nel <em>corpus</em>, anno per anno, dalle sei categorie più ricorrenti — dai Dipinti alle Stampe — fino a una voce residuale «Altre», che riunisce 68 voci di vocabolario diverse. È stata esclusa solo «Oggetti d'arte»: presente in 982 eventi, ma troppo generica — nella prassi catalografica ottocentesca indicava un insieme eterogeneo senza distinzione di materiale o tecnica.</p>
       </div>
 
       {# Nota metodologica: resta nel DOM ma esce dal flusso — si sposta nel modale all'apertura #}
       <div class="expl-meta-slot" id="tip-metanote-slot" hidden>
         <p class="expl-metanote-label">Note sulla visualizzazione</p>
-        <p class="expl-metanote">Il grafico visualizza le tipologie di oggetti venduti all'asta negli eventi documentati nel <em>corpus</em>, anno per anno. I dati sono estratti dalle informazioni registrate sui frontespizi e si riferiscono in massima parte ad aste 'tematiche', dedicate a tipologie chiaramente individuabili. Sono state escluse quindi le aste in cui sono offerti «oggetti d'arte», categoria troppo generica per evincere i contenuti reali della vendita. Cliccando sui pulsanti in alto è possibile filtrare il grafico in base alle sei tipologie più ricorrenti — Dipinti, Mobili, Disegni, Acquerelli, Porcellane, Stampe — per visionare il numero degli eventi associati. Cliccando su «altre» si apre la lista di tutte le categorie di oggetti citate sui frontespizi che permette di apprezzare la varietà dei manufatti offerti alla vendita e immessi sul mercato.</p>
+        <p class="expl-metanote">Il grafico visualizza la distribuzione delle tipologie di oggetti venduti all'asta negli eventi documentati nel <em>corpus</em>, anno per anno. Il conteggio registra le presenze: un evento che mette in vendita più tipologie compare in ciascuna di esse, quindi i totali per anno sono superiori al numero di aste.
+Sono rappresentate le sei tipologie più ricorrenti — Dipinti, Mobili, Disegni, Acquerelli, Porcellane, Stampe — più una categoria residuale «Altre» che include 68 voci del vocabolario, consultabili espandendo la sezione corrispondente. È stata esclusa la categoria «Oggetti d'arte», presente in 982 eventi, perché troppo generica per essere informativa: nella prassi catalografica ottocentesca designava un insieme eterogeneo di manufatti decorativi senza distinzione di materiale o tecnica.</p>
       </div>
 
       {# Anteprima scalata — click per aprire il grafico a tutto schermo #}

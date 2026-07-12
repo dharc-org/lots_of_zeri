@@ -884,36 +884,45 @@ band2LegendToggle.addEventListener('click', e => {
 
   render();
 
-  /* Breve tour dimostrativo, una tantum: mostra i primi 3 nodi del
-     grafo (i banditori più attivi, in cima a B.top_band), poi torna
-     alla vista libera. Non si ripete al resize o ad altre interazioni,
-     solo al primo caricamento del grafico. */
-  (function autoTour() {
+  /* Breve tour dimostrativo: mostra i primi nodi del grafo (i
+     banditori più attivi, fino a Couturier André se presente),
+     poi torna alla vista libera. Parte solo all'apertura del
+     modale — non al caricamento della pagina — e ogni volta che
+     il modale si riapre, come l'autoplay di Piazze/Trend. */
+  let tourTimers = [];
+  function clearTour() {
+    tourTimers.forEach(t => clearTimeout(t));
+    tourTimers = [];
+  }
+  function autoTour() {
+    clearTour();
     const couturierIdx = B.top_band.findIndex(b => b.n === 'Couturier, André');
     const tourEnd = couturierIdx >= 0 ? couturierIdx + 1 : 3;
     const reps = B.top_band.slice(0, tourEnd);
     if (!reps.length) return;
 
     reps.forEach((b, i) => {
-      setTimeout(() => {
+      tourTimers.push(setTimeout(() => {
         const row = rows.find(r => r.querySelector('.band-name').title === b.n);
         if (row) row.click();
-      }, 900 + i * 2200);
+      }, 900 + i * 2200));
     });
 
-    setTimeout(() => {
+    tourTimers.push(setTimeout(() => {
       selBand = null;
       resetLista();
       render();
-    }, 900 + reps.length * 2200);
-  })();
+    }, 900 + reps.length * 2200));
+  }
 
-  /* Alla chiusura del modale: riporta selezione e legenda allo stato
-     iniziale, così l'anteprima non resta "sporca" con l'ultima
-     interazione fatta dentro il modale. */
+  /* Alla chiusura del modale: ferma un tour eventualmente in corso e
+     riporta selezione e legenda allo stato iniziale, così l'anteprima
+     non resta "sporca" con l'ultima interazione fatta dentro il modale. */
   const band2PreviewEl = document.getElementById('band2-preview');
   if (band2PreviewEl) {
+    band2PreviewEl._onExpand = autoTour;
     band2PreviewEl._onCollapse = () => {
+      clearTour();
       selBand = null;
       resetLista();
       render();
@@ -1004,9 +1013,9 @@ async function loadAndRenderTipologie() {
 
   function makeChip(label, color, idx) {
     const b = document.createElement('button');
-    b.className = 'expl-chip';
     const isAltre = T.cats[idx] === 'ALTRE';
-    b.innerHTML = isAltre ? label + ' <span class="chip-arrow">▾</span>' : label;
+    b.className = isAltre ? 'expl-chip expl-chip--altre' : 'expl-chip';
+    b.innerHTML = isAltre ? label + ' <span class="chip-arrow"><i class="ph ph-caret-down"></i></span>' : label;
     b.style.color = color || 'var(--ink)';
     b.style.borderColor = color || 'var(--ink)';
     b.addEventListener('click', e => {
@@ -1018,7 +1027,7 @@ async function loadAndRenderTipologie() {
         if (altreOpen) { setTimeout(() => altrePanel.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50); }
         b.style.background  = altreOpen ? color : 'none';
         b.style.color       = altreOpen ? 'var(--paper-light)' : color;
-        b.querySelector('.chip-arrow').textContent = altreOpen ? '▴' : '▾';
+        b.querySelector('.chip-arrow i').className = altreOpen ? 'ph ph-caret-up' : 'ph ph-caret-down';
       }
       mode = (mode === idx && !isAltre) ? -1 : idx;
       render();
@@ -1108,7 +1117,7 @@ async function loadAndRenderTipologie() {
         if (altreBtn) {
           altreBtn.style.background = 'none';
           altreBtn.style.color = CL['ALTRE'];
-          altreBtn.querySelector('.chip-arrow').textContent = '▾';
+          altreBtn.querySelector('.chip-arrow i').className = 'ph ph-caret-down';
         }
       }
       render();
@@ -1535,6 +1544,11 @@ async function loadAndRenderTrend() {
       /* riporta la selezione della timeline all'intero periodo,
          così l'anteprima torna sempre allo stesso stato iniziale */
       brushG.call(brush.move, [xScale(YMIN), xScale(YMAX + 1)]);
+      /* chiude anche il dettaglio fissato da un click su un pin,
+         altrimenti la miniatura eredita l'ultimo stato del modale */
+      tooltipPinned = false;
+      tooltip.style.pointerEvents = 'none';
+      tooltip.style.display = 'none';
     };
   }
 }
@@ -1964,53 +1978,17 @@ if (stagPreviewEl) {
 
 async function loadAndRenderCollezioni() {
   const C = await fetchJSON('collezioni.json');
-  const statsEl = document.getElementById('coll-stats');
   const legendEl = document.getElementById('coll-legend');
   const listEl = document.getElementById('coll-list');
-  statsEl.innerHTML = '';
   legendEl.innerHTML = '';
   listEl.innerHTML = '';
 
-  const cards = [
-    { target: C.stats.totale,    suffix: '',                          l: 'collezioni nominate nel corpus' },
-    { target: C.stats.ricorrenti, suffix: ` (${C.stats.pct_ricorrenti}%)`, l: 'ricompaiono in 2 o più aste' },
-    { target: C.stats.singole,   suffix: '',                          l: 'compaiono una sola volta' }
-  ];
-  const counters = [];
-  cards.forEach(c => {
-    const card = document.createElement('div');
-    card.style.cssText = 'border-radius:4px;padding:.6rem .9rem;flex:1;text-align:center;';
-    card.innerHTML = `<div class="coll-stat-num" style="font-size:22px;color:var(--ink);">0</div><div style="font-size:11px;color:var(--gray-3);">${c.l}</div>`;
-    statsEl.appendChild(card);
-    counters.push({ numEl: card.querySelector('.coll-stat-num'), target: c.target, suffix: c.suffix });
-  });
-
-  /* Il conteggio non parte più al caricamento (si vedrebbe già nella
-     miniatura scalata), ma solo quando il modale viene aperto —
-     stesso principio già usato per l'autoplay di Piazze e Trend. */
-  function animateCounters() {
-    counters.forEach(({ numEl, target, suffix }) => {
-      const duration = 1400;
-      let started = null;
-      function tick(now) {
-        if (started === null) started = now;
-        const t = Math.min(1, (now - started) / duration);
-        const eased = 1 - Math.pow(1 - t, 2);
-        numEl.textContent = Math.round(target * eased).toLocaleString('it-IT') + suffix;
-        if (t < 1) requestAnimationFrame(tick);
-      }
-      requestAnimationFrame(tick);
-    });
-  }
-  function resetCounters() {
-    counters.forEach(({ numEl }) => { numEl.textContent = '0'; });
-  }
+  /* Alla chiusura del modale: richiudi eventuali dettagli di
+     collezione lasciati aperti, così l'anteprima non resta "sporca"
+     con l'ultima interazione fatta dentro il modale. */
   const collPreviewEl = document.getElementById('coll-preview');
   if (collPreviewEl) {
-    collPreviewEl._onExpand = animateCounters;
     collPreviewEl._onCollapse = () => {
-      resetCounters();
-      /* richiudi eventuali dettagli di collezione lasciati aperti */
       listEl.querySelectorAll('[data-detail]').forEach(el => { el.style.display = 'none'; });
     };
   }
@@ -2035,7 +2013,7 @@ async function loadAndRenderCollezioni() {
   const collInfoBtn = document.getElementById('coll-info-btn');
   const collInfoPopover = document.getElementById('coll-info-popover');
   if (collInfoBtn && collInfoPopover) {
-    collInfoPopover.textContent = 'Un secondo pallino «case d\'asta diverse» accanto a «stesso anno» segnala collezioni vendute in un solo anno ma presso più case d\'asta.';
+    collInfoPopover.textContent = 'Il colore del pallino indica come si distribuiscono le ricomparse di una collezione: terracotta pieno = stesso anno, probabile unica vendita in più sessioni; ocra = stessa casa d\'asta su anni diversi, probabile liquidazione a tranche; marrone scuro = anni e case d\'asta diverse, dispersione reale sul mercato. Un secondo pallino marrone segnala, accanto a «stesso anno», collezioni vendute in un solo anno ma presso più case d\'asta.';
     collInfoBtn.addEventListener('click', e => {
       e.stopPropagation();
       const open = collInfoPopover.classList.toggle('is-open');
@@ -2076,8 +2054,16 @@ async function loadAndRenderCollezioni() {
     const detail = document.createElement('div');
     detail.style.cssText = 'display:none;margin:4px 0;padding:6px 10px;background:var(--paper-dark);border-radius:3px;font-family:var(--ff-mono);font-size:10.5px;color:var(--ink);line-height:1.6;';
     const houses = item.case.map(h => `${h.n} (${h.v})`).join(', ');
-    detail.innerHTML = `Periodo: ${item.periodo}<br>Case d'asta coinvolte: ${houses}` +
-      (showSecondary ? `<br><span style="color:#5C0A00;">tutti gli eventi nello stesso anno, ma distribuiti su ${realHouses.length} case d'asta diverse</span>` : '');
+    /* Link alle aste specifiche in cui è comparsa questa collezione.
+       Compare solo se il JSON ha un URI reale (item.uri) — finché non
+       arriva la mappatura nome→URI dal backend, resta testo semplice
+       invece di un link che porterebbe sempre a zero risultati. */
+    const collLink = item.uri
+      ? `<br><a href="/aste?collezione=${encodeURIComponent(item.uri)}" style="color:var(--terra-muted) !important;text-decoration:underline;text-underline-offset:2px;">Vedi l'asta relativa <i class="ph ph-arrow-right"></i></a>`
+      : '';
+    detail.innerHTML = `<strong>Periodo:</strong> ${item.periodo}<br><strong>Case d'asta coinvolte:</strong> ${houses}` +
+      (showSecondary ? `<br><span style="color:#5C0A00;">tutti gli eventi nello stesso anno, ma distribuiti su ${realHouses.length} case d'asta diverse</span>` : '') +
+      collLink;
 
     row.addEventListener('click', e => {
       e.stopPropagation();

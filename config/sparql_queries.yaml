@@ -112,6 +112,12 @@ facet_queries:
     }
     GROUP BY ?facetURI ?facetValue ORDER BY DESC(?count) LIMIT 200
 
+eventi_asta__collezione:
+  multiselect: |
+    ?auction crm:P16_used_specific_object ?coll .
+    ?coll a crm:E78_Curated_Holding .
+    VALUES ?coll { {values_clause} }
+
   # boolean: ?facetURI = ?facetValue (stringa "true"/"false")
   cataloghi__illustrazioni: |
     SELECT ?facetURI ?facetValue (COUNT(DISTINCT ?doc) AS ?count)

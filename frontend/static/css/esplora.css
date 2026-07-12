@@ -65,9 +65,8 @@
   position: sticky;
   top: var(--navbar-h, 60px);
   z-index: 100;
-  background: var(--paper);
+  background: var(--ink-light);
   border-bottom: 2px solid var(--gray-1);
-  background: var(--paper-light)
 }
 
 /* Riga superiore: eyebrow + tab */
@@ -100,26 +99,26 @@
   transition: border-color .15s;
 }
 
-.expl-tab:hover .expl-tab-label { color: var(--ink); }
+.expl-tab:hover .expl-tab-label { color: var(--terra-light); }
 
-.expl-tab.active { border-bottom-color: var(--terra); }
+.expl-tab.active { border-bottom-color: var(--terra-muted); }
 
 .expl-tab-num {
   font-family: var(--ff-mono);
   font-size: var(--fs-body-sm);
   letter-spacing: .08em;
-  color: var(--gray-2);
+  color: var(--paper);
 }
 
 .expl-tab-label {
   font-family: var(--ff-body);
   font-size: var(--fs-body-sm);
   font-weight: 500;
-  color: var(--gray-3);
+  color: var(--paper);
   transition: color .15s;
 }
 
-.expl-tab.active .expl-tab-label { color: var(--terra); }
+.expl-tab.active .expl-tab-label { color: var(--terra-muted); }
 .expl-tab.active .expl-tab-num   { color: var(--terra-muted); }
 
 
@@ -129,7 +128,7 @@
 .expl-panels {
   flex: 1;
   padding: 1.75rem 5rem 3rem;
-  background: var(--paper-light);
+  background: var(--ink-light);
 }
 
 .expl-panel { display: none; }
@@ -140,7 +139,7 @@
   font-family: var(--ff-body);
   font-size: var(--fs-body-sm);
   line-height: 1.6;
-  color: var(--gray-4);
+  color: var(--paper-light);
   margin-bottom: 2rem;
   columns: 2;
   column-width: 250;
@@ -152,7 +151,7 @@
   font-size: var(--fs-caption);
   font-weight: 500;
   letter-spacing: .1em;
-  color: var(--gray-2);
+  color: var(--paper);
   text-transform: uppercase;
   margin-bottom: .3rem;
 }
@@ -361,7 +360,7 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  margin-bottom: 14px;
+  margin-bottom: 20px;
 }
 .geo-head-label {
   font-family: var(--ff-mono);
@@ -420,8 +419,15 @@
   border-radius: 2px;
   width: 0%;
 }
-.geo-row--altre { cursor: pointer; border-radius: 3px; transition: background .15s; }
-.geo-row--altre:hover { background: rgba(217,64,16,.06); }
+.geo-row--altre {
+  cursor: pointer;
+  border-radius: 3px;
+  background: rgba(192,175,152,.10);
+  border: 1px dashed var(--gray-1);
+  box-sizing: border-box;
+  transition: background .15s, border-color .15s;
+}
+.geo-row--altre:hover { background: rgba(217,64,16,.08); border-color: var(--terra); }
 .geo-row--altre .geo-row-bar { background: var(--gray-1); }
 .geo-row--altre .geo-row-name {
   color: var(--gray-2);
@@ -443,8 +449,19 @@
 .geo-row-val {
   font-family: var(--ff-mono);
   font-size: 10.5px;
-  color: var(--gray-3);
+  color: var(--gray-3) !important;
   text-align: right;
+  text-decoration: none !important;
+  cursor: default;
+}
+.geo-row-val--link {
+  color: var(--terra) !important;
+  cursor: pointer;
+  text-decoration: underline !important;
+  text-decoration-color: rgba(217,64,16,.35) !important;
+}
+.geo-row-val--link:hover {
+  text-decoration-color: var(--terra) !important;
 }
 .geo-scrub {
   display: flex;
@@ -602,3 +619,49 @@
   color: var(--gray-3);
 }
 
+
+/* Freccia del chip "Altre" (Tipologie) — badge circolare con icona */
+.chip-arrow {
+  font-size: 10px;
+  margin-left: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1.3px solid var(--paper-light);
+  background: currentColor;
+  vertical-align: middle;
+}
+.chip-arrow i {
+  color: var(--paper-light);
+}
+
+/* Chip "Altre" — bordo tratteggiato e sfondo tenue sempre visibili */
+.expl-chip--altre {
+  border-style: dashed !important;
+  background: rgba(192,175,152,.12);
+}
+.expl-chip--altre:hover {
+  background: rgba(217,64,16,.08);
+}
+
+/* Etichetta colonna "aste" sopra i numeri di Piazze del mercato */
+.geo-col-label {
+  position: absolute;
+  top: -16px;
+  right: 0;
+  width: 36px;
+  text-align: right;
+  font-family: var(--ff-mono);
+  font-size: 11px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--gray-2);
+}
+
+/* Scrollbar lista Collezioni (Chrome/Safari — Firefox già coperto via JS inline) */
+#coll-list::-webkit-scrollbar { width: 9px; }
+#coll-list::-webkit-scrollbar-track { background: var(--paper-dark); }
+#coll-list::-webkit-scrollbar-thumb { background: var(--gray-1); border-radius: 6px; }

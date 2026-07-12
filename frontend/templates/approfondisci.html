@@ -557,22 +557,62 @@
       </div>
 
       {# Griglia: Rappresentazione dei lotti #}
-      <div class="appr-chart-label" style="margin-top:1.5rem;">RAPPRESENTAZIONE DEI LOTTI</div>
-      <hr style="border:none;border-top:1px solid var(--gray-1);margin:.35rem 0 0;">
-      <div class="appr-lotti-grid">
-        {% for i in range(4) %}
-        <div>
-          <div class="appr-lotto-card-placeholder"><i class="bi bi-image"></i></div>
-          {# <img class="appr-lotto-card-img" src="/static/img/approfondisci/approfondisci_corpus_lotti_0{{ i+1 }}.jpg" alt="Rappresentazione lotto"> #}
-          <div class="appr-lotto-card-title">Lorem Ipsum</div>
-          <div class="appr-lotto-card-sub">nei cataloghi più datati · San Donato</div>
+      <div class="appr-dark-section appr-dark-section--light">
+        <div class="appr-dark-label">RAPPRESENTAZIONE DEI LOTTI</div>
+        <hr class="appr-dark-rule">
+        <div class="appr-img-grid-5">
+          <div class="appr-img-item">
+            <img class="appr-img-thumb" src="/static/img/approfondisci/corpus1.jpg" alt="Incisioni">
+            <div class="appr-img-caption">
+              <span class="appr-img-caption-title">01 <br> Incisioni</span>
+              <span class="appr-img-caption-sub">Asta Pillet, Palais San Donato, 1880</span>
+            </div>
+          </div>
+          <div class="appr-img-item">
+            <img class="appr-img-thumb" src="/static/img/approfondisci/corpus2.jpg" alt="Fotoincisioni">
+            <div class="appr-img-caption">
+              <span class="appr-img-caption-title">02 <br> Fotoincisioni</span>
+              <span class="appr-img-caption-sub">Asta Sangiorgi, Collezione Guidi, 1902</span>
+            </div>
+          </div>
+          <div class="appr-img-item">
+            <img class="appr-img-thumb" src="/static/img/approfondisci/corpus3.jpg" alt="Tricromie">
+            <div class="appr-img-caption">
+              <span class="appr-img-caption-title">03 <br> Tricromie</span>
+              <span class="appr-img-caption-sub">Asta Sangiorgi, Collezione Guidi, 1902</span>
+            </div>
+          </div>
+          <div class="appr-img-item">
+            <img class="appr-img-thumb" src="/static/img/approfondisci/corpus4.jpg" alt="Immagine infra-testo">
+            <div class="appr-img-caption">
+              <span class="appr-img-caption-title">04 <br> Immagine infra-testo</span>
+              <span class="appr-img-caption-sub">Asta Sangiorgi, Collezione Nevin, 1907</span>
+            </div>
+          </div>
+          <div class="appr-img-item">
+            <img class="appr-img-thumb" src="/static/img/approfondisci/corpus5.jpg" alt="Tavole multiple">
+            <div class="appr-img-caption">
+              <span class="appr-img-caption-title">05 <br> Tavole multiple</span>
+              <span class="appr-img-caption-sub">Asta Sangiorgi, Collezione Guidi, 1902</span>
+            </div>
+          </div>
         </div>
-        {% endfor %}
       </div>
 
     </section>
 
   </main>
+
+  {# ── Lightbox riutilizzabile per tutte le immagini della pagina ── #}
+  <div id="appr-lightbox" class="appr-lightbox" aria-hidden="true">
+    <button class="appr-lightbox-close" id="appr-lightbox-close" type="button" aria-label="Chiudi">&times;</button>
+    <button class="appr-lightbox-nav appr-lightbox-prev" id="appr-lightbox-prev" type="button" aria-label="Immagine precedente">&#8249;</button>
+    <div class="appr-lightbox-content">
+      <img id="appr-lightbox-img" src="" alt="">
+      <div class="appr-lightbox-caption" id="appr-lightbox-caption"></div>
+    </div>
+    <button class="appr-lightbox-nav appr-lightbox-next" id="appr-lightbox-next" type="button" aria-label="Immagine successiva">&#8250;</button>
+  </div>
 </div>
 {% endblock %}
 
@@ -635,6 +675,84 @@
   }, { rootMargin: '-20% 0px -70% 0px' });
 
   sections.forEach(s => observer.observe(s));
+})();
+
+/* ── Lightbox riutilizzabile per tutte le immagini della pagina ── */
+(function () {
+  const lightbox  = document.getElementById('appr-lightbox');
+  const lbImg     = document.getElementById('appr-lightbox-img');
+  const lbCaption = document.getElementById('appr-lightbox-caption');
+  const closeBtn  = document.getElementById('appr-lightbox-close');
+  const prevBtn   = document.getElementById('appr-lightbox-prev');
+  const nextBtn   = document.getElementById('appr-lightbox-next');
+  if (!lightbox) return;
+
+  /* Costruisce un gruppo per ogni griglia di immagini — le frecce
+     scorrono solo tra le immagini dello stesso blocco */
+  const groups = [];
+  document.querySelectorAll('.appr-img-grid-4, .appr-img-grid-5').forEach(grid => {
+    const imgs = Array.from(grid.querySelectorAll('.appr-img-thumb'));
+    if (!imgs.length) return;
+    groups.push(imgs.map(img => {
+      const item  = img.closest('.appr-img-item');
+      const title = item ? item.querySelector('.appr-img-caption-title') : null;
+      const sub   = item ? item.querySelector('.appr-img-caption-sub')   : null;
+      const titleText = title ? title.textContent.replace(/\s+/g, ' ').trim() : '';
+      const subText   = sub   ? sub.textContent.trim() : '';
+      return { el: img, src: img.src, caption: [titleText, subText].filter(Boolean).join(' — ') };
+    }));
+  });
+
+  /* Immagini singole fuori da una griglia (es. l'immagine annotata
+     nella sezione "lotto") — ciascuna è un gruppo a sé, senza frecce */
+  document.querySelectorAll('.appr-lotto-img').forEach(img => {
+    groups.push([{ el: img, src: img.src, caption: img.alt || '' }]);
+  });
+
+  let currentGroup = null;
+  let currentIndex = 0;
+
+  function render() {
+    const item = currentGroup[currentIndex];
+    lbImg.src = item.src;
+    lbImg.alt = item.caption;
+    lbCaption.textContent = item.caption;
+    const multi = currentGroup.length > 1;
+    prevBtn.style.display = multi ? 'flex' : 'none';
+    nextBtn.style.display = multi ? 'flex' : 'none';
+  }
+  function openLightbox(group, index) {
+    currentGroup = group;
+    currentIndex = index;
+    render();
+    lightbox.classList.add('is-open');
+    lightbox.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLightbox() {
+    lightbox.classList.remove('is-open');
+    lightbox.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+  function prev() { currentIndex = (currentIndex - 1 + currentGroup.length) % currentGroup.length; render(); }
+  function next() { currentIndex = (currentIndex + 1) % currentGroup.length; render(); }
+
+  groups.forEach(group => {
+    group.forEach((item, i) => {
+      item.el.addEventListener('click', () => openLightbox(group, i));
+    });
+  });
+
+  closeBtn.addEventListener('click', closeLightbox);
+  prevBtn.addEventListener('click', prev);
+  nextBtn.addEventListener('click', next);
+  lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
+  document.addEventListener('keydown', e => {
+    if (!lightbox.classList.contains('is-open')) return;
+    if (e.key === 'Escape')     closeLightbox();
+    if (e.key === 'ArrowLeft')  prev();
+    if (e.key === 'ArrowRight') next();
+  });
 })();
 </script>
 {% endblock %}

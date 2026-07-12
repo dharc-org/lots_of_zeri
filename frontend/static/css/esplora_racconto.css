@@ -1024,10 +1024,20 @@ body.expl-modal-open { overflow: hidden; }
 
 /* Freccia del chip "Altre" — più visibile del testo circostante */
 .chip-arrow {
-  font-size: 12px;
-  font-weight: 700;
-  margin-left: 2px;
-  display: inline-block;
+  font-size: 10px;
+  margin-left: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1.3px solid var(--paper-light);
+  background: currentColor;
+  vertical-align: middle;
+}
+.chip-arrow i {
+  color: var(--paper-light);
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -1094,3 +1104,15 @@ body.expl-modal-open { overflow: hidden; }
 #coll-list::-webkit-scrollbar { width: 9px; }
 #coll-list::-webkit-scrollbar-track { background: var(--paper-dark); }
 #coll-list::-webkit-scrollbar-thumb { background: var(--gray-1); border-radius: 6px; }
+
+/* Chip "Altre" in Tipologie di oggetti — bordo tratteggiato e sfondo
+   tenue sempre visibili (non solo la freccia), stesso principio già
+   usato per la riga "altre città" in Piazze del mercato: segnala che
+   è un elemento diverso dagli altri, pensato per essere espanso. */
+.expl-chip--altre {
+  border-style: dashed !important;
+  background: rgba(192,175,152,.12);
+}
+.expl-chip--altre:hover {
+  background: rgba(217,64,16,.08);
+}
