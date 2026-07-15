@@ -10,14 +10,14 @@ services:
       entrypoint: ["bash", "-c"]
       command:
         - |
-          if [ -f /index/zac.index.pos-1 ]; then
+          if [ -f /index/.build_done ]; then
             echo 'Indice già presente, skip.';
           else
             echo 'Costruzione indice...' &&
             qlever-index \
               -f /data/zac_catalogues_metadata_8_7_2026.ttl -F ttl \
-              -f /data/zac_manifests_30_6_2026.ttl -F ttl \
               -i /index/zac &&
+            touch /index/.build_done &&
             echo 'Indice costruito.';
           fi
       volumes:
