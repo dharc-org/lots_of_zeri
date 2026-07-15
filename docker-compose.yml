@@ -69,7 +69,7 @@ services:
         qlever:
           condition: service_healthy
       ports:
-        - "8006:8006"
+        - "5432:5432"
       volumes:
         - ./config:/app/config:ro
         - .:/app
@@ -79,7 +79,7 @@ services:
         - PYTHONUNBUFFERED=1
       networks:
         - zac-net
-      command: uvicorn main:app --host 0.0.0.0 --port 8006 --reload
+      command: uvicorn main:app --host 0.0.0.0 --port 5432 --reload
 
 volumes:
   qlever-index:
