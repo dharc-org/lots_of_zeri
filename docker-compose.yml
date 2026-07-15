@@ -43,7 +43,7 @@ services:
           -e "256 MB" \
           -j 4
     volumes:
-      - qlever-index:/index:ro
+      - qlever-index:/index
     ports:
       - "7001:7001"
     depends_on:
