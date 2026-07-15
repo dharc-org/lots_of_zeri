@@ -69,7 +69,7 @@ services:
         qlever:
           condition: service_healthy
       ports:
-        - "8000:8000"
+        - "8006:8006"
       volumes:
         - ./config:/app/config:ro
         - .:/app
