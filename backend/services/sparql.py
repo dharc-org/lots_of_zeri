@@ -8,6 +8,7 @@ import httpx
 import logging
 import json
 from typing import Any, Dict, List, Optional
+import re
 
 logger = logging.getLogger("zac.sparql")
 
@@ -18,6 +19,16 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX aat: <http://vocab.getty.edu/aat/>
 PREFIX zac: <http://w3id.org/zac/>
 """
+
+##################### HELPERS
+
+def iiif_sized(url: Optional[str], height: int) -> Optional[str]:
+    """Base IIIF Image API o URL IIIF completo → URL con l'altezza richiesta."""
+    if not url:
+        return None
+    if "/full/" in url:
+        return re.sub(r"/full/[^/]+/", f"/full/,{height}/", url, count=1)
+    return f"{url}/full/,{height}/0/default.jpg" 
 
 
 class SparqlService:
@@ -89,9 +100,7 @@ class SparqlService:
         values = " ".join(f"<{u}>" for u in uris)
         q = f"""SELECT ?item ?m WHERE {{
           VALUES ?item {{ {values} }}
-          {{ ?item crm:P138i_has_representation ?m }}
-          UNION
-          {{ ?doc crm:P70_documents ?item ; crm:P138i_has_representation ?m }}
+          ?item crm:P138i_has_representation|^crm:P70_documents/crm:P138i_has_representation ?m .
         }}"""
         rows = self.parse_bindings(await self.query(q, add_prefixes=True))
         out = {}
@@ -101,6 +110,8 @@ class SparqlService:
         return out
 
     async def fetch_thumbnail_from_manifest(self, manifest_url: str) -> Optional[str]:
+        """Ritorna la base del service IIIF Image API del primo canvas
+        (risoluzione parametrica); fallback sulla thumbnail statica."""
         try:
             r = await self.client.get(manifest_url, headers={"Accept": "application/json"})
             r.raise_for_status()
@@ -108,9 +119,21 @@ class SparqlService:
         except (httpx.HTTPError, ValueError):
             return None
         try:
-            thumb = m["sequences"][0]["canvases"][0]["thumbnail"]
+            canvas = m["sequences"][0]["canvases"][0]
         except (KeyError, IndexError, TypeError):
             return None
+        # Preferisci il service IIIF → size scelta in rendering
+        try:
+            svc = canvas["images"][0]["resource"]["service"]
+            if isinstance(svc, list):
+                svc = svc[0]
+            base = svc.get("@id")
+            if base:
+                return base.rstrip("/")
+        except (KeyError, IndexError, TypeError, AttributeError):
+            pass
+        # Fallback: thumbnail statica
+        thumb = canvas.get("thumbnail")
         if isinstance(thumb, list):
             thumb = thumb[0]
         return thumb.get("@id") if isinstance(thumb, dict) else thumb

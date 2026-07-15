@@ -126,7 +126,8 @@ cataloghi:
     uri_var: "doc"
     slug_from_uri: true
     result_fields:
-      thumb: "thumb"
+      thumb:      "thumb"
+      zeri_url:   "zeriUrl"
       doc_id:     "docId"
       title:      "title"
       year:       "year"

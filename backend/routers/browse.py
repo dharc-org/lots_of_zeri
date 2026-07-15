@@ -17,7 +17,7 @@ from fastapi import APIRouter, Request, Query
 from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 
-from backend.services.sparql import FilterEngine
+from backend.services.sparql import FilterEngine, iiif_sized
 from backend.services.detail_view import build_view, _esc_sparql_literal
 
 log    = logging.getLogger("zac.browse")
@@ -252,26 +252,26 @@ def _extract_items(rows: list, route_cfg: dict) -> list:
     return items
 
 
-async def _run_results_query(sparql, cfg, tab_id, route_cfg, facets, params, limit, offset):
-    """Execute the count + data queries and return (total, items)."""
-    engine = _build_engine(cfg, tab_id, params)
-    pfx    = cfg.get_prefixes()
-    count_q = pfx + engine.build_query(cfg.get_results_query(route_cfg["count_query"]), 0, 0)
-    data_q  = pfx + engine.build_query(cfg.get_results_query(route_cfg["results_query"]), limit, offset)
+# async def _run_results_query(sparql, cfg, tab_id, route_cfg, facets, params, limit, offset):
+#     """Execute the count + data queries and return (total, items)."""
+#     engine = _build_engine(cfg, tab_id, params)
+#     pfx    = cfg.get_prefixes()
+#     count_q = pfx + engine.build_query(cfg.get_results_query(route_cfg["count_query"]), 0, 0)
+#     data_q  = pfx + engine.build_query(cfg.get_results_query(route_cfg["results_query"]), limit, offset)
 
-    count_res, data_res = await asyncio.gather(
-        sparql.select(count_q),
-        sparql.select(data_q),
-        return_exceptions=True,
-    )
-    if isinstance(count_res, Exception):
-        log.error(f"Count: {count_res}"); count_res = [{}]
-    if isinstance(data_res, Exception):
-        log.error(f"Data: {data_res}"); data_res = []
+#     count_res, data_res = await asyncio.gather(
+#         sparql.select(count_q),
+#         sparql.select(data_q),
+#         return_exceptions=True,
+#     )
+#     if isinstance(count_res, Exception):
+#         log.error(f"Count: {count_res}"); count_res = [{}]
+#     if isinstance(data_res, Exception):
+#         log.error(f"Data: {data_res}"); data_res = []
 
-    total = int(float((count_res or [{}])[0].get("total", 0)))
-    items = _extract_items(data_res, route_cfg)
-    return total, items
+#     total = int(float((count_res or [{}])[0].get("total", 0)))
+#     items = _extract_items(data_res, route_cfg)
+#     return total, items
 
 async def _facet_range(sparql, cfg, tab_id, facet_id, filter_block=""):
     key  = f"{tab_id}__{facet_id}__range"
@@ -399,21 +399,24 @@ def _register_list_route(tab_id, tab_cfg, route_cfg, cfg):
 
         total = int(float((count_res or [{}])[0].get("total", 0)))
         items = _extract_items(data_res, route_cfg)
-        if "thumb" in route_cfg.get("result_fields", {}):
-            cache = request.app.state.cache
-            thumbs = await sparql.thumbnails_batch([it["uri"] for it in items], cache=cache)
-            for it in items:
-                it["thumb"] = thumbs.get(it["uri"])
 
         # ── 3. active_filters per sidebar ────────────────────────
         active_filters = {}
         for fid, fcfg in facets.items():
             ftype = fcfg.get("type")
             if ftype == "range":
-                rng = fcfg.get("range", {})
-                active_filters[fid + "_from"] = params.get(fid + "_from") or rng.get("min", 1860)
-                active_filters[fid + "_to"]   = params.get(fid + "_to")   or rng.get("max", 1940)
-                active_filters[fid + "_is_set"] = (fid + "_from" in params) or (fid + "_to" in params)
+                rng  = dynamic_ranges.get(fid) or fcfg.get("range", {})
+                rmin = rng.get("min", 1860)
+                rmax = rng.get("max", 1940)
+                vf = params.get(fid + "_from")
+                vt = params.get(fid + "_to")
+                active_filters[fid + "_from"] = vf if vf is not None else rmin
+                active_filters[fid + "_to"]   = vt if vt is not None else rmax
+                is_set = (vf is not None) or (vt is not None)
+                # selezione == intero range → nessun filtro effettivo, niente pill
+                if is_set and (vf is None or vf == rmin) and (vt is None or vt == rmax):
+                    is_set = False
+                active_filters[fid + "_is_set"] = is_set
             elif ftype == "multiselect":
                 active_filters[fid] = params.get(fid, [])
             elif ftype == "text_search":
@@ -471,11 +474,6 @@ def _register_api_route(tab_id, tab_cfg, route_cfg, cfg):
 
         items = _extract_items(data_res, _route_cfg)
         items = _extract_items(data_res, _route_cfg)
-        if "thumb" in _route_cfg.get("result_fields", {}):
-            cache = request.app.state.cache
-            thumbs = await sparql.thumbnails_batch([it["uri"] for it in items], cache=cache)
-            for it in items:
-                it["thumb"] = thumbs.get(it["uri"])
         return JSONResponse(content={
             "items":    items,
             "offset":   offset,
@@ -671,6 +669,19 @@ def _register_detail_route(tab_id, tab_cfg, route_cfg, cfg):
             except Exception as e:
                 log.warning(f"related {block_id}: {e}")
 
+        # ── Thumbnail per i correlati (stesso meccanismo di cerca NL) ──
+        rel_uris = [r["uri"] for rows in related_rows.values()
+                    for r in rows if r.get("uri")]
+        if rel_uris:
+            try:
+                thumbs = await sparql.thumbnails_batch(
+                    rel_uris, cache=request.app.state.cache)
+                for rows in related_rows.values():
+                    for r in rows:
+                        r["thumb"] = iiif_sized(thumbs.get(r.get("uri")), 480)
+            except Exception as e:
+                log.warning(f"related thumbs: {e}")
+
         # ── Merge config + dati → view ──────────────────────────────
         view = build_view(_kind, cfg_view, scalars=scalars,
                            multis=multis, related=related_rows,
@@ -681,3 +692,12 @@ def _register_detail_route(tab_id, tab_cfg, route_cfg, cfg):
             "active_tab": _route_cfg.get("active_tab", _tab_id),
             "view":       view,
         })
+    
+@router.get("/api/thumbs")
+async def api_thumbs(request: Request, uris: list[str] = Query([])):
+    sparql = request.app.state.sparql
+    cache  = request.app.state.cache
+    bases  = await sparql.thumbnails_batch(uris[:100], cache=cache)
+    return {u: {"thumb": iiif_sized(b, 160),    # lista
+                "cover": iiif_sized(b, 480)}    # griglia
+            for u, b in bases.items()}

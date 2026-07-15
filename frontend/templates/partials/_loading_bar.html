@@ -1,0 +1,28 @@
+{# ── Barra di caricamento globale ──────────────────────────
+   Richiede le regole #zac-loading-bar in style.css.
+   API: window.zacLoading.show() / window.zacLoading.hide() #}
+<div id="zac-loading-bar" aria-hidden="true"></div>
+
+<script>
+(function () {
+  var bar = document.getElementById('zac-loading-bar');
+  if (!bar) return;
+  var safety = null;
+
+  function show() {
+    bar.classList.add('active');
+    clearTimeout(safety);
+    safety = setTimeout(hide, 10000);  // download/azioni che non ricaricano la pagina
+  }
+  function hide() {
+    bar.classList.remove('active');
+    clearTimeout(safety);
+  }
+
+  document.addEventListener('submit', show, true);   // submit nativi e requestSubmit()
+  window.addEventListener('beforeunload', show);     // pill, sort, link, breadcrumbs
+  window.addEventListener('pageshow', hide);         // reset (anche da bfcache)
+
+  window.zacLoading = { show: show, hide: hide };    // hook manuale per casi particolari
+})();
+</script>

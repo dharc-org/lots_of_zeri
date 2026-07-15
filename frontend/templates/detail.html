@@ -18,6 +18,9 @@
 ──────────────────────────────────────────────────────────────── #}
 {% extends "base.html" %}
 {% block title %}{{ view.title }} — ZAC{% endblock %}
+{% block styles %}
+<link href="/static/css/browse.css" rel="stylesheet">
+{% endblock %}
 
 {% block content %}
 
@@ -159,37 +162,41 @@
       {% elif block.vals %}
         <div class="detail-carousel">
           {% for it in block.vals %}
-            {# Card secondo il tipo dichiarato in config #}
             {% if block.card == "catalogo" %}
-              <a href="/cataloghi/{{ it.doc_id }}" class="carousel-card">
-                <div class="carousel-thumb"><i class="bi bi-journal-text"></i></div>
-                <div class="carousel-body">
-                  <div class="carousel-title">{{ it.title }}</div>
-                  {% if it.year %}<div class="carousel-meta">{{ it.year }}</div>{% endif %}
+              <a href="/cataloghi/{{ it.doc_id }}" class="result-card-grid">
+                <div class="card-cover">
+                  {% if it.thumb %}
+                    <img src="{{ it.thumb }}" alt="" loading="lazy">
+                  {% else %}
+                    <div class="thumb-placeholder"></div>
+                  {% endif %}
                 </div>
-                <span class="carousel-cta">Apri <i class="ph ph-arrow-right"></i></span>
+                <div class="card-body">
+                  <div class="card-title">{{ it.title }}</div>
+                  {% if it.year %}<div class="card-meta">{{ it.year }}</div>{% endif %}
+                  <span class="btn-apri-mini">Apri →</span>
+                </div>
               </a>
 
             {% elif block.card == "evento" %}
-              <a href="/aste/{{ it.slug }}" class="carousel-card">
-                <div class="carousel-thumb"><i class="bi bi-hammer"></i></div>
-                <div class="carousel-body">
-                  <div class="carousel-title">{{ it.label }}</div>
-                  <div class="carousel-meta">
-                    {% if it.house %}{{ it.house }}{% endif %}
-                    {% if it.place %} · {{ it.place }}{% endif %}
+              <a href="/aste/{{ it.slug }}" class="result-card-grid">
+                <div class="card-cover">
+                  {% if it.thumb %}
+                    <img src="{{ it.thumb }}" alt="" loading="lazy">
+                  {% else %}
+                    <div class="thumb-placeholder"></div>
+                  {% endif %}
+                </div>
+                <div class="card-body">
+                  <div class="card-title">{{ it.label }}</div>
+                  <div class="card-meta">
+                    {% if it.house %}{{ it.house }}{% endif %}{% if it.place %} · {{ it.place }}{% endif %}
                   </div>
+                  <span class="btn-apri-mini">Apri →</span>
                 </div>
-                <span class="carousel-cta">Apri <i class="ph ph-arrow-right"></i></span>
               </a>
-
-            {% else %}{# lotto — non raggiungibile finché placeholder=true #}
-              <div class="carousel-card">
-                <div class="carousel-thumb"><i class="bi bi-tag"></i></div>
-                <div class="carousel-body">
-                  <div class="carousel-title">{{ it.title }}</div>
-                </div>
-              </div>
+            {% else %}
+              {# lotto — resta placeholder #}
             {% endif %}
           {% endfor %}
         </div>
@@ -252,52 +259,52 @@ Mirador.viewer({
   id: 'mirador-viewer',
   windows: [{ manifestId: {{ view.manifest_url|tojson }} }],
   selectedTheme: 'dark',
-themes: {
-  dark: {
-    palette: {
-      mode: 'dark',
-      primary: {
-        main: '#E86040',
-        contrastText: '#FDF6E4',   // --paper-light, al posto del bianco calcolato automaticamente
-      },
-      secondary: {
-        main: '#E86040',
-        contrastText: '#FDF6E4',
-      },
-      common: {
-        white: '#FDF6E4',
-      },
-      background: {
-        default: '#352C24',
-        paper: '#352C24',
-      },
-      shades: {
-        dark: '#241d17',
-        main: '#352C24',
-        light: '#4a3d30',
+  themes: {
+    dark: {
+      palette: {
+        mode: 'dark',
+        primary: {
+          main: '#E86040',
+          contrastText: '#FDF6E4',   // --paper-light, al posto del bianco calcolato automaticamente
+        },
+        secondary: {
+          main: '#E86040',
+          contrastText: '#FDF6E4',
+        },
+        common: {
+          white: '#FDF6E4',
+        },
+        background: {
+          default: '#352C24',
+          paper: '#352C24',
+        },
+        shades: {
+          dark: '#241d17',
+          main: '#352C24',
+          light: '#4a3d30',
+        }
       }
     }
-  }
-},
-  workspace: {
-    isWorkspaceAddVisible: false,
   },
-  workspaceControlPanel: {
-    enabled: false,
-  },
-  window: {
-    panels: {
-      info: false,
-      attribution: false,
-      canvas: false,
-      annotations: false,
-      search: false,
+    workspace: {
+      isWorkspaceAddVisible: false,
     },
-    hideWindowTitle: true,
-    allowClose: false,
-    allowMaximize: false,
-    allowFullscreen: true,
-  },
+    workspaceControlPanel: {
+      enabled: false,
+    },
+    window: {
+      panels: {
+        info: false,
+        attribution: false,
+        canvas: false,
+        annotations: false,
+        search: false,
+      },
+      hideWindowTitle: true,
+      allowClose: false,
+      allowMaximize: false,
+      allowFullscreen: true,
+    },
 });
 
 </script>

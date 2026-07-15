@@ -230,6 +230,7 @@ def build_view(
                         "doc_id": r.get("docId"),
                         "title":  r.get("title") or r.get("docId") or u,
                         "year":   r.get("year"),
+                        "thumb":  r.get("thumb"),
                     })
             elif block["card"] == "evento":
                 seen = set()
@@ -243,6 +244,7 @@ def build_view(
                         "label": r.get("label") or u,
                         "house": r.get("house"),
                         "place": r.get("place"),
+                        "thumb":  r.get("thumb"),
                     })
 
         related_out.append({

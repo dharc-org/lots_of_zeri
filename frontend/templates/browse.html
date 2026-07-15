@@ -167,13 +167,7 @@
   {% for item in items %}
   <div class="result-row">
     <a href="{{ tab_route }}/{{ item.slug or item.doc_id or item.uri.split('/')[-1] }}" class="row-link">
-      <div class="row-thumb">
-        {% if item.thumb %}
-          <img src="{{ item.thumb }}" alt="" loading="lazy" class="thumb-img">
-        {% else %}
-          <div class="thumb-placeholder"></div>
-        {% endif %}
-      </div>
+<div class="row-thumb" data-thumb-uri="{{ item.uri }}"><div class="thumb-placeholder"></div></div>
       <div class="row-body">
         <div class="row-title">{{ item.title or item.label or item.slug }}</div>
       {% if active_tab == 'aste' %}
@@ -199,9 +193,11 @@
     </a>
     <div class="row-actions">
       <a href="{{ tab_route }}/{{ item.slug or item.doc_id or item.uri.split('/')[-1] }}" class="btn-apri">Apri →</a>
-      <a href="{{ item.zeri_url or '#' }}" target="_blank" rel="noopener" class="row-zeri-link">
+      {% if item.zeri_url %}
+      <a href="{{ item.zeri_url }}" target="_blank" rel="noopener" class="row-zeri-link">
         <i class="ph ph-link"></i> Scheda Zeri
       </a>
+      {% endif %}
     </div>
   </div>
   {% endfor %}
@@ -213,11 +209,9 @@
           <a href="{{ tab_route }}/{{ item.slug or item.doc_id or item.uri.split('/')[-1] }}"
             class="result-card-grid">
             <div class="card-cover">
-              {% if item.thumb %}
-                <img src="{{ item.thumb }}" alt="" loading="lazy" class="cover-img">
-              {% else %}
-                <div class="thumb-placeholder"></div>
-              {% endif %}
+            <div class="row-thumb" data-thumb-uri="{{ item.uri }}">
+              <div class="thumb-placeholder"></div>
+            </div>
             </div>
             <div class="card-body">
               <div class="card-title">{{ item.title or item.label or item.slug }}</div>
@@ -270,6 +264,38 @@
 
 {% block scripts %}
 <script>
+
+/* ── Idratazione thumbnail (condivisa: SSR + infinite scroll) ── */
+async function hydrateThumbs(scope = document) {
+  const nodes = [...scope.querySelectorAll('[data-thumb-uri]:not([data-thumb-done])')];
+  if (!nodes.length) return;
+  const CHUNK = 10;
+  for (let i = 0; i < nodes.length; i += CHUNK) {
+    hydrateChunk(nodes.slice(i, i + CHUNK));   // niente await: partono in parallelo
+  }
+}
+
+async function hydrateChunk(nodes) {
+  const qs = nodes.map(n => 'uris=' + encodeURIComponent(n.dataset.thumbUri)).join('&');
+  let map = {};
+  try { map = await (await fetch('/api/thumbs?' + qs)).json(); } catch (e) { return; }
+  for (const n of nodes) {
+    n.dataset.thumbDone = '1';
+    const t = map[n.dataset.thumbUri];
+    if (!t) continue;
+    const inCover = !!n.closest('.card-cover');
+    const src = inCover ? t.cover : t.thumb;
+    if (src) {
+      const img = document.createElement('img');
+      img.src = src;
+      img.loading = 'lazy';
+      img.className = inCover ? 'cover-img' : 'thumb-img';
+      n.replaceChildren(img);
+    }
+  }
+}
+document.addEventListener('DOMContentLoaded', () => hydrateThumbs());
+
 document.addEventListener('DOMContentLoaded', function () {
 
   var tabRoute = {{ tab_route|tojson }};
@@ -343,12 +369,87 @@ document.addEventListener('DOMContentLoaded', function () {
   var resultsList = document.getElementById('zac-catalogue-results-list');
   var listEl = resultsList.querySelector('.results-list');
   var gridEl = resultsList.querySelector('.results-grid');
+  var isAste = !!(listEl && listEl.classList.contains('results-list-aste'));
   var apiBase  = sentinel.dataset.api;
   var tabRoute = sentinel.dataset.route;
   var offset   = parseInt(sentinel.dataset.offset, 10);
   var limit    = parseInt(sentinel.dataset.limit,  10);
   var total    = parseInt(sentinel.dataset.total,  10);
   var loading  = false;
+
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  /* Tenere allineato al filtro Jinja `lingua_estesa` */
+  var LINGUE = { de: 'Tedesco', fr: 'Francese', en: 'Inglese',
+                 it: 'Italiano', nl: 'Olandese', es: 'Spagnolo' };
+  function linguaEstesa(v) {
+    return LINGUE[String(v || '').toLowerCase()] || v;
+  }
+
+  function badgesHtml(item, cls) {
+    var h = '';
+    if (item.language)    h += '<span class="badge-pill">' + esc(linguaEstesa(item.language)) + '</span>';
+    if (item.illustrated) h += '<span class="badge-pill badge-pill-accent">Illustrato</span>';
+    return '<div class="' + cls + '">' + h + '</div>';
+  }
+
+  function buildListRow(item, slug, title) {
+    var href = tabRoute + '/' + encodeURIComponent(slug);
+    var meta;
+    if (isAste) {
+      meta = (item.house ? '<span class="row-meta-org">' + esc(item.house) + '</span>' : '')
+           + (item.year  ? '<span class="row-meta-date">' + esc(item.year)  + '</span>' : '');
+    } else {
+      meta = (item.house ? esc(item.house) : '')
+           + (item.year  ? ' · ' + esc(item.year) : '');
+    }
+    var row = document.createElement('div');
+    row.className = 'result-row';
+    row.innerHTML =
+        '<a href="' + href + '" class="row-link">'
+      +   '<div class="row-thumb" data-thumb-uri="' + esc(item.uri) + '">'
+      +     '<div class="thumb-placeholder"></div>'
+      +   '</div>'
+      +   '<div class="row-body">'
+      +     '<div class="row-title">' + esc(title) + '</div>'
+      +     '<div class="row-meta">' + meta + '</div>'
+      +     badgesHtml(item, 'row-badges')
+      +   '</div>'
+      + '</a>'
+      + '<div class="row-actions">'
+      +   '<a href="' + href + '" class="btn-apri">Apri →</a>'
+      +   '<a href="' + esc(item.zeri_url || '#') + '" target="_blank" rel="noopener" class="row-zeri-link">'
+      +     '<i class="ph ph-link"></i> Scheda Zeri'
+      +   '</a>'
+      + '</div>';
+    return row;
+  }
+
+  function buildGridCard(item, slug, title) {
+    var href = tabRoute + '/' + encodeURIComponent(slug);
+    var meta = (item.house ? esc(item.house) : '')
+             + (item.year  ? ', ' + esc(item.year) : '');
+    var card = document.createElement('a');
+    card.href = href;
+    card.className = 'result-card-grid';
+    card.innerHTML =
+        '<div class="card-cover">'
+      +   '<div class="row-thumb" data-thumb-uri="' + esc(item.uri) + '">'
+      +     '<div class="thumb-placeholder"></div>'
+      +   '</div>'
+      + '</div>'
+      + '<div class="card-body">'
+      +   '<div class="card-title">' + esc(title) + '</div>'
+      +   '<div class="card-meta">' + meta + '</div>'
+      +   badgesHtml(item, 'card-badges')
+      +   '<span class="btn-apri-mini">Apri <i class="ph ph-arrow-right"></i></span>'
+      + '</div>';
+    return card;
+  }
 
   var observer = new IntersectionObserver(function (entries) {
     if (entries[0].isIntersecting && !loading && offset < total) loadMore();
@@ -365,55 +466,18 @@ document.addEventListener('DOMContentLoaded', function () {
       .then(function (r) { return r.json(); })
       .then(function (data) {
         (data.items || []).forEach(function (item) {
+          if (!item || !item.uri) return;
           var slug  = item.slug || item.doc_id || item.uri.split('/').pop();
           var title = item.title || item.label || item.doc_id || slug;
-          var metaParts = [];
-          if (item.house) metaParts.push(item.house);
-          if (item.place) metaParts.push(item.place);
-          if (item.year)  metaParts.push(item.year);
-          if (item.language) metaParts.push(item.language);
-          var metaText = metaParts.join(' · ');
-
-          var thumbHtml = item.thumb
-            ? '<img src="' + item.thumb + '" alt="" loading="lazy" class="thumb-img">'
-            : '<div class="thumb-placeholder"></div>';
-
-          /* lista */
-          var aL = document.createElement('a');
-          aL.href = tabRoute + '/' + slug;
-          aL.className = 'result-row';
-          aL.innerHTML =
-            '<div class="row-thumb">' + thumbHtml + '</div>'
-            + '<div class="row-body">'
-            +   '<div class="row-title">' + title + '</div>'
-            +   '<div class="row-meta">' + metaText + '</div>'
-            +   (item.doc_id ? '<div class="row-sub">' + item.doc_id + '</div>' : '')
-            + '</div>'
-            + '<div class="row-actions"><span class="btn-apri">Apri →</span></div>';
-          listEl.appendChild(aL);
-
-          var thumbHtmlGrid = item.thumb
-            ? '<img src="' + item.thumb + '" alt="" loading="lazy" class="cover-img">'
-            : '<div class="thumb-placeholder"></div>';
-
-          /* griglia */
-          var aG = document.createElement('a');
-          aG.href = tabRoute + '/' + slug;
-          aG.className = 'result-card-grid';
-          aG.innerHTML =
-            '<div class="card-cover">' + thumbHtmlGrid + '</div>'
-            + '<div class="card-body">'
-            +   '<div class="card-title">' + title + '</div>'
-            +   '<div class="card-meta">' + metaText + '</div>'
-            +   '<span class="btn-apri-mini">Apri →</span>'
-            + '</div>';
-          gridEl.appendChild(aG);
+          listEl.appendChild(buildListRow(item, slug, title));
+          gridEl.appendChild(buildGridCard(item, slug, title));
         });
 
         offset += (data.items || []).length;
         if (offset >= total) observer.disconnect();
         sentinel.innerHTML = '';
         loading = false;
+        hydrateThumbs(resultsList);
       })
       .catch(function () {
         sentinel.innerHTML = '<span class="text-muted small">Errore caricamento.</span>';

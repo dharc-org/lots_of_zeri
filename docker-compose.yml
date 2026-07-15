@@ -15,7 +15,7 @@ services:
           else
             echo 'Costruzione indice...' &&
             qlever-index \
-              -f /data/zac_catalogues_metadata_5_3_2026.ttl -F ttl \
+              -f /data/zac_catalogues_metadata_8_7_2026.ttl -F ttl \
               -f /data/zac_manifests_30_6_2026.ttl -F ttl \
               -i /index/zac &&
             echo 'Indice costruito.';

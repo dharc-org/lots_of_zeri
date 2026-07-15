@@ -112,11 +112,11 @@ facet_queries:
     }
     GROUP BY ?facetURI ?facetValue ORDER BY DESC(?count) LIMIT 200
 
-eventi_asta__collezione:
-  multiselect: |
-    ?auction crm:P16_used_specific_object ?coll .
-    ?coll a crm:E78_Curated_Holding .
-    VALUES ?coll { {values_clause} }
+  # eventi_asta__collezione:
+  #   multiselect: |
+  #     ?auction crm:P16_used_specific_object ?coll .
+  #     ?coll a crm:E78_Curated_Holding .
+  #     VALUES ?coll { {values_clause} }
 
   # boolean: ?facetURI = ?facetValue (stringa "true"/"false")
   cataloghi__illustrazioni: |
@@ -143,6 +143,16 @@ eventi_asta__collezione:
       {FILTERS}
     }
     GROUP BY ?facetURI ?facetValue ORDER BY ?facetValue
+
+  cataloghi__anno_pubblicazione__range: |
+    SELECT (MIN(YEAR(?y)) AS ?minYear) (MAX(YEAR(?y)) AS ?maxYear)
+    WHERE {
+      ?doc a crm:E31_Document ;
+           crm:P2_has_type aat:300026068 ;
+           crm:P94i_was_created_by ?cr .
+      ?cr crm:P82_at_some_time_within ?y .
+      {FILTERS}
+    }
 
   cataloghi__lingua: |
     SELECT ?facetURI ?facetValue (COUNT(DISTINCT ?doc) AS ?count)
@@ -280,6 +290,7 @@ filter_snippets:
   cataloghi__lingua:
     multiselect: |
       ?doc crm:P72_has_language ?lang .
+      FILTER(LANG(?l) = "it" || LANG(?l) = "")
       VALUES ?lang { {values_clause} }
 
   cataloghi__illustrazioni:
@@ -317,7 +328,7 @@ filter_snippets:
       VALUES ?obj_type_f { {values_clause} }
 
   # Ricerca libera per parola chiave — usata dalla barra di ricerca
-  # Effettua la corrispondenza su: titolo, sottotitolo, identificativo, autori/casa d'asta
+  # Effettua la corrispondenza su: titolo (ma dovrebbe anche.. sottotitolo, identificativo, autori/casa d'asta)
   cataloghi___search:
     text_search: |
       ?doc crm:P102_has_title ?searchTitleNode .
@@ -331,7 +342,11 @@ filter_snippets:
 results:
 
   eventi_asta: |
-    SELECT DISTINCT ?auction ?auctionLabel ?houseLabel ?yearLabel ?placeLabel
+    SELECT ?auction
+           (MIN(?auctionLabel0) AS ?auctionLabel)
+           (MIN(?houseLabel0)   AS ?houseLabel)
+           (MIN(?yearLabel0)    AS ?yearLabel)
+           (MIN(?placeLabel0)   AS ?placeLabel)
     WHERE {
       ?auction a crm:E7_Activity ;
         crm:P2_has_type aat:300054751 .
@@ -339,19 +354,20 @@ results:
         ?auction crm:P9_consists_of ?organisation .
         ?organisation crm:P2_has_type zac:auction_organisation ;
           crm:P14_carried_out_by ?house .
-        ?house rdfs:label ?houseLabel .
+        ?house rdfs:label ?houseLabel0 .
       }
-      OPTIONAL { ?auction rdfs:label ?auctionLabel }
+      OPTIONAL { ?auction rdfs:label ?auctionLabel0 }
       OPTIONAL {
         ?auction crm:P4_has_time-span ?ts .
-        ?ts rdfs:label ?yearLabel .
+        ?ts rdfs:label ?yearLabel0 .
       }
       OPTIONAL {
         ?auction crm:P7_took_place_at ?place .
-        ?place rdfs:label ?placeLabel .
+        ?place rdfs:label ?placeLabel0 .
       }
       {FILTERS}
     }
+    GROUP BY ?auction
     ORDER BY {ORDER}
     LIMIT {limit}
     OFFSET {offset}
@@ -360,53 +376,68 @@ results:
     SELECT (COUNT(DISTINCT ?auction) AS ?total)
     WHERE {
       ?auction a crm:E7_Activity ;
-        crm:P2_has_type aat:300054751 ;
-        rdfs:label ?auctionLabel .
+        crm:P2_has_type aat:300054751 .
       {FILTERS}
     }
 
   catalogo: |
-    SELECT DISTINCT ?doc ?docId ?title ?year ?houseLabel ?langLabel ?illustrated
+    SELECT ?doc ?year ?docId ?zeriUrl
+           (SAMPLE(?title0)       AS ?title)
+           (SAMPLE(?houseLabel0)  AS ?houseLabel)
+           (SAMPLE(?langLabel0)   AS ?langLabel)
+           (SAMPLE(?illustrated0) AS ?illustrated)
     WHERE {
-        ?doc a crm:E31_Document ;
-             crm:P2_has_type aat:300026068 .
-        
-        OPTIONAL { 
-          ?doc crm:P48_has_preferred_identifier ?idNode . 
-          ?idNode rdfs:label ?docId 
+        {
+          SELECT ?doc (MIN(?y) AS ?year) (MIN(?id) AS ?docId)
+          WHERE {
+            ?doc a crm:E31_Document ;
+                 crm:P2_has_type aat:300026068 .
+            OPTIONAL {
+              ?doc crm:P94i_was_created_by ?creation .
+              ?creation crm:P82_at_some_time_within ?y .
+            }
+            OPTIONAL {
+              ?doc crm:P48_has_preferred_identifier ?idNode .
+              ?idNode rdfs:label ?id .
+            }
+            {FILTERS}
           }
-
+          GROUP BY ?doc
+          ORDER BY {ORDER}
+          LIMIT {limit}
+          OFFSET {offset}
+        }
         OPTIONAL {
           ?doc crm:P102_has_title ?tn .
-          ?tn crm:P2_has_type zac:primary_title ; rdfs:label ?title .
+          ?tn crm:P2_has_type zac:primary_title ; rdfs:label ?title0 .
+        }
+        OPTIONAL {
+          ?doc crm:P72_has_language ?lang2 .
+          ?lang2 rdfs:label ?langLabel0 .
         }
         OPTIONAL {
           ?doc crm:P94i_was_created_by ?creation .
-          ?creation crm:P82_at_some_time_within ?year .
-        }
-        OPTIONAL {
-          ?doc crm:P72_has_language ?lang .
-          ?lang rdfs:label ?langLabel .
-        }
-        OPTIONAL {
-          ?doc crm:P14_carried_out_by ?house .
-          ?house rdfs:label ?houseLabel .
+          ?creation crm:P14_carried_out_by ?house .
+          ?house rdfs:label ?houseLabel0 .
         }
         OPTIONAL {
           ?doc crm:P2_has_type zac:illustrated .
-          BIND("true" AS ?illustrated)
+          BIND("true" AS ?illustrated0)
         }
-        {FILTERS}
+        OPTIONAL {
+          ?doc crm:P70i_is_documented_in ?zrec .
+          ?zrec crm:P1_is_identified_by ?zid .
+          ?zid crm:P190_has_symbolic_content ?zeriUrl .
+        }
     }
+    GROUP BY ?doc ?year ?docId ?zeriUrl
     ORDER BY {ORDER}
-    LIMIT {limit}
-    OFFSET {offset}
 
   catalogo_count: |
     SELECT (COUNT(DISTINCT ?doc) AS ?total)
     WHERE {
       ?doc a crm:E31_Document ;
-           crm:P2_has_type aat:300026068 .
+        crm:P2_has_type aat:300026068 .
       {FILTERS}
     }
 
