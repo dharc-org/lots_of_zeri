@@ -120,3 +120,19 @@ async def guida_alla_ricerca(request: Request):
         "active_tab": None,
         "active_page": "guida",
     })
+
+@app.get("/contatti", response_class=HTMLResponse)
+async def contatti(request: Request):
+    return templates.TemplateResponse("contatti.html", {
+        "request": request,
+        "active_tab": None,
+        "active_page": "contatti",
+    })
+
+@app.get("/crediti", response_class=HTMLResponse)
+async def crediti(request: Request):
+    return templates.TemplateResponse("crediti.html", {
+        "request": request,
+        "active_tab": None,
+        "active_page": "crediti",
+    })
