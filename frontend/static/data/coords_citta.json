@@ -1,0 +1,98 @@
+{
+ "Parigi": {
+  "lat": 48.86,
+  "lon": 2.35
+ },
+ "Berlino": {
+  "lat": 52.52,
+  "lon": 13.4
+ },
+ "Monaco di Baviera": {
+  "lat": 48.14,
+  "lon": 11.58
+ },
+ "Francoforte sul Meno": {
+  "lat": 50.11,
+  "lon": 8.68
+ },
+ "Colonia": {
+  "lat": 50.94,
+  "lon": 6.96
+ },
+ "Milano": {
+  "lat": 45.46,
+  "lon": 9.19
+ },
+ "Roma": {
+  "lat": 41.9,
+  "lon": 12.5
+ },
+ "Firenze": {
+  "lat": 43.77,
+  "lon": 11.26
+ },
+ "Stoccarda": {
+  "lat": 48.78,
+  "lon": 9.18
+ },
+ "Amsterdam": {
+  "lat": 52.37,
+  "lon": 4.9
+ },
+ "Aquisgrana": {
+  "lat": 50.78,
+  "lon": 6.08
+ },
+ "Amburgo": {
+  "lat": 53.55,
+  "lon": 9.99
+ },
+ "Bonn": {
+  "lat": 50.73,
+  "lon": 7.1
+ },
+ "New York": {
+  "lat": 40.71,
+  "lon": -74.01
+ },
+ "Napoli": {
+  "lat": 40.85,
+  "lon": 14.27
+ },
+ "Londra": {
+  "lat": 51.51,
+  "lon": -0.13
+ },
+ "Venezia": {
+  "lat": 45.44,
+  "lon": 12.34
+ },
+ "Bruxelles": {
+  "lat": 50.85,
+  "lon": 4.35
+ },
+ "Dresda": {
+  "lat": 51.05,
+  "lon": 13.74
+ },
+ "Lubecca": {
+  "lat": 53.87,
+  "lon": 10.69
+ },
+ "Genova": {
+  "lat": 44.41,
+  "lon": 8.93
+ },
+ "Würzburg": {
+  "lat": 49.79,
+  "lon": 9.95
+ },
+ "Zurigo": {
+  "lat": 47.38,
+  "lon": 8.54
+ },
+ "Bologna": {
+  "lat": 44.49,
+  "lon": 11.34
+ }
+}

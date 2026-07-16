@@ -714,3 +714,162 @@ detail:
     }
     ORDER BY ?yearLabel
     LIMIT 12
+
+# ══════════════════════════════════════════════════════════
+# ESPLORA — query di aggregazione piatta per /api/esplora/*
+# Da appendere a sparql_queries.yaml come chiave top-level `esplora:`.
+# Ogni query restituisce righe piatte; il pivot/shaping avviene
+# in backend/routers/esplora.py (stessa logica di genera_json_esplora.py).
+# ══════════════════════════════════════════════════════════
+esplora:
+
+  # eventi per anno (base per eventi_per_anno.json e trend_mercato.ytotals)
+  eventi_anno: |
+    SELECT ?year (COUNT(DISTINCT ?auction) AS ?count)
+    WHERE {
+      ?auction a crm:E7_Activity ;
+        crm:P2_has_type aat:300054751 ;
+        crm:P4_has_time-span ?ts .
+      ?ts crm:P82a_begin_of_the_begin ?d .
+      BIND(YEAR(?d) AS ?year)
+    }
+    GROUP BY ?year ORDER BY ?year
+
+  # casa d'asta × anno (case_dasta.json → py)
+  case_anno: |
+    SELECT ?houseLabel ?year (COUNT(DISTINCT ?auction) AS ?count)
+    WHERE {
+      ?auction a crm:E7_Activity ;
+        crm:P2_has_type aat:300054751 ;
+        crm:P9_consists_of ?sub_act ;
+        crm:P4_has_time-span ?ts .
+      ?sub_act crm:P2_has_type zac:auction_organisation ;
+        crm:P14_carried_out_by ?house .
+      ?house rdfs:label ?houseLabel .
+      ?ts crm:P82a_begin_of_the_begin ?d .
+      BIND(YEAR(?d) AS ?year)
+    }
+    GROUP BY ?houseLabel ?year
+
+  # casa d'asta × luogo (case_dasta.json → city = luogo modale)
+  case_luogo: |
+    SELECT ?houseLabel ?placeLabel (COUNT(DISTINCT ?auction) AS ?count)
+    WHERE {
+      ?auction a crm:E7_Activity ;
+        crm:P2_has_type aat:300054751 ;
+        crm:P9_consists_of ?sub_act ;
+        crm:P7_took_place_at ?place .
+      ?sub_act crm:P2_has_type zac:auction_organisation ;
+        crm:P14_carried_out_by ?house .
+      ?house rdfs:label ?houseLabel .
+      ?place rdfs:label ?placeLabel .
+    }
+    GROUP BY ?houseLabel ?placeLabel
+
+  # banditore × casa (banditori.json: all/top_band/case/edges)
+  # OPTIONAL sull'organizzatore: banditore senza casa = "autorganizzato"
+  banditori_case: |
+    SELECT ?bandLabel ?houseLabel (COUNT(DISTINCT ?auction) AS ?count)
+    WHERE {
+      ?auction a crm:E7_Activity ;
+        crm:P2_has_type aat:300054751 ;
+        crm:P9_consists_of ?sub_band .
+      ?sub_band a crm:E7_Activity ;
+        crm:P2_has_type zac:auctioneering ;
+        crm:P14_carried_out_by ?band .
+      ?band rdfs:label ?bandLabel .
+      OPTIONAL {
+        ?auction crm:P9_consists_of ?sub_org .
+        ?sub_org crm:P2_has_type zac:auction_organisation ;
+          crm:P14_carried_out_by ?house .
+        ?house rdfs:label ?houseLabel .
+      }
+    }
+    GROUP BY ?bandLabel ?houseLabel
+
+  # luogo × anno (geografia_decenni.json + trend_mercato.json → py città)
+  luoghi_anno: |
+    SELECT ?placeLabel ?year (COUNT(DISTINCT ?auction) AS ?count)
+    WHERE {
+      ?auction a crm:E7_Activity ;
+        crm:P2_has_type aat:300054751 ;
+        crm:P7_took_place_at ?place ;
+        crm:P4_has_time-span ?ts .
+      ?place rdfs:label ?placeLabel .
+      ?ts crm:P82a_begin_of_the_begin ?d .
+      BIND(YEAR(?d) AS ?year)
+    }
+    GROUP BY ?placeLabel ?year
+
+  # luogo × casa (trend_mercato.json → org principale per città)
+  luoghi_case: |
+    SELECT ?placeLabel ?houseLabel (COUNT(DISTINCT ?auction) AS ?count)
+    WHERE {
+      ?auction a crm:E7_Activity ;
+        crm:P2_has_type aat:300054751 ;
+        crm:P7_took_place_at ?place ;
+        crm:P9_consists_of ?sub_act .
+      ?place rdfs:label ?placeLabel .
+      ?sub_act crm:P2_has_type zac:auction_organisation ;
+        crm:P14_carried_out_by ?house .
+      ?house rdfs:label ?houseLabel .
+    }
+    GROUP BY ?placeLabel ?houseLabel
+
+  # tipologia oggetti × anno (tipologie_oggetti.json)
+  tipologie_anno: |
+    SELECT ?tipoLabel ?year (COUNT(DISTINCT ?auction) AS ?count)
+    WHERE {
+      ?auction a crm:E7_Activity ;
+        crm:P2_has_type aat:300054751 ;
+        crm:P125_used_objects_of_type ?obj_type ;
+        crm:P4_has_time-span ?ts .
+      ?obj_type crm:P2_has_type zac:object_type ;
+        rdfs:label ?tipoLabel .
+      ?ts crm:P82a_begin_of_the_begin ?d .
+      BIND(YEAR(?d) AS ?year)
+    }
+    GROUP BY ?tipoLabel ?year
+
+  # collezione × evento (collezioni.json — righe NON aggregate:
+  # servono anno e casa per evento per tag anno/casa/diverse)
+  collezioni_eventi: |
+    SELECT DISTINCT ?auction ?collLabel ?year ?houseLabel
+    WHERE {
+      ?auction a crm:E7_Activity ;
+        crm:P2_has_type aat:300054751 ;
+        crm:P16_used_specific_object ?coll ;
+        crm:P4_has_time-span ?ts .
+      ?coll a crm:E78_Curated_Holding ;
+        rdfs:label ?collLabel .
+      ?ts crm:P82a_begin_of_the_begin ?d .
+      BIND(YEAR(?d) AS ?year)
+      OPTIONAL {
+        ?auction crm:P9_consists_of ?sub_act .
+        ?sub_act crm:P2_has_type zac:auction_organisation ;
+          crm:P14_carried_out_by ?house .
+        ?house rdfs:label ?houseLabel .
+      }
+    }
+
+  # ── ATTENZIONE: stagionalita e cataloghi_per_paese ──
+  # Nei JSON attuali il "paese" viene dal FONDO archivistico dell'Excel,
+  # che (probabilmente) non è nel triplestore. Se esiste un path
+  # luogo→paese (es. ?place crm:P89_falls_within ?country) sostituiscilo
+  # qui sotto; altrimenti questi due restano statici.
+  stagionalita_paese_mese: |
+    SELECT ?paeseLabel ?month (COUNT(DISTINCT ?auction) AS ?count)
+    WHERE {
+      ?auction a crm:E7_Activity ;
+        crm:P2_has_type aat:300054751 ;
+        crm:P7_took_place_at ?place ;
+        crm:P4_has_time-span ?ts .
+      # TODO: verificare il path reale luogo→paese nel grafo
+      ?place crm:P89_falls_within ?country .
+      ?country rdfs:label ?paeseLabel .
+      ?ts crm:P82a_begin_of_the_begin ?d .
+      BIND(MONTH(?d) AS ?month)
+      BIND(YEAR(?d) AS ?year)
+      FILTER(?year >= 1879 && ?year <= 1929)
+    }
+    GROUP BY ?paeseLabel ?month

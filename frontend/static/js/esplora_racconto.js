@@ -7,7 +7,7 @@
 'use strict';
 
 /* ── Percorso base dei JSON statici ────────────────────── */
-const DATA_BASE = '/static/data/';
+const DATA_BASE = '/api/esplora/';
 
 /* ══════════════════════════════════════════════════════════
    0. MODALE ESPANDI — sposta il grafico reale dentro/fuori

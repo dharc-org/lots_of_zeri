@@ -17,6 +17,9 @@ from backend.services.sparql import SparqlService
 from backend.services.cache import CacheService
 from backend.services.config import ConfigService
 
+from backend.routers import browse
+from backend.routers import esplora as esplora_api
+
 BASE = Path(__file__).parent
 
 
@@ -67,6 +70,7 @@ app = FastAPI(title="ZAC — Zeri Auction Catalogues", lifespan=lifespan)
 app.mount("/static", StaticFiles(directory=BASE / "frontend" / "static"), name="static")
 
 app.include_router(browse.router)
+app.include_router(esplora_api.router)
 
 
 @app.get("/", response_class=HTMLResponse)
