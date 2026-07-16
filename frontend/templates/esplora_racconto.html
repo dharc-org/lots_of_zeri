@@ -2,7 +2,7 @@
 {% block title %}Esplora — ZAC{% endblock %}
 
 {% block styles %}
-<link href="/static/css/esplora_racconto.css" rel="stylesheet">
+<link href="{{ base_path }}/static/css/esplora_racconto.css" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
@@ -66,7 +66,7 @@
       </div>
 
       <div class="racc-cta">
-        <a href="/approfondisci#asta">Cos'è un'asta <i class="ph ph-arrow-right"></i></a>
+        <a href="{{ base_path }}/approfondisci#asta">Cos'è un'asta <i class="ph ph-arrow-right"></i></a>
       </div>
     </section>
 
@@ -314,7 +314,7 @@ Nel <em>corpus</em>, appena il 7% delle collezioni nominate ricompare in più di
       </div>
 
       <div class="racc-cta">
-        <a href="/approfondisci#lotto">Cos'è un lotto <i class="ph ph-arrow-right"></i></a>
+        <a href="{{ base_path }}/approfondisci#lotto">Cos'è un lotto <i class="ph ph-arrow-right"></i></a>
       </div>
     </section>
 
@@ -359,5 +359,5 @@ Nel <em>corpus</em>, appena il 7% delle collezioni nominate ricompare in più di
 
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
-<script src="/static/js/esplora_racconto.js"></script>
+<script src="{{ base_path }}/static/js/esplora_racconto.js"></script>
 {% endblock %}

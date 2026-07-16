@@ -10,7 +10,7 @@ const GRID_ROWS        = 3;
 const FLIP_INTERVAL_MS = 500;
 
 const COVERS = Array.from({length: 67}, (_, i) =>
-  `/static/img/covers/${String(i + 1).padStart(3, '0')}.jpg`
+  `${window.BASE_PATH || ''}/static/img/covers/${String(i + 1).padStart(3, '0')}.jpg`
 );
 
 function shuffle(arr) {

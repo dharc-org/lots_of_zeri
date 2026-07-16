@@ -1,52 +1,17 @@
 # ZAC Platform — Application Settings
-
-app:
-  name: "ZAC — Zeri Auction Catalogues"
-  name_short: "ZAC"
-  version: "1.0.0"
-  description: "Digital platform for historical auction catalogues 1860–1940"
-  institution: "Fondazione Federico Zeri — Università di Bologna"
-  language_default: "it"
-  languages: ["it", "en"]
-
-server:
-  host: "0.0.0.0"
-  port: 8000
-  reload: true  # dev mode
-  workers: 4    # production
+# Nota: qui stanno solo le chiavi effettivamente lette dal codice
+# (main.py, config.py). Il base path per il deploy sotto prefisso
+# viene dalla variabile d'ambiente ZAC_BASE_PATH (docker-compose),
+# host/port/workers dal CMD del Dockerfile.
 
 # QLever Triplestore
 triplestore:
-  host: "qlever"        # era "localhost" — dentro Docker il container si chiama "qlever"
-  port: 7001            # era 9999
-  endpoint: "/api"      # era "/blazegraph/sparql"
-  query_timeout_seconds: 30
-  max_results: 10000
+  host: "qlever"        # nome del servizio in docker-compose
+  port: 7001
+  endpoint: "/api"
   named_graph: "http://w3id.org/zac/catalogues"
-  format: "application/sparql-results+json"
 
 # Pagination
 pagination:
   default_page_size: 20
   max_page_size: 100
-
-# Cache (Redis or in-memory)
-cache:
-  enabled: true
-  backend: "memory"   # "memory" | "redis"
-  redis_url: "redis://redis:6379/0"
-  facet_ttl_seconds: 3600    # 1h — facet values change rarely
-  results_ttl_seconds: 300   # 5min — results may change
-  max_memory_items: 500
-
-# CORS
-cors:
-  origins: ["*"]  # restrict in production
-  methods: ["GET", "POST", "OPTIONS"]
-  headers: ["*"]
-
-# Logging
-logging:
-  level: "INFO"
-  format: "%(asctime)s — %(name)s — %(levelname)s — %(message)s"
-  file: "logs/zac.log"

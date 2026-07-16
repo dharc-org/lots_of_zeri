@@ -1,8 +1,8 @@
 <nav class="navbar navbar-expand-xl px-3 sticky-top">
 
   <!-- Brand -->
-  <a class="navbar-brand" href="/">
-    <img src="/static/img/loghi/logo_zeri.png" alt="Logo Zeri" height="35">
+  <a class="navbar-brand" href="{{ base_path }}/">
+    <img src="{{ base_path }}/static/img/loghi/logo_zeri.png" alt="Logo Zeri" height="35">
   </a>
 
   <!-- Hamburger mobile -->
@@ -16,19 +16,19 @@
     <ul class="navbar-nav ms-auto gap-1">
 
       <li class="nav-item">
-        <a class="nav-link {% if active_tab %}active{% endif %}" href="/cataloghi">Cerca</a>
+        <a class="nav-link {% if active_tab %}active{% endif %}" href="{{ base_path }}/cataloghi">Cerca</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link {% if active_page == 'esplora' %}active{% endif %}" href="/esplora">Esplora</a>
+        <a class="nav-link {% if active_page == 'esplora' %}active{% endif %}" href="{{ base_path }}/esplora">Esplora</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link {% if active_page == 'esplora_racconto' %}active{% endif %}" href="/esplora-racconto">Esplora2</a>
+        <a class="nav-link {% if active_page == 'esplora_racconto' %}active{% endif %}" href="{{ base_path }}/esplora-racconto">Esplora2</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link {% if active_page == 'approfondisci' %}active{% endif %}" href="/approfondisci">Approfondisci</a>
+        <a class="nav-link {% if active_page == 'approfondisci' %}active{% endif %}" href="{{ base_path }}/approfondisci">Approfondisci</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link {% if active_page == 'progetto' %}active{% endif %}" href="/progetto">Progetto</a>
+        <a class="nav-link {% if active_page == 'progetto' %}active{% endif %}" href="{{ base_path }}/progetto">Progetto</a>
       </li>
     </ul>
   </div>

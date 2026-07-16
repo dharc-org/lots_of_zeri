@@ -19,7 +19,7 @@
 {% extends "base.html" %}
 {% block title %}{{ view.title }} — ZAC{% endblock %}
 {% block styles %}
-<link href="/static/css/browse.css" rel="stylesheet">
+<link href="{{ base_path }}/static/css/browse.css" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
@@ -163,7 +163,7 @@
         <div class="detail-carousel">
           {% for it in block.vals %}
             {% if block.card == "catalogo" %}
-              <a href="/cataloghi/{{ it.doc_id }}" class="result-card-grid">
+              <a href="{{ base_path }}/cataloghi/{{ it.doc_id }}" class="result-card-grid">
                 <div class="card-cover">
                   {% if it.thumb %}
                     <img src="{{ it.thumb }}" alt="" loading="lazy">
@@ -179,7 +179,7 @@
               </a>
 
             {% elif block.card == "evento" %}
-              <a href="/aste/{{ it.slug }}" class="result-card-grid">
+              <a href="{{ base_path }}/aste/{{ it.slug }}" class="result-card-grid">
                 <div class="card-cover">
                   {% if it.thumb %}
                     <img src="{{ it.thumb }}" alt="" loading="lazy">

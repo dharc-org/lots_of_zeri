@@ -26,3 +26,4 @@ backend/services/__pycache__/sparql.cpython-311.pyc
 /backend/routers/__pycache__
 __pycache__/main.cpython-311.pyc
 *.pyc
+.env

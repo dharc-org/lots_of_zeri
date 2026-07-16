@@ -3,24 +3,26 @@ ZAC — main.py
 Single entry point. All browse tabs are driven by config (facets.yaml),
 registered dynamically by browse.py. No per-tab router files.
 """
+import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 
 import yaml
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from backend.routers import browse
+from backend.routers import esplora as esplora_api
 from backend.services.sparql import SparqlService
 from backend.services.cache import CacheService
 from backend.services.config import ConfigService
 
-from backend.routers import browse
-from backend.routers import esplora as esplora_api
-
 BASE = Path(__file__).parent
+
+# Prefisso di deploy (es. "/lots_of_zeri"); vuoto in locale.
+BASE_PATH = os.environ.get("ZAC_BASE_PATH", "").rstrip("/")
 
 
 def _load_config() -> ConfigService:
@@ -37,7 +39,7 @@ _cfg = _load_config()
 
 templates = Jinja2Templates(directory=BASE / "frontend" / "templates")
 browse.setup(templates)
-browse.register_tab_routes(_cfg)          # routes added to router BEFORE include_router
+browse.register_tab_routes(_cfg)        
 
 LINGUE_ESTESE = {
     "it": "Italiano", "fr": "Francese", "de": "Tedesco",
@@ -51,6 +53,7 @@ def lingua_estesa(codice: str) -> str:
     return LINGUE_ESTESE.get(codice.strip().lower(), codice)
 
 templates.env.filters["lingua_estesa"] = lingua_estesa
+templates.env.globals["base_path"] = BASE_PATH
 
 
 @asynccontextmanager
@@ -66,11 +69,23 @@ async def lifespan(app: FastAPI):
     await app.state.sparql.close()
 
 
-app = FastAPI(title="ZAC — Zeri Auction Catalogues", lifespan=lifespan)
+app = FastAPI(title="ZAC — Zeri Auction Catalogues",
+              lifespan=lifespan, root_path=BASE_PATH)
 app.mount("/static", StaticFiles(directory=BASE / "frontend" / "static"), name="static")
 
 app.include_router(browse.router)
 app.include_router(esplora_api.router)
+
+
+@app.exception_handler(500)
+async def internal_error(request: Request, exc: Exception):
+    if request.url.path.startswith("/api/"):
+        return JSONResponse({"detail": "Internal server error"}, status_code=500)
+    return templates.TemplateResponse("500.html", {
+        "request": request,
+        "active_tab": None,
+        "active_page": None,
+    }, status_code=500)
 
 
 @app.get("/", response_class=HTMLResponse)

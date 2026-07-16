@@ -2,14 +2,14 @@
 {% block title %}{{ tab_label }} — ZAC{% endblock %}
 
 {% block styles %}
-<link href="/static/css/browse.css" rel="stylesheet">
+<link href="{{ base_path }}/static/css/browse.css" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
 
 {# ── Breadcrumbs ─────────────────────────────────────────── #}
 <nav class="zac-breadcrumbs">
-  <a href="/">Homepage</a>
+  <a href="{{ base_path }}/">Homepage</a>
   <span class="sep">›</span>
   <a href="#">Cerca</a>
   <span class="sep">›</span>
@@ -21,8 +21,8 @@
 
   {# Tabs orizzontali (Cataloghi / Aste / Lotti) #}
   <div class="search-tabs">
-    <a href="/cataloghi" class="search-tab {% if active_tab == 'catalogo' %}active{% endif %}">Cataloghi</a>
-    <a href="/aste"      class="search-tab {% if active_tab == 'aste'     %}active{% endif %}">Aste</a>
+    <a href="{{ base_path }}/cataloghi" class="search-tab {% if active_tab == 'catalogo' %}active{% endif %}">Cataloghi</a>
+    <a href="{{ base_path }}/aste"      class="search-tab {% if active_tab == 'aste'     %}active{% endif %}">Aste</a>
     <span                class="search-tab disabled">Lotti</span>
   </div>
 
@@ -35,7 +35,7 @@
         <i class="bi bi-search"></i>
       </button>
     </div>
-    <a href="/guida-alla-ricerca" class="search-help">
+    <a href="{{ base_path }}/guida-alla-ricerca" class="search-help">
       Guida alla ricerca <i class="ph ph-arrow-right"></i>
     </a>
   </div>
@@ -237,7 +237,7 @@
       {# Sentinel infinite scroll #}
       {% if loaded < total %}
       <div id="scroll-sentinel" class="text-center py-3"
-           data-api="/api{{ tab_route }}/results"
+           data-api="{{ base_path }}/api{{ tab_route }}/results"
            data-offset="{{ loaded }}"
            data-limit="{{ page_size }}"
            data-total="{{ total }}"
