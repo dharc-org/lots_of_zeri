@@ -251,28 +251,6 @@ def _extract_items(rows: list, route_cfg: dict) -> list:
         items.append(item)
     return items
 
-
-# async def _run_results_query(sparql, cfg, tab_id, route_cfg, facets, params, limit, offset):
-#     """Execute the count + data queries and return (total, items)."""
-#     engine = _build_engine(cfg, tab_id, params)
-#     pfx    = cfg.get_prefixes()
-#     count_q = pfx + engine.build_query(cfg.get_results_query(route_cfg["count_query"]), 0, 0)
-#     data_q  = pfx + engine.build_query(cfg.get_results_query(route_cfg["results_query"]), limit, offset)
-
-#     count_res, data_res = await asyncio.gather(
-#         sparql.select(count_q),
-#         sparql.select(data_q),
-#         return_exceptions=True,
-#     )
-#     if isinstance(count_res, Exception):
-#         log.error(f"Count: {count_res}"); count_res = [{}]
-#     if isinstance(data_res, Exception):
-#         log.error(f"Data: {data_res}"); data_res = []
-
-#     total = int(float((count_res or [{}])[0].get("total", 0)))
-#     items = _extract_items(data_res, route_cfg)
-#     return total, items
-
 async def _facet_range(sparql, cfg, tab_id, facet_id, filter_block=""):
     key  = f"{tab_id}__{facet_id}__range"
     body = cfg.get_facet_query_by_key(key)
@@ -684,8 +662,8 @@ def _register_detail_route(tab_id, tab_cfg, route_cfg, cfg):
 
         # ── Merge config + dati → view ──────────────────────────────
         view = build_view(_kind, cfg_view, scalars=scalars,
-                           multis=multis, related=related_rows,
-                           manifest_url=manifest_url)
+                           multis=multis, related=related_rows,manifest_url=manifest_url,
+                           base_path=tmpl.env.globals.get("base_path", ""))
 
         return tmpl.TemplateResponse("detail.html", {
             "request":    request,

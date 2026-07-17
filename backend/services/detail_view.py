@@ -4,16 +4,11 @@ Costruisce il dict `view` per detail.html, facendo il merge fra:
   - la config detail_views.yaml (campi, sezioni, correlati)
   - i risultati SPARQL eseguiti per blocco (scalars, multivalore, correlati)
 
-Nessuna logica di presentazione hardcoded: il template itera su `view`.
-
-── Novità: facet_link ────────────────────────────────────────────
-Un campo multivalore può dichiarare in detail_views.yaml:
-    facet_link: { route: "/cataloghi", param: "lingua" }
-In tal caso, se la relativa query multivalore restituisce anche ?uri,
-ogni valore diventa un dict {label, url} dove url è:
-    {route}?{param}={uri-urlencoded}
-e il template lo renderizza come <a href="…">label</a>.
-Se manca l'?uri (o facet_link), il valore resta una semplice stringa.
+── NOTA SU base_path ─────────────────────────────────────────────────────
+Le route in detail_views.yaml restano pulite ("/cataloghi", "/aste").
+Il prefisso di deploy viene passato dal router come kwarg `base_path`
+e anteposto a tutti gli URL interni generati qui (back, switch,
+contributori, facet_link, link_route).
 """
 from typing import Any, Dict, List, Optional
 from urllib.parse import quote
@@ -63,11 +58,12 @@ def _multi(rows: List[dict], key: str = "value") -> List[str]:
 
 
 def _multi_linked(rows: List[dict], facet_link: dict,
-                  label_key: str = "value", uri_key: str = "uri") -> List[dict]:
+                  label_key: str = "value", uri_key: str = "uri",
+                  base_path: str = "") -> List[dict]:
     """
     Lista di valori distinti come dict {label, url}.
-    url = "{route}?{param}={uri-urlencoded}" se l'URI è presente, altrimenti None.
-    De-dup sulla label, preservando l'ordine.
+    url = "{base_path}{route}?{param}={uri-urlencoded}" se l'URI è presente,
+    altrimenti None. De-dup sulla label, preservando l'ordine.
     """
     route = facet_link.get("route", "")
     param = facet_link.get("param", "")
@@ -80,7 +76,7 @@ def _multi_linked(rows: List[dict], facet_link: dict,
         uri = r.get(uri_key)
         url = None
         if uri not in (None, "", "NaN") and route and param:
-            url = f"{route}?{param}={quote(str(uri), safe='')}"
+            url = f"{base_path}{route}?{param}={quote(str(uri), safe='')}"
         out.append({"label": label, "url": url})
     return out
 
@@ -93,6 +89,7 @@ def build_view(
     multis: Dict[str, List[dict]],
     related: Dict[str, List[dict]],
     manifest_url: Optional[str] = None,
+    base_path: str = "",
 ) -> dict:
     """
     kind        : "catalogo" | "evento" | …
@@ -101,9 +98,14 @@ def build_view(
     multis      : { field_key → righe della query multivalore }
                   per i contributori la chiave è "contributors" con righe {name, role}
     related     : { block_id → righe della query correlati }
+    base_path   : prefisso di deploy (es. "/zac"), anteposto a tutti gli URL interni
     """
     sc = scalars or [{}]
     row0 = sc[0] if sc else {}
+
+    def _bp(url):
+        """Antepone il base_path a un URL interno (no-op se url è vuoto/None)."""
+        return f"{base_path}{url}" if url else url
 
     # Slug/id per i link interni — ricavati dagli scalars
     auction_slug = _scalar(sc, "auctionSlug")
@@ -118,7 +120,7 @@ def build_view(
         if not entry["disabled"] and "link_key" in b:
             val = link_vals.get(b["link_key"])
             if val:
-                entry["url"] = b["route"].replace("{slug}", val).replace("{id}", val)
+                entry["url"] = _bp(b["route"].replace("{slug}", val).replace("{id}", val))
         switch.append(entry)
 
     # ── Campi della scheda ───────────────────────────────────────────
@@ -150,7 +152,7 @@ def build_view(
                 url = None
                 uri = r.get("uri")
                 if facet_link and uri not in (None, "", "NaN") and route and param:
-                    url = f"{route}?{param}={quote(str(uri), safe='')}"
+                    url = _bp(f"{route}?{param}={quote(str(uri), safe='')}")
                 items.append({"name": name, "role": r.get("role") or "", "url": url})
             out["kind"] = "contributors"
             out["vals"] = items
@@ -162,7 +164,7 @@ def build_view(
             facet_link = f.get("facet_link")
             if facet_link:
                 # Valori come dict {label, url} → link a browse pre-filtrata
-                items = _multi_linked(rows, facet_link)
+                items = _multi_linked(rows, facet_link, base_path=base_path)
                 out["linked"] = True
                 out["vals"] = items
                 out["has_value"] = bool(items)
@@ -188,7 +190,7 @@ def build_view(
             if out["has_value"] and "link_route" in f and "link_key" in f:
                 lv = link_vals.get(f["link_key"])
                 if lv:
-                    out["link"] = f["link_route"].replace("{slug}", lv).replace("{id}", lv)
+                    out["link"] = _bp(f["link_route"].replace("{slug}", lv).replace("{id}", lv))
 
             fl = f.get("facet_link")
             if out["has_value"] and fl:
@@ -198,8 +200,8 @@ def build_view(
                     route = fl.get("route", "")
                     param = fl.get("param", "")
                     if year4 and route and param:
-                        out["link"] = (f"{route}?{param}_from={year4}"
-                                       f"&{param}_to={year4}")
+                        out["link"] = _bp(f"{route}?{param}_from={year4}"
+                                          f"&{param}_to={year4}")
                 else:
                     # Link a faccetta multiselect (scalare con URI separata, es. place)
                     uri_key = fl.get("uri_key", key + "URI")
@@ -207,7 +209,7 @@ def build_view(
                     route   = fl.get("route", "")
                     param   = fl.get("param", "")
                     if uri_val and route and param:
-                        out["link"] = f"{route}?{param}={quote(str(uri_val), safe='')}"
+                        out["link"] = _bp(f"{route}?{param}={quote(str(uri_val), safe='')}")
 
         fields.append(out)
 
@@ -274,11 +276,11 @@ def build_view(
         "subtitle":   subtitle,
 
         "back": {
-            "url":           cfg_view["back"]["url"],
+            "url":           _bp(cfg_view["back"]["url"]),
             "label_it":      cfg_view["back"]["label_it"],
             "breadcrumb_it": cfg_view["back"].get("breadcrumb_it", ""),
         },
-        
+
         "has_viewer": cfg_view.get("has_viewer", False),
         "switch":     switch,
         "sections":   sections,

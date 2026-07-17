@@ -470,9 +470,9 @@ detail:
         BIND(IF(EXISTS { <{uri}> crm:P2_has_type zac:illustrated }, "Sì", "No") AS ?illustrated)
 
         OPTIONAL {
-          <{uri}> crm:P70_documents ?auction .
-          ?auction rdfs:label ?auctionLabel .
-          BIND(REPLACE(STR(?auction), "^.*/", "") AS ?auctionSlug)
+          <{uri}> crm:P48_has_preferred_identifier ?idNode .
+          ?idNode crm:P2_has_type aat:300312355 ;
+                  crm:P190_has_symbolic_content ?docId .
         }
     }
     LIMIT 1
@@ -551,7 +551,11 @@ detail:
         ?cr crm:P82_at_some_time_within ?year .
         FILTER(YEAR(?year) = {year})
         FILTER(?uri != <{me}>)
-        OPTIONAL { ?uri crm:P48_has_preferred_identifier ?docId }
+        OPTIONAL {
+          ?uri crm:P48_has_preferred_identifier ?idNode .
+          ?idNode crm:P2_has_type aat:300312355 ;
+                  crm:P190_has_symbolic_content ?docId .
+        }
         OPTIONAL {
           ?uri crm:P102_has_title ?tn .
           ?tn crm:P2_has_type zac:primary_title ; rdfs:label ?title .
@@ -602,8 +606,9 @@ detail:
         # catalogo collegato
         OPTIONAL {
           ?doc crm:P70_documents <{uri}> .
-          ?doc rdfs:label ?docLabel .
-          BIND(REPLACE(STR(?doc), "^.*/", "") AS ?docSlug)
+          ?doc crm:P48_has_preferred_identifier ?idNode .
+          ?idNode crm:P2_has_type aat:300312355 ;
+                  crm:P190_has_symbolic_content ?docId .
         }
     }
     LIMIT 1
@@ -706,7 +711,6 @@ detail:
         ?org crm:P2_has_type zac:auction_organisation ;
              crm:P14_carried_out_by ?h .
         ?h rdfs:label ?house .
-        FILTER(STR(?house) = "{house}")
         FILTER(?uri != <{me}>)
         OPTIONAL { ?uri rdfs:label ?label }
         OPTIONAL { ?uri crm:P4_has_time-span ?ts . ?ts rdfs:label ?yearLabel . }

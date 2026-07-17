@@ -7,7 +7,7 @@
 'use strict';
 
 /* ── Percorso base dei JSON statici ────────────────────── */
-const DATA_BASE = '/api/esplora/';
+const DATA_BASE = (window.BASE_PATH || '') + '/api/esplora/';
 
 /* ══════════════════════════════════════════════════════════
    1. SISTEMA TAB

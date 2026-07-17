@@ -6,7 +6,7 @@
     - active_filters:  dict {facet_id → active value}
 #}
 <div class="sidebar-header">Filtra</div>
-<form method="GET" action="{{ tab_route }}" class="h-100 pt-1 p-3" id="facet-form">
+<form method="GET" action="{{ base_path }}{{ tab_route }}" class="h-100 pt-1 p-3" id="facet-form">
 
   {% for facet in facet_defs %}
 
