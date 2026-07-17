@@ -1553,13 +1553,15 @@ async function loadAndRenderTrend() {
   }
 }
 
-/* ── Carica topojson se necessario ──────────────────────── */
-if (typeof topojson === 'undefined') {
-  const s = document.createElement('script');
-  s.src = 'https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js';
-  s.onload = () => { /* topojson ora disponibile */ };
-  document.head.appendChild(s);
-}
+console.log("topojson caricato", topojson)
+
+// /* ── Carica topojson se necessario ──────────────────────── */
+// if (typeof topojson === 'undefined') {
+//   const s = document.createElement('script');
+//   s.src = 'https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js';
+//   s.onload = () => { /* topojson ora disponibile */ };
+//   document.head.appendChild(s);
+// }
 
 
 /* ══════════════════════════════════════════════════════════
