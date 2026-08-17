@@ -106,6 +106,26 @@ def _resolve_sort(request: Request, route_cfg: dict) -> tuple[str, str]:
         sort = default
     return sort, sort_fields.get(sort, "")
 
+def _build_tree(flat: list) -> list:
+    """Flat list {uri,value,count,parent} → albero annidato (profondità arbitraria).
+    I nodi senza parent noto diventano radici. Ordine: count desc, poi label."""
+    by_uri = {o["uri"]: {**o, "children": []} for o in flat}
+    roots = []
+    for o in by_uri.values():
+        p = o.get("parent")
+        if p and p in by_uri:
+            by_uri[p]["children"].append(o)
+        else:
+            roots.append(o)
+    def _k(x): return (-(x.get("count") or 0), (x.get("value") or "").lower())
+    def _sort(nodes):
+        nodes.sort(key=_k)
+        for n in nodes:
+            if n["children"]:
+                _sort(n["children"])
+    _sort(roots)
+    return roots
+
 
 async def _facet_values(sparql, cfg, tab_id: str, facet_id: str,
                         filter_block: str = "") -> list:
@@ -125,9 +145,10 @@ async def _facet_values(sparql, cfg, tab_id: str, facet_id: str,
         rows = await sparql.select(full_query)          
         return [
             {
-                "uri":   r.get("facetURI") or r.get("facetValue"),   
-                "value": r["facetValue"],
-                "count": int(float(r.get("count", 0)))
+                "uri":    r.get("facetURI") or r.get("facetValue"),
+                "value":  r["facetValue"],
+                "count":  int(float(r.get("count", 0))),
+                "parent": r.get("facetParent") or None,
             }
             for r in rows if r.get("facetValue") not in (None, "", "NaN")
         ]
@@ -216,7 +237,9 @@ def _build_facet_defs(facets: dict, facet_values: dict, params: dict, dynamic_ra
         }
 
         if ftype == "multiselect":
-            d["options"] = facet_values.get(fid, [])
+            d["options"] = facet_values.get(fid, [])          # flat → serve alle pill
+            if d["ui_widget"] == "checkbox_tree":
+                d["tree"] = _build_tree(d["options"])
         elif ftype == "boolean":
             yaml_vals = fcfg.get("values", {"true": "Sì", "false": "No"})
             counts = {item["value"]: item["count"] for item in facet_values.get(fid, [])}

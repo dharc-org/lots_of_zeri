@@ -6,6 +6,7 @@ prefixes: |
   PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
   PREFIX aat: <http://vocab.getty.edu/aat/>
   PREFIX zac: <http://w3id.org/zac/>
+  PREFIX la: <https://linked.art/ns/terms/>
 
 # ─────────────────────────────────────────
 # FACET VALUE QUERIES
@@ -165,7 +166,7 @@ facet_queries:
       BIND(?lang AS ?facetURI)
       {FILTERS}
     }
-    GROUP BY ?facetURI ?facetValue ORDER BY DESC(?count) LIMIT 100
+    GROUP BY ?facetURI ?facetValue ORDER BY DESC(?count)
 
   cataloghi__autori: |
     SELECT ?facetURI ?facetValue (COUNT(DISTINCT ?doc) AS ?count)
@@ -180,7 +181,7 @@ facet_queries:
       BIND(?contrib AS ?facetURI)
       {FILTERS}
     }
-    GROUP BY ?facetURI ?facetValue ORDER BY DESC(?count) LIMIT 200
+    GROUP BY ?facetURI ?facetValue ORDER BY DESC(?count)
 
   cataloghi__collezione: |
     SELECT ?facetURI ?facetValue (COUNT(DISTINCT ?doc) AS ?count)
@@ -194,7 +195,7 @@ facet_queries:
       BIND(?coll AS ?facetURI)
       {FILTERS}
     }
-    GROUP BY ?facetURI ?facetValue ORDER BY ?facetValue LIMIT 200
+    GROUP BY ?facetURI ?facetValue ORDER BY ?facetValue
 
   cataloghi__luogo: |
     SELECT ?facetURI ?facetValue (COUNT(DISTINCT ?doc) AS ?count)
@@ -207,7 +208,7 @@ facet_queries:
       BIND(?place AS ?facetURI)
       {FILTERS}
     }
-    GROUP BY ?facetURI ?facetValue ORDER BY ?facetValue LIMIT 200
+    GROUP BY ?facetURI ?facetValue ORDER BY ?facetValue
 
   cataloghi__tipologia_oggetti: |
     SELECT ?facetURI ?facetValue (COUNT(DISTINCT ?doc) AS ?count)
@@ -221,7 +222,36 @@ facet_queries:
       BIND(?obj_type AS ?facetURI)
       {FILTERS}
     }
-    GROUP BY ?facetURI ?facetValue ORDER BY DESC(?count) LIMIT 200
+    GROUP BY ?facetURI ?facetValue ORDER BY DESC(?count)
+
+  lotti__artista_scuola: |
+    SELECT ?facetURI (SAMPLE(?lbl) AS ?facetValue)
+           (SAMPLE(?parent0) AS ?facetParent)
+           (COUNT(DISTINCT ?lot) AS ?count)
+    WHERE {
+      ?lot a la:Set ;
+           crm:P1_is_identified_by ?idN ;
+           crm:P94i_was_created_by ?cr .
+      ?cr crm:P14_carried_out_by ?leaf .
+      ?leaf crm:P127_has_broader_term* ?facetURI .   # foglia + tutti gli antenati → rollup
+      ?facetURI rdfs:label ?lbl .
+      OPTIONAL { ?facetURI crm:P127_has_broader_term ?parent0 }
+      {FILTERS}
+    }
+    GROUP BY ?facetURI ORDER BY DESC(?count)
+
+  lotti__tipologia: |
+    SELECT ?facetURI (SAMPLE(?lbl) AS ?facetValue) (COUNT(DISTINCT ?lot) AS ?count)
+    WHERE {
+      ?lot a la:Set ;
+           crm:P1_is_identified_by ?idN ;
+           crm:P2_has_type ?otype .
+      ?otype rdfs:label ?lbl .
+      FILTER(STRSTARTS(STR(?otype), "http://w3id.org/zac/type/"))
+      BIND(?otype AS ?facetURI)
+      {FILTERS}
+    }
+    GROUP BY ?facetURI ORDER BY DESC(?count)
 
 
 # ─────────────────────────────────────────
@@ -334,6 +364,22 @@ filter_snippets:
       ?searchTitleNode rdfs:label ?searchLabel .
       FILTER(CONTAINS(LCASE(STR(?searchLabel)), LCASE("{text_value}")))
 
+  lotti__artista_scuola:
+    multiselect: |
+      ?lot crm:P94i_was_created_by ?cr_as .
+      ?cr_as crm:P14_carried_out_by ?agent_as .
+      ?agent_as crm:P127_has_broader_term* ?sel_as .
+      VALUES ?sel_as { {values_clause} }
+
+  lotti__tipologia:
+    multiselect: |
+      ?lot crm:P2_has_type ?otype_f .
+      VALUES ?otype_f { {values_clause} }
+
+  lotti___search:
+    text_search: |
+      ?lot rdfs:label ?searchLabel .
+      FILTER(CONTAINS(LCASE(STR(?searchLabel)), LCASE("{text_value}")))
 
 # ─────────────────────────────────────────
 # MAIN RESULT QUERIES
@@ -440,6 +486,37 @@ results:
       {FILTERS}
     }
 
+  lotto: |
+    SELECT ?lot
+           (SAMPLE(?label0)       AS ?label)
+           (SAMPLE(?title0)       AS ?title)
+           (SAMPLE(?img0)         AS ?img)
+           (SAMPLE(?authorLabel0) AS ?authorLabel)
+    WHERE {
+      ?lot a la:Set ;
+           crm:P1_is_identified_by ?idNode .
+      OPTIONAL { ?lot rdfs:label ?label0 }
+      OPTIONAL { ?lot crm:P102_has_title ?tn . ?tn rdfs:label ?title0 }
+      OPTIONAL { ?lot crm:P138i_has_representation ?img0 }
+      OPTIONAL {
+        ?lot crm:P94i_was_created_by ?cr .
+        ?cr crm:P14_carried_out_by ?agent .
+        ?agent rdfs:label ?authorLabel0 .
+      }
+      {FILTERS}
+    }
+    GROUP BY ?lot
+    ORDER BY {ORDER}
+    LIMIT {limit}
+    OFFSET {offset}
+
+  lotto_count: |
+    SELECT (COUNT(DISTINCT ?lot) AS ?total)
+    WHERE {
+      ?lot a la:Set ;
+           crm:P1_is_identified_by ?idNode .
+      {FILTERS}
+    }
 
 # ─────────────────────────────────────────
 # DETAIL QUERIES

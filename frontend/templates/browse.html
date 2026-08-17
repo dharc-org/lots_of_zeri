@@ -23,7 +23,7 @@
   <div class="search-tabs">
     <a href="{{ base_path }}/cataloghi" class="search-tab {% if active_tab == 'catalogo' %}active{% endif %}">Cataloghi</a>
     <a href="{{ base_path }}/aste"      class="search-tab {% if active_tab == 'aste'     %}active{% endif %}">Aste</a>
-    <span                class="search-tab disabled">Lotti</span>
+    <a href="{{ base_path }}/lotti" class="search-tab {% if active_tab == 'lotti' %}active{% endif %}">Lotti</a>
   </div>
 
   {# Search bar — collegata al form filtri (facet-form) tramite l'attributo form #}

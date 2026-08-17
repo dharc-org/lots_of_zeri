@@ -202,22 +202,49 @@ cataloghi:
 lotti:
   label_it: "Lotti"
   label_en: "Lots"
-  description_it: "Ricerca per lotto d'asta (funzionalità in sviluppo)"
-  description_en: "Search by auction lot (feature in development)"
-  enabled: false
+  description_it: "Ricerca per lotto d'asta"
+  enabled: true
+  primary_class: "la:Set"
+
+  route:
+    path: "/lotti"
+    active_tab: "lotti"
+    results_query: "lotto"
+    count_query: "lotto_count"
+    icon: "ph ph-image"
+    entity_label: "lotti"
+    uri_var: "lot"
+    slug_from_uri: true
+    result_fields:
+      title:  "title"
+      label:  "label"
+      house:  "authorLabel"   # autore nello slot generico finché non tocchiamo il template
+      img:    "img"
+    sort_fields:
+      name_asc:  "ASC(?title)"
+      name_desc: "DESC(?title)"
+    default_sort: "name_asc"
+    export_filename: "zac_lotti"
 
   facets:
-    descrizione_lotto:
-      label_it: "Descrizione Lotto"
-      label_en: "Lot Description"
-      type: "text_search"
-      ui_widget: "text_input"
+    artista_scuola:
+      label_it: "Artista o scuola"
+      label_en: "Artist or school"
+      type: "multiselect"
+      ui_widget: "checkbox_tree"    
 
-    autore_lotto:
-      label_it: "Autore"
-      label_en: "Author / Artist"
+    tipologia:
+      label_it: "Tipologia"
+      label_en: "Object type"
       type: "multiselect"
       ui_widget: "checkbox_list"
+
+    # cronologia: BLOCCATA — nessun path data/periodo sul lotto TBD
+    # cronologia:
+    #   label_it: "Cronologia"
+    #   type: "range"
+    #   ui_widget: "range_slider"
+    #   range: { min: 1860, max: 1940, step: 1 }
 
 # ─────────────────────────────────────────
 # UI Configuration

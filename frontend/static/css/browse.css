@@ -469,6 +469,11 @@
   font-size: var(--fs-caption);
 }
 
+/* FACET TREE STYLE - TAXONOMY */
+.facet-tree, .facet-tree-children { list-style: none; margin: 0; padding: 0; }
+.facet-tree-children { margin-left: 1rem; border-left: 1px solid var(--gray-3); padding-left: .5rem; }
+.facet-tree-row { cursor: pointer; padding: .1rem 0; }
+
 /* ── AREA RISULTATI ────────────────────────────────────── */
 .zac-catalogue-content {
   flex: 1;

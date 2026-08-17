@@ -98,6 +98,35 @@
     </div>
     {% endif %}
 
+    {# ── CHECKBOX TREE (multiselect gerarchico) ───────────── #}
+    {% elif facet.ui_widget == "checkbox_tree" %}
+    {% if facet.tree %}
+    <div class="facet">
+      <label class="facet-title mb-2">{{ facet.label_it }}</label>
+      {% set active_vals = active_filters[facet.id] if facet.id in active_filters else [] %}
+      <div style="max-height:260px; overflow-y:auto; overflow-x:hidden; width:100%;">
+        <ul class="facet-tree">
+        {% for node in facet.tree recursive %}
+          <li>
+            <label class="form-check-label facet-tree-row d-flex justify-content-between w-100">
+              <span class="facet-tree-label">
+                <input class="form-check-input me-1" type="checkbox"
+                       name="{{ facet.id }}" value="{{ node.uri }}"
+                       {% if node.uri in active_vals %}checked{% endif %}>
+                {{ node.value }}
+              </span>
+              <span class="text-muted ms-1 {% if node.count == 0 %}opacity-25{% endif %}">{{ node.count }}</span>
+            </label>
+            {% if node.children %}
+              <ul class="facet-tree-children">{{ loop(node.children) }}</ul>
+            {% endif %}
+          </li>
+        {% endfor %}
+        </ul>
+      </div>
+    </div>
+    {% endif %}
+
     {% endif %}
   {% endfor %}
 

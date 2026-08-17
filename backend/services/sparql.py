@@ -112,6 +112,11 @@ class SparqlService:
     async def fetch_thumbnail_from_manifest(self, manifest_url: str) -> Optional[str]:
         """Ritorna la base del service IIIF Image API del primo canvas
         (risoluzione parametrica); fallback sulla thumbnail statica."""
+        
+        # se c'è gia il link diretto all'immagine nel triplestore allora ritorna direttamente quello
+        if "/full/" in manifest_url:
+            return manifest_url
+        
         try:
             r = await self.client.get(manifest_url, headers={"Accept": "application/json"})
             r.raise_for_status()
