@@ -260,6 +260,21 @@ def build_view(
                         "thumb":  r.get("thumb"),
                     })
 
+            elif block["card"] == "lotto":
+                seen = set()
+                for r in rows:
+                    u = r.get("uri", "")
+                    if not u or u in seen:
+                        continue
+                    seen.add(u)
+                    img = r.get("img")
+                    thumb = img.replace("/full/full/", "/full/,400/") if img else None
+                    items.append({
+                        "slug":  u.rstrip("/").split("/")[-1],
+                        "label": r.get("label") or u.rstrip("/").split("/")[-1],
+                        "thumb": thumb,
+                    })
+
         related_out.append({
             "title_it":       block["title_it"],
             "card":           block["card"],

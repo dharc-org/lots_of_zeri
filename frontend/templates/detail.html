@@ -195,8 +195,20 @@
                   <span class="btn-apri-mini">Apri →</span>
                 </div>
               </a>
-            {% else %}
-              {# lotto — resta placeholder #}
+            {% elif block.card == "lotto" %}
+              <a href="{{ base_path }}/lotti/{{ it.slug }}" class="result-card-grid">
+                <div class="card-cover">
+                  {% if it.thumb %}
+                    <img src="{{ it.thumb }}" alt="" loading="lazy">
+                  {% else %}
+                    <div class="thumb-placeholder"></div>
+                  {% endif %}
+                </div>
+                <div class="card-body">
+                  <div class="card-title">{{ it.label }}</div>
+                  <span class="btn-apri-mini">Apri →</span>
+                </div>
+              </a>
             {% endif %}
           {% endfor %}
         </div>

@@ -72,11 +72,10 @@ catalogo:
         link_route: "/aste/{slug}", link_key: "auctionSlug" }
 
   related:
-    - id: "catalogo_lotti"
+    - id: "catalogo_related_lotti"
       title_it: "Lotti nel catalogo"
       card: "lotto"
       count_label_it: "lotti totali in vendita"
-      placeholder: true
     - id: "catalogo_related_year"
       title_it: "Altri cataloghi dello stesso anno"
       card: "catalogo"
@@ -92,6 +91,9 @@ catalogo:
       auctioneer: "catalogo_auctioneer"
       languages:    "catalogo_languages"
     related:
+      catalogo_related_lotti:
+        query:      "catalogo_related_lotti"
+        depends_on: "title"         # la query usa {me}
       catalogo_related_year:
         query:      "catalogo_related_year"
         depends_on: "year"           # chiave scalare da cui prendere il valore
@@ -137,11 +139,10 @@ evento:
         link_route: "/cataloghi/{slug}", link_key: "docSlug" }
  
   related:
-    - id: "evento_lotti"
+    - id: "evento_related_lotti"
       title_it: "Lotti in vendita nell'asta"
       card: "lotto"
       count_label_it: "lotti in vendita"
-      placeholder: true
     - id: "evento_related_house"
       title_it: "Aste correlate"
       card: "evento"
@@ -158,6 +159,9 @@ evento:
       object_types:   "evento_object_types"
       object_periods: "evento_object_periods"
     related:
+      evento_related_lotti:
+        query:      "evento_related_lotti"
+        depends_on: "label"         # la query usa {me}
       evento_related_house:
         query:      "evento_related_house"
         depends_on: "house"
@@ -189,8 +193,26 @@ lotto:
     - { key: "lotId",        label_it: "Identificativo",    multi: false }
     - { key: "auctionLabel", label_it: "Venduto nell'asta", multi: false,
         link_route: "/aste/{slug}", link_key: "auctionSlug" }
+  
+  related:
+    - id: "set_di_lotti"
+      title_it: "Lotti della stessa asta"
+      card: "lotto"
+      count_label_it: "lotti"
+    - id: "lotti_tipologie"
+      title_it: "Lotti della stessa tipologia"
+      card: "lotto"
+      count_label_it: "lotti"
 
   query_blocks:
     scalars: "lotto_scalars"
     multis:
       author: "lotto_author"
+    related:
+      set_di_lotti:
+        query:      "set_di_lotti"
+        depends_on: "label"      # la query usa {me}
+      lotti_tipologie:
+        query:      "lotti_tipologie"
+        depends_on: "label"
+      
