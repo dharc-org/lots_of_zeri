@@ -197,7 +197,7 @@ cataloghi:
         "false" : "No"
 
 # ─────────────────────────────────────────
-# TAB 3 — LOTTI (disabled)
+# TAB 3 — LOTTI
 # ─────────────────────────────────────────
 lotti:
   label_it: "Lotti"
@@ -211,15 +211,19 @@ lotti:
     active_tab: "lotti"
     results_query: "lotto"
     count_query: "lotto_count"
+    detail_kind: "lotto"  
     icon: "ph ph-image"
     entity_label: "lotti"
     uri_var: "lot"
     slug_from_uri: true
     result_fields:
-      title:  "title"
-      label:  "label"
-      house:  "authorLabel"   # autore nello slot generico finché non tocchiamo il template
-      img:    "img"
+      title:         "title"
+      label:         "label"
+      house:         "authorLabel"
+      img:           "img"
+      type_label:    "typeLabel"
+      auction_label: "auctionLabel"
+      auction_slug:  "auctionSlug"
     sort_fields:
       name_asc:  "ASC(?title)"
       name_desc: "DESC(?title)"
@@ -227,11 +231,17 @@ lotti:
     export_filename: "zac_lotti"
 
   facets:
-    artista_scuola:
-      label_it: "Artista o scuola"
-      label_en: "Artist or school"
+    scuola:
+      label_it: "Scuola"
+      label_en: "School"
       type: "multiselect"
-      ui_widget: "checkbox_tree"    
+      ui_widget: "checkbox_tree"  
+
+    artista:
+      label_it: "Artista"
+      label_en: "Artist"
+      type: "multiselect"
+      ui_widget: "checkbox_list"    
 
     tipologia:
       label_it: "Tipologia"

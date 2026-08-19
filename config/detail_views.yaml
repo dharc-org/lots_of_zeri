@@ -162,3 +162,35 @@ evento:
         query:      "evento_related_house"
         depends_on: "house"
         transform:  "sparql_literal"
+
+
+# ════════════════════════════════════════════════════════════════
+lotto:
+  back:
+    url: "/lotti"
+    label_it: "Torna ai lotti"
+    breadcrumb_it: "Lotti"
+
+  has_viewer: true
+
+  switch:
+    - { label_it: "Catalogo", link_key: "docId",      route: "/cataloghi/{id}" }
+    - { label_it: "Asta",     link_key: "auctionSlug", route: "/aste/{slug}" }
+
+  sections:
+    - { anchor: "viewer", label_it: "Immagine del lotto" }
+    - { anchor: "scheda", label_it: "Scheda del lotto" }
+
+  fields:
+    - { key: "author",       label_it: "Autore / Scuola",   multi: true,
+        facet_link: { route: "/lotti", param: "artista_scuola" } }
+    - { key: "typeLabel",    label_it: "Tipologia",         multi: false }
+    - { key: "description",  label_it: "Descrizione",       multi: false }
+    - { key: "lotId",        label_it: "Identificativo",    multi: false }
+    - { key: "auctionLabel", label_it: "Venduto nell'asta", multi: false,
+        link_route: "/aste/{slug}", link_key: "auctionSlug" }
+
+  query_blocks:
+    scalars: "lotto_scalars"
+    multis:
+      author: "lotto_author"

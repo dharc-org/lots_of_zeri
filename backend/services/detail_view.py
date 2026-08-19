@@ -13,6 +13,17 @@ contributori, facet_link, link_route).
 from typing import Any, Dict, List, Optional
 from urllib.parse import quote
 
+import re
+
+def _iiif_canvas_id(manifest_url: Optional[str], image_url: Optional[str]) -> Optional[str]:
+    """canvasId storica: canvas UUID == image UUID → lo costruisco senza scaricare il manifest."""
+    if not manifest_url or not image_url:
+        return None
+    m = re.search(r"/iiif-server/([^/]+)", str(image_url))
+    if not m:
+        return None
+    base = re.sub(r"/manifest/?$", "", str(manifest_url))
+    return f"{base}/canvas/{m.group(1)}"
 
 def _esc_sparql_literal(s: str) -> str:
     """Escape minimale per inserire una stringa in un FILTER(STR(?x) = \"...\")."""
@@ -268,8 +279,15 @@ def build_view(
     elif kind == "evento":
         title    = _scalar(sc, "label") or "Asta"
         subtitle = None
+    elif kind == "lotto":
+        title    = _scalar(sc, "title") or _scalar(sc, "label") or "Lotto"
+        subtitle = None
     else:
         title, subtitle = "Dettaglio", None
+
+    # ── Manifest ─────────────────────────────────────────
+    manifest_url = _scalar(sc, "manifest")
+    lot_image    = _scalar(sc, "lotImage")
 
     return {
         "title":      title,
@@ -282,9 +300,11 @@ def build_view(
         },
 
         "has_viewer": cfg_view.get("has_viewer", False),
+        "manifest_url": manifest_url,
+        "canvas_id":    _iiif_canvas_id(manifest_url, lot_image),
         "switch":     switch,
         "sections":   sections,
         "fields":     fields,
         "related":    related_out,
-        "manifest_url": manifest_url,
     }
+

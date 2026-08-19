@@ -175,12 +175,25 @@
           {% if item.house %}<span class="row-meta-org">{{ item.house }}</span>{% endif %}
           {% if item.year %}<span class="row-meta-date">{{ item.year }}</span>{% endif %}
         </div>
+      {% elif active_tab == 'lotti' %}
+        <div class="row-meta">{% if item.house %}{{ item.house }}{% endif %}</div>
       {% else %}
         <div class="row-meta">
           {% if item.house %}{{ item.house }}{% endif %}
           {% if item.year  %} · {{ item.year }}{% endif %}
         </div>
       {% endif %}
+        <div class="row-badges">
+          {% if active_tab == 'lotti' %}
+            {% if item.type_label %}<span class="badge-pill">{{ item.type_label }}</span>{% endif %}
+          {% else %}
+            {% if item.language %}<span class="badge-pill">{{ item.language | lingua_estesa }}</span>{% endif %}
+            {% if item.illustrated %}<span class="badge-pill badge-pill-accent">Illustrato</span>{% endif %}
+          {% endif %}
+        </div>
+        {% if active_tab == 'lotti' and item.auction_label %}
+        <div class="row-meta-auction">{{ item.auction_label }}</div>
+        {% endif %}
         <div class="row-badges">
           {% if item.language %}
             <span class="badge-pill">{{ item.language | lingua_estesa }}</span>

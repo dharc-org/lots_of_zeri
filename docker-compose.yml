@@ -16,7 +16,7 @@ services:
             echo 'Costruzione indice...' &&
             qlever-index \
               -f /data/zac_catalogues_metadata_8_7_2026.ttl -F ttl \
-              -f /data/zac_lot_descriptions_1_8_2026.ttl -F ttl \
+              -f /data/zac_lot_descriptions_18_8_2026.ttl -F ttl \
               -i /index/zac &&
             touch /index/.build_done &&
             echo 'Indice costruito.';

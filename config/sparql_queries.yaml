@@ -224,18 +224,36 @@ facet_queries:
     }
     GROUP BY ?facetURI ?facetValue ORDER BY DESC(?count)
 
-  lotti__artista_scuola: |
+  lotti__scuola: |
     SELECT ?facetURI (SAMPLE(?lbl) AS ?facetValue)
            (SAMPLE(?parent0) AS ?facetParent)
            (COUNT(DISTINCT ?lot) AS ?count)
     WHERE {
       ?lot a la:Set ;
-           crm:P1_is_identified_by ?idN ;
-           crm:P94i_was_created_by ?cr .
-      ?cr crm:P14_carried_out_by ?leaf .
-      ?leaf crm:P127_has_broader_term* ?facetURI .   # foglia + tutti gli antenati → rollup
+        crm:P94i_was_created_by ?cr .
+      ?cr crm:P14_carried_out_by ?agent ;
+        crm:P2_has_type zac:validated .
+      ?agent a crm:E74_Group ;
+        crm:P127_has_broader_term* ?facetURI .   
       ?facetURI rdfs:label ?lbl .
       OPTIONAL { ?facetURI crm:P127_has_broader_term ?parent0 }
+      {FILTERS}
+    }
+    GROUP BY ?facetURI ORDER BY DESC(?count)
+
+  lotti__artista: |
+    SELECT ?facetURI (SAMPLE(?lbl) AS ?facetValue)
+           (SAMPLE(?parent0) AS ?facetParent)
+           (COUNT(DISTINCT ?lot) AS ?count)
+    WHERE {
+      ?lot a la:Set ;
+        crm:P94i_was_created_by ?cr .
+      ?cr crm:P14_carried_out_by ?facetURI ;
+        crm:P2_has_type zac:validated .
+
+      ?facetURI a crm:E21_Person;
+        rdfs:label ?lbl .
+
       {FILTERS}
     }
     GROUP BY ?facetURI ORDER BY DESC(?count)
@@ -367,7 +385,8 @@ filter_snippets:
   lotti__artista_scuola:
     multiselect: |
       ?lot crm:P94i_was_created_by ?cr_as .
-      ?cr_as crm:P14_carried_out_by ?agent_as .
+      ?cr_as crm:P14_carried_out_by ?agent_as ;
+        crm:P2_has_type zac:validated . 
       ?agent_as crm:P127_has_broader_term* ?sel_as .
       VALUES ?sel_as { {values_clause} }
 
@@ -488,10 +507,13 @@ results:
 
   lotto: |
     SELECT ?lot
-           (SAMPLE(?label0)       AS ?label)
-           (SAMPLE(?title0)       AS ?title)
-           (SAMPLE(?img0)         AS ?img)
-           (SAMPLE(?authorLabel0) AS ?authorLabel)
+           (SAMPLE(?label0)        AS ?label)
+           (SAMPLE(?title0)        AS ?title)
+           (SAMPLE(?img0)          AS ?img)
+           (SAMPLE(?authorLabel0)  AS ?authorLabel)
+           (SAMPLE(?typeLabel0)    AS ?typeLabel)
+           (SAMPLE(?auctionLabel0) AS ?auctionLabel)
+           (SAMPLE(?auctionSlug0)  AS ?auctionSlug)
     WHERE {
       ?lot a la:Set ;
            crm:P1_is_identified_by ?idNode .
@@ -500,8 +522,23 @@ results:
       OPTIONAL { ?lot crm:P138i_has_representation ?img0 }
       OPTIONAL {
         ?lot crm:P94i_was_created_by ?cr .
-        ?cr crm:P14_carried_out_by ?agent .
+        ?cr crm:P14_carried_out_by ?agent ;
+          crm:P2_has_type zac:validated . 
         ?agent rdfs:label ?authorLabel0 .
+      }
+      OPTIONAL {
+        ?lot crm:P2_has_type ?otype .
+        FILTER(STRSTARTS(STR(?otype), "http://w3id.org/zac/type/"))
+        ?otype rdfs:label ?typeLabel0 .
+      }
+      OPTIONAL {
+        ?lotsA crm:P46_composed_of ?lot ; a la:Set .
+        BIND(REPLACE(STR(?lotsA), "^.*[_/]([0-9]+)_lots$", "$1") AS ?lotCode)
+        ?auction crm:P16_used_specific_object ?lotsB ;
+                 crm:P2_has_type aat:300054751 ;
+                 rdfs:label ?auctionLabel0 .
+        FILTER(STR(?lotsB) = CONCAT("http://w3id.org/zac/", ?lotCode, "_lots"))
+        BIND(REPLACE(STR(?auction), "^.*/", "") AS ?auctionSlug0)
       }
       {FILTERS}
     }
@@ -527,7 +564,7 @@ detail:
 
   # Campi scalari + chiavi per i link interni (auctionSlug, docId)
   catalogo_scalars: |
-    SELECT DISTINCT ?title ?secTitle ?year ?illustrated ?docId ?auction ?auctionSlug ?auctionLabel
+    SELECT DISTINCT ?title ?secTitle ?year ?illustrated ?docId ?auction ?auctionSlug ?auctionLabel ?manifest
     WHERE {
         <{uri}> a crm:E31_Document .
         OPTIONAL { <{uri}> crm:P48_has_preferred_identifier ?idNode . ?idNode rdfs:label ?docId }
@@ -551,6 +588,8 @@ detail:
           ?idNode crm:P2_has_type aat:300312355 ;
                   crm:P190_has_symbolic_content ?docId .
         }
+
+        OPTIONAL { <{uri}> crm:P138i_has_representation ?manifest }
     }
     LIMIT 1
 
@@ -795,6 +834,56 @@ detail:
     }
     ORDER BY ?yearLabel
     LIMIT 12
+
+  # ── LOTTO ──────────────────────────────────────────────────────
+
+  lotto_scalars: |
+    SELECT DISTINCT ?label ?title ?description ?typeLabel ?lotId ?lotImage
+                    ?manifest ?docId ?auctionSlug ?auctionLabel
+    WHERE {
+        <{uri}> a la:Set .
+        OPTIONAL { <{uri}> rdfs:label ?label }
+        OPTIONAL { <{uri}> crm:P102_has_title ?tn . ?tn rdfs:label ?title }
+        OPTIONAL { <{uri}> crm:P67i_is_referred_to_by ?dn . ?dn rdfs:label ?description }
+        OPTIONAL {
+          <{uri}> crm:P2_has_type ?otype .
+          FILTER(STRSTARTS(STR(?otype), "http://w3id.org/zac/type/"))
+          ?otype rdfs:label ?typeLabel .
+        }
+        OPTIONAL { <{uri}> crm:P1_is_identified_by ?idn . ?idn rdfs:label ?lotId }
+        OPTIONAL { <{uri}> crm:P138i_has_representation ?lotImage }
+
+        # lotto → set lotti → asta → catalogo → manifest 
+        OPTIONAL {
+          ?lotsA crm:P46_is_composed_of <{uri}> ; a la:Set .
+          ?auction crm:P16_used_specific_object ?lotsA ;
+                   crm:P2_has_type aat:300054751 ;
+                   rdfs:label ?auctionLabel .
+          BIND(REPLACE(STR(?auction), "^.*/", "") AS ?auctionSlug)
+          OPTIONAL {
+            ?doc crm:P70_documents ?auction ;
+                 crm:P2_has_type aat:300026068 .
+            OPTIONAL { ?doc crm:P138i_has_representation ?manifest }
+            OPTIONAL {
+              ?doc crm:P48_has_preferred_identifier ?docIdNode .
+              ?docIdNode crm:P2_has_type aat:300312355 ;
+                         crm:P190_has_symbolic_content ?docId .
+            }
+          }
+        }
+    }
+    LIMIT 1
+
+  lotto_author: |
+    SELECT DISTINCT ?uri ?value
+    WHERE {
+        <{uri}> crm:P94i_was_created_by ?cr .
+        ?cr crm:P14_carried_out_by ?agent ;
+          crm:P2_has_type zac:validated .
+        BIND(?agent AS ?uri)
+        ?agent rdfs:label ?value .
+    }
+    ORDER BY ?value
 
 # ══════════════════════════════════════════════════════════
 # ESPLORA — query di aggregazione piatta per /api/esplora/*

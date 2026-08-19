@@ -253,11 +253,14 @@
 
 {{ super() }}
 {% if view.has_viewer and view.manifest_url %}
-<script src="https://cdn.jsdelivr.net/npm/mirador@latest/dist/mirador.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mirador@3.3.0/dist/mirador.min.js"></script>
 <script>
 Mirador.viewer({
   id: 'mirador-viewer',
-  windows: [{ manifestId: {{ view.manifest_url|tojson }} }],
+  windows: [{
+    manifestId: {{ view.manifest_url|tojson }},
+    {% if view.canvas_id %}canvasId: {{ view.canvas_id|tojson }},{% endif %}
+  }],
   selectedTheme: 'dark',
   themes: {
     dark: {
