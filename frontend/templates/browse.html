@@ -19,14 +19,12 @@
 {# ── Search header: tabs + barra parola chiave ──────────── #}
 <div class="zac-search-header">
 
-  {# Tabs orizzontali (Cataloghi / Aste / Lotti) #}
   <div class="search-tabs">
     <a href="{{ base_path }}/cataloghi" class="search-tab {% if active_tab == 'catalogo' %}active{% endif %}">Cataloghi</a>
     <a href="{{ base_path }}/aste"      class="search-tab {% if active_tab == 'aste'     %}active{% endif %}">Aste</a>
-    <a href="{{ base_path }}/lotti" class="search-tab {% if active_tab == 'lotti' %}active{% endif %}">Lotti</a>
+    <a href="{{ base_path }}/lotti"     class="search-tab {% if active_tab == 'lotti'    %}active{% endif %}">Lotti</a>
   </div>
 
-  {# Search bar — collegata al form filtri (facet-form) tramite l'attributo form #}
   <div class="search-bar-wrap">
     <div class="search-bar">
       <input type="text" name="q" form="facet-form" id="search-q"
@@ -47,10 +45,8 @@
   <div class="action-left">
     <span class="result-count"><strong>{{ total }}</strong> Risultati</span>
 
-    {# namespace() necessario: {% set %} dentro un for-loop Jinja2 non persiste fuori dal loop #}
     {% set ns = namespace(has_any_active=false) %}
 
-    {# Pill ricerca per parola chiave #}
     {% if active_filters.get('q') %}
       {% set ns.has_any_active = true %}
       <span class="active-pill" data-facet="q" data-type="text">
@@ -59,7 +55,6 @@
       </span>
     {% endif %}
 
-    {# Pill filtri attivi, rimovibili #}
     {% for facet in facet_defs %}
       {% if facet.type == 'range' %}
         {% if active_filters.get(facet.id ~ '_is_set') %}
@@ -73,7 +68,6 @@
       {% elif facet.type == 'multiselect' %}
         {% for v in active_filters.get(facet.id, []) %}
           {% set ns.has_any_active = true %}
-          {# Lookup URI → label nelle options della faccetta; fallback all'URI se assente #}
           {% set pill_label = (facet.options | selectattr('uri', 'equalto', v) | map(attribute='value') | first) or v %}
           {% set pill_label = pill_label | lingua_estesa if facet.id == 'lingua' else pill_label %}
           <span class="active-pill" data-facet="{{ facet.id }}" data-type="multi" data-value="{{ v }}">
@@ -140,133 +134,163 @@
   </div>
 </div>
 
+{# ═══════════════════════════════════════════════════════════
+   MACRO GENERICHE — card guidate da `display` in facets.yaml
+   ═══════════════════════════════════════════════════════════ #}
+
+{%- macro _pick(item, keys) -%}
+  {%- set ns = namespace(v=None) -%}
+  {%- for k in keys if k -%}
+    {%- if ns.v is none and item.get(k) -%}{%- set ns.v = item.get(k) -%}{%- endif -%}
+  {%- endfor -%}
+  {{- ns.v if ns.v is not none else '' -}}
+{%- endmacro -%}
+
+{%- macro _is_true(v) -%}
+  {{- 'x' if (v and (v|string|lower) not in ('false','0','no','')) else '' -}}
+{%- endmacro -%}
+
+{%- macro _text(item, spec, default_class) -%}
+  {%- set val = _pick(item, [spec.field] + (spec.fallback or [])) -%}
+  {%- if val -%}
+    <div class="{{ spec.class or default_class }}">{{ val }}{{ spec.suffix or '' }}</div>
+  {%- endif -%}
+{%- endmacro -%}
+
+{%- macro _meta(item, spec, override_class) -%}
+  {%- set ns = namespace(parts=[]) -%}
+  {%- for p in spec.parts if item.get(p) -%}
+    {%- set ns.parts = ns.parts + [item.get(p)|string] -%}
+  {%- endfor -%}
+  {%- if ns.parts -%}
+    <div class="{{ override_class or spec.class or 'row-meta' }}">{{ ns.parts | join(spec.separator or ' · ') }}</div>
+  {%- endif -%}
+{%- endmacro -%}
+
+{%- macro _badges(item, spec, override_class) -%}
+  {%- set ns = namespace(any=false) -%}
+  {%- for b in spec.vals -%}
+    {%- if b.flag and _is_true(item.get(b.flag)) -%}{%- set ns.any = true -%}{%- endif -%}
+    {%- if b.field and item.get(b.field) -%}{%- set ns.any = true -%}{%- endif -%}
+  {%- endfor -%}
+  {%- if ns.any -%}
+    <div class="{{ override_class or spec.class or 'row-badges' }}">
+    {%- for b in spec.vals -%}
+      {%- if b.flag -%}
+        {%- if _is_true(item.get(b.flag)) -%}<span class="{{ b.class or 'badge-pill' }}">{{ b.label }}</span>{%- endif -%}
+      {%- elif item.get(b.field) -%}
+        {%- set v = item.get(b.field) -%}
+        <span class="{{ b.class or 'badge-pill' }}">{{ (v | lingua_estesa) if b.transform == 'lingua_estesa' else v }}</span>
+      {%- endif -%}
+    {%- endfor -%}
+    </div>
+  {%- endif -%}
+{%- endmacro -%}
+
+{%- macro _actions(item, display, base_path, tab_route) -%}
+  {%- set slug = item.slug or item.doc_id or (item.uri.rstrip('/').split('/')[-1] if item.uri else '') -%}
+  <div class="row-actions">
+  {%- for a in display.actions -%}
+    {%- if a.kind == 'open' -%}
+      <a href="{{ base_path }}{{ tab_route }}/{{ slug }}" class="{{ a.class or 'btn-apri' }}">{{ a.label }}</a>
+    {%- elif a.kind == 'cross' and item.get(a.slug_field) -%}
+      <a href="{{ base_path }}{{ a.route }}/{{ item.get(a.slug_field) }}" class="{{ a.class or 'row-cross-link' }}">{{ a.label }}</a>
+    {%- elif a.kind == 'external' and item.get(a.field) -%}
+      <a href="{{ item.get(a.field) }}" target="_blank" rel="noopener" class="{{ a.class or 'row-zeri-link' }}">
+        {%- if a.icon %}<i class="{{ a.icon }}"></i> {% endif -%}{{ a.label }}</a>
+    {%- endif -%}
+  {%- endfor -%}
+  </div>
+{%- endmacro -%}
+
+{%- macro result_row(item, display, base_path, tab_route) -%}
+  {%- set slug = item.slug or item.doc_id or (item.uri.rstrip('/').split('/')[-1] if item.uri else '') -%}
+  <div class="result-row">
+    <a href="{{ base_path }}{{ tab_route }}/{{ slug }}" class="row-link">
+      <div class="row-thumb" data-thumb-uri="{{ item.get(display.thumb_field or 'uri') or item.uri }}">
+        <div class="thumb-placeholder"></div>
+      </div>
+      <div class="row-body">
+        {% if display.title %}{{ _text(item, display.title, 'row-title') }}{% endif %}
+        {% if display.subtitle %}{{ _text(item, display.subtitle, 'row-subtitle') }}{% endif %}
+        {% if display.meta %}{{ _meta(item, display.meta) }}{% endif %}
+        {% if display.badges %}{{ _badges(item, display.badges) }}{% endif %}
+        {% if display.footer %}{{ _text(item, display.footer, 'row-footer') }}{% endif %}
+      </div>
+    </a>
+    {{ _actions(item, display, base_path, tab_route) }}
+  </div>
+{%- endmacro -%}
+
+{%- macro result_card(item, display, base_path, tab_route) -%}
+  {%- set slug = item.slug or item.doc_id or (item.uri.rstrip('/').split('/')[-1] if item.uri else '') -%}
+  <a href="{{ base_path }}{{ tab_route }}/{{ slug }}" class="result-card-grid">
+    <div class="card-cover">
+      <div class="row-thumb" data-thumb-uri="{{ item.get(display.thumb_field or 'uri') or item.uri }}">
+        <div class="thumb-placeholder"></div>
+      </div>
+    </div>
+    <div class="card-body">
+      {% if display.title %}<div class="card-title">{{ _pick(item, [display.title.field] + (display.title.fallback or [])) }}</div>{% endif %}
+      {% if display.subtitle and item.get(display.subtitle.field) %}<div class="card-subtitle">{{ item.get(display.subtitle.field) }}</div>{% endif %}
+      {% if display.meta %}{{ _meta(item, display.meta, 'card-meta') }}{% endif %}
+      {% if display.badges %}{{ _badges(item, display.badges, 'card-badges') }}{% endif %}
+      <span class="btn-apri-mini">Apri <i class="ph ph-arrow-right"></i></span>
+    </div>
+  </a>
+{%- endmacro -%}
+
 {# ── Layout sidebar + risultati ──────────────────────────── #}
 <div class="zac-catalogue-container">
 
-    {# Sidebar filtri collassabile #}
-<aside class="zac-catalogue-sidebar" id="zac-sidebar">
-  <div class="zac-sidebar-card">
-    <div class="zac-sidebar-panel">
-      {% include "partials/_sidebar.html" %}
+  <aside class="zac-catalogue-sidebar" id="zac-sidebar">
+    <div class="zac-sidebar-card">
+      <div class="zac-sidebar-panel">
+        {% include "partials/_sidebar.html" %}
+      </div>
     </div>
-  </div>
-  <button class="zac-sidebar-toggle" id="zac-sidebar-toggle" aria-label="Nascondi filtri">
-    <span class="toggle-icon">‹</span>
-    <span class="toggle-text">Nascondi filtri</span>
-  </button>
-</aside>
+    <button class="zac-sidebar-toggle" id="zac-sidebar-toggle" aria-label="Nascondi filtri">
+      <span class="toggle-icon">‹</span>
+      <span class="toggle-text">Nascondi filtri</span>
+    </button>
+  </aside>
 
-    {# Risultati #}
-    <div class="zac-catalogue-content">
+  <div class="zac-catalogue-content">
 
-      {% if items %}
-      <div id="zac-catalogue-results-list" data-view="list">
+    {% if items %}
+    <div id="zac-catalogue-results-list" data-view="list">
 
       {# ── LISTA ── #}
-<div class="results-list {% if active_tab == 'aste' %}results-list-aste{% endif %}">
-  {% for item in items %}
-  <div class="result-row">
-    <a href="{{ base_path }}{{ tab_route }}/{{ item.slug or item.doc_id or item.uri.split('/')[-1] }}" class="row-link">
-<div class="row-thumb" data-thumb-uri="{{ item.uri }}"><div class="thumb-placeholder"></div></div>
-      <div class="row-body">
-        <div class="row-title">{{ item.title or item.label or item.slug }}</div>
-      {% if active_tab == 'aste' %}
-        <div class="row-meta">
-          {% if item.house %}<span class="row-meta-org">{{ item.house }}</span>{% endif %}
-          {% if item.year %}<span class="row-meta-date">{{ item.year }}</span>{% endif %}
-        </div>
-      {% elif active_tab == 'lotti' %}
-        <div class="row-meta">{% if item.house %}{{ item.house }}{% endif %}</div>
-      {% else %}
-        <div class="row-meta">
-          {% if item.house %}{{ item.house }}{% endif %}
-          {% if item.year  %} · {{ item.year }}{% endif %}
-        </div>
-      {% endif %}
-        <div class="row-badges">
-          {% if active_tab == 'lotti' %}
-            {% if item.type_label %}<span class="badge-pill">{{ item.type_label }}</span>{% endif %}
-          {% else %}
-            {% if item.language %}<span class="badge-pill">{{ item.language | lingua_estesa }}</span>{% endif %}
-            {% if item.illustrated %}<span class="badge-pill badge-pill-accent">Illustrato</span>{% endif %}
-          {% endif %}
-        </div>
-        {% if active_tab == 'lotti' and item.auction_label %}
-        <div class="row-meta-auction">{{ item.auction_label }}</div>
-        {% endif %}
-        <div class="row-badges">
-          {% if item.language %}
-            <span class="badge-pill">{{ item.language | lingua_estesa }}</span>
-          {% endif %}
-          {% if item.illustrated %}
-            <span class="badge-pill badge-pill-accent">Illustrato</span>
-          {% endif %}
-        </div>
+      <div class="results-list results-list-{{ active_tab }}">
+        {% for item in items %}{{ result_row(item, display, base_path, tab_route) }}{% endfor %}
       </div>
-    </a>
-    <div class="row-actions">
-      <a href="{{ base_path }}{{ tab_route }}/{{ item.slug or item.doc_id or item.uri.split('/')[-1] }}" class="btn-apri">Apri →</a>
-      {% if item.zeri_url %}
-      <a href="{{ item.zeri_url }}" target="_blank" rel="noopener" class="row-zeri-link">
-        <i class="ph ph-link"></i> Scheda Zeri
-      </a>
-      {% endif %}
+
+      {# ── GRIGLIA ── #}
+      <div class="results-grid results-grid-{{ active_tab }}">
+        {% for item in items %}{{ result_card(item, display, base_path, tab_route) }}{% endfor %}
+      </div>
+
     </div>
-  </div>
-  {% endfor %}
-</div>
 
-        {# ── GRIGLIA ── #}
-        <div class="results-grid">
-          {% for item in items %}
-          <a href="{{ base_path }}{{ tab_route }}/{{ item.slug or item.doc_id or item.uri.split('/')[-1] }}"
-            class="result-card-grid">
-            <div class="card-cover">
-            <div class="row-thumb" data-thumb-uri="{{ item.uri }}">
-              <div class="thumb-placeholder"></div>
-            </div>
-            </div>
-            <div class="card-body">
-              <div class="card-title">{{ item.title or item.label or item.slug }}</div>
-              <div class="card-meta">
-                {% if item.house %}{{ item.house }}{% endif %}{% if item.year %}, {{ item.year }}{% endif %}
-              </div>
-              <div class="card-badges">
-                {% if item.language %}
-                  <span class="badge-pill">{{ item.language | lingua_estesa }}</span>
-                {% endif %}
-                {% if item.illustrated %}
-                  <span class="badge-pill badge-pill-accent">Illustrato</span>
-                {% endif %}
-              </div>
-              <span class="btn-apri-mini">Apri <i class="ph ph-arrow-right"></i></span>
-            </div>
-          </a>
-          {% endfor %}
-        </div>
+    {% if loaded < total %}
+    <div id="scroll-sentinel" class="text-center py-3"
+         data-api="{{ base_path }}/api{{ tab_route }}/results"
+         data-offset="{{ loaded }}"
+         data-limit="{{ page_size }}"
+         data-total="{{ total }}"
+         data-route="{{ base_path }}{{ tab_route }}">
+    </div>
+    {% endif %}
 
-      </div>
+    {% else %}
+    <div class="empty-state">
+      <i class="{{ icon }}"></i>
+      <p>Nessun risultato trovato.</p>
+      <a href="{{ base_path }}{{ tab_route }}" class="btn-reset">Rimuovi i filtri</a>
+    </div>
+    {% endif %}
 
-      {# Sentinel infinite scroll #}
-      {% if loaded < total %}
-      <div id="scroll-sentinel" class="text-center py-3"
-           data-api="{{ base_path }}/api{{ tab_route }}/results"
-           data-offset="{{ loaded }}"
-           data-limit="{{ page_size }}"
-           data-total="{{ total }}"
-           data-route="{{ base_path }}{{ tab_route }}">
-      </div>
-      {% endif %}
-
-      {% else %}
-      <div class="empty-state">
-        <i class="{{ icon }}"></i>
-        <p>Nessun risultato trovato.</p>
-        <a href="{{ base_path }}{{ tab_route }}" class="btn-reset">Rimuovi i filtri</a>
-      </div>
-      {% endif %}
-
-    </div>{# /zac-catalogue-content #}
+  </div>{# /zac-catalogue-content #}
 
 </div>{# /zac-catalogue-container #}
 <button class="btn-back-top" id="btn-back-top" aria-label="Torna su">
@@ -277,17 +301,16 @@
 
 {% block scripts %}
 <script>
+/* Descrittore card condiviso SSR ↔ infinite scroll */
+const DISPLAY = {{ display | tojson }};
 
-/* ── Idratazione thumbnail (condivisa: SSR + infinite scroll) ── */
+/* ── Idratazione thumbnail ── */
 async function hydrateThumbs(scope = document) {
   const nodes = [...scope.querySelectorAll('[data-thumb-uri]:not([data-thumb-done])')];
   if (!nodes.length) return;
   const CHUNK = 10;
-  for (let i = 0; i < nodes.length; i += CHUNK) {
-    hydrateChunk(nodes.slice(i, i + CHUNK));   // niente await: partono in parallelo
-  }
+  for (let i = 0; i < nodes.length; i += CHUNK) hydrateChunk(nodes.slice(i, i + CHUNK));
 }
-
 async function hydrateChunk(nodes) {
   const qs = nodes.map(n => 'uris=' + encodeURIComponent(n.dataset.thumbUri)).join('&');
   let map = {};
@@ -300,8 +323,7 @@ async function hydrateChunk(nodes) {
     const src = inCover ? t.cover : t.thumb;
     if (src) {
       const img = document.createElement('img');
-      img.src = src;
-      img.loading = 'lazy';
+      img.src = src; img.loading = 'lazy';
       img.className = inCover ? 'cover-img' : 'thumb-img';
       n.replaceChildren(img);
     }
@@ -309,35 +331,38 @@ async function hydrateChunk(nodes) {
 }
 document.addEventListener('DOMContentLoaded', () => hydrateThumbs());
 
+/* Helpers condivisi */
+function esc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+var LINGUE = { de: 'Tedesco', fr: 'Francese', en: 'Inglese', it: 'Italiano', nl: 'Olandese', es: 'Spagnolo' };
+function linguaEstesa(v) { return LINGUE[String(v || '').toLowerCase()] || v; }
+function isTrue(v) { return v && !['false','0','no',''].includes(String(v).toLowerCase()); }
+function pickField(item, keys) { for (const k of (keys||[])) if (k && item[k]) return item[k]; return ''; }
+
 document.addEventListener('DOMContentLoaded', function () {
 
-  var tabRoute = (window.BASE_PATH || '') + {{ tab_route|tojson }};
-
-  /* ── Ordina per: submit automatico del form filtri ──── */
+  /* ── Ordina per ──── */
   var sortSelect = document.getElementById('sort-select');
-  if (sortSelect) {
-    sortSelect.addEventListener('change', function () {
-      var form = document.getElementById('facet-form');
-      if (form) form.submit();
-    });
-  }
+  if (sortSelect) sortSelect.addEventListener('change', function () {
+    var form = document.getElementById('facet-form'); if (form) form.submit();
+  });
 
-  /* ── Export (CSV / JSON) ─────────────────────────────── */
+  /* ── Export ─────── */
   document.querySelectorAll('[data-export-format]').forEach(function (link) {
     link.addEventListener('click', function (e) {
       e.preventDefault();
-      var apiUrl = new URL((window.BASE_PATH || '') + '/api' + {{ tab_route|tojson }} + '/export', window.location.origin);
+      var apiUrl  = new URL((window.BASE_PATH || '') + '/api' + {{ tab_route|tojson }} + '/export', window.location.origin);
       var current = new URL(window.location.href);
-      current.searchParams.forEach(function (value, key) {
-        apiUrl.searchParams.append(key, value);
-      });
+      current.searchParams.forEach(function (value, key) { apiUrl.searchParams.append(key, value); });
       apiUrl.searchParams.set('format', link.dataset.exportFormat);
       window.location.href = apiUrl.toString();
     });
   });
 
-
-  /* ── Toggle vista lista/griglia ─────────────────────── */
+  /* ── Toggle vista ── */
   var container = document.getElementById('zac-catalogue-results-list');
   document.querySelectorAll('.view-btn').forEach(function (btn) {
     btn.addEventListener('click', function () {
@@ -348,119 +373,107 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
   var savedView = localStorage.getItem('zac_view');
-  if (savedView) {
-    var b = document.querySelector('.view-btn[data-view="' + savedView + '"]');
-    if (b) b.click();
-  }
+  if (savedView) { var b = document.querySelector('.view-btn[data-view="' + savedView + '"]'); if (b) b.click(); }
 
-  /* ── Rimozione pill filtri ──────────────────────────── */
+  /* ── Rimozione pill ── */
   document.querySelectorAll('.pill-remove').forEach(function (btn) {
     btn.addEventListener('click', function (e) {
       e.preventDefault(); e.stopPropagation();
-      var pill  = btn.closest('.active-pill');
-      var facet = pill.dataset.facet;
-      var type  = pill.dataset.type;
-      var url   = new URL(window.location.href);
-      if (type === 'range') {
-        url.searchParams.delete(facet + '_from');
-        url.searchParams.delete(facet + '_to');
-      } else if (type === 'multi') {
+      var pill = btn.closest('.active-pill'), facet = pill.dataset.facet, type = pill.dataset.type;
+      var url = new URL(window.location.href);
+      if (type === 'range') { url.searchParams.delete(facet + '_from'); url.searchParams.delete(facet + '_to'); }
+      else if (type === 'multi') {
         var value = pill.dataset.value;
         var remaining = url.searchParams.getAll(facet).filter(function (v) { return v !== value; });
         url.searchParams.delete(facet);
         remaining.forEach(function (v) { url.searchParams.append(facet, v); });
-      } else {
-        url.searchParams.delete(facet);
-      }
+      } else { url.searchParams.delete(facet); }
       window.location.href = url.toString();
     });
   });
 
-  /* ── Infinite scroll ────────────────────────────────── */
+  /* ── Infinite scroll ── */
   var sentinel = document.getElementById('scroll-sentinel');
   if (!sentinel) return;
   var resultsList = document.getElementById('zac-catalogue-results-list');
-  var listEl = resultsList.querySelector('.results-list');
-  var gridEl = resultsList.querySelector('.results-grid');
-  var isAste = !!(listEl && listEl.classList.contains('results-list-aste'));
+  var listEl   = resultsList.querySelector('.results-list');
+  var gridEl   = resultsList.querySelector('.results-grid');
   var apiBase  = sentinel.dataset.api;
-  var tabRoute = sentinel.dataset.route;
+  var tabRoute = sentinel.dataset.route;           // già con BASE_PATH
+  var basePath = (window.BASE_PATH || '');
   var offset   = parseInt(sentinel.dataset.offset, 10);
   var limit    = parseInt(sentinel.dataset.limit,  10);
   var total    = parseInt(sentinel.dataset.total,  10);
   var loading  = false;
 
-  function esc(s) {
-    return String(s == null ? '' : s)
-      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-  }
+  /* Builder generici — specchio delle macro Jinja */
+  function slugOf(item) { return item.slug || item.doc_id || (item.uri ? item.uri.replace(/\/+$/,'').split('/').pop() : ''); }
 
-  /* Tenere allineato al filtro Jinja `lingua_estesa` */
-  var LINGUE = { de: 'Tedesco', fr: 'Francese', en: 'Inglese',
-                 it: 'Italiano', nl: 'Olandese', es: 'Spagnolo' };
-  function linguaEstesa(v) {
-    return LINGUE[String(v || '').toLowerCase()] || v;
+  function metaHtml(item, spec, cls) {
+    var parts = (spec.parts || []).map(function (p) { return item[p]; }).filter(Boolean);
+    if (!parts.length) return '';
+    return '<div class="' + (cls || spec.class || 'row-meta') + '">' + parts.map(esc).join(spec.separator || ' · ') + '</div>';
   }
-
-  function badgesHtml(item, cls) {
+  function textHtml(item, spec, dflt) {
+    var v = pickField(item, [spec.field].concat(spec.fallback || []));
+    if (!v) return '';
+    return '<div class="' + (spec.class || dflt) + '">' + esc(v) + (spec.suffix || '') + '</div>';
+  }
+  function badgesHtml(item, spec, cls) {
     var h = '';
-    if (item.language)    h += '<span class="badge-pill">' + esc(linguaEstesa(item.language)) + '</span>';
-    if (item.illustrated) h += '<span class="badge-pill badge-pill-accent">Illustrato</span>';
-    return '<div class="' + cls + '">' + h + '</div>';
+    (spec.vals || []).forEach(function (b) {
+      if (b.flag) { if (isTrue(item[b.flag])) h += '<span class="' + (b.class || 'badge-pill') + '">' + esc(b.label) + '</span>'; }
+      else if (item[b.field]) {
+        var v = item[b.field]; if (b.transform === 'lingua_estesa') v = linguaEstesa(v);
+        h += '<span class="' + (b.class || 'badge-pill') + '">' + esc(v) + '</span>';
+      }
+    });
+    return h ? '<div class="' + (cls || spec.class || 'row-badges') + '">' + h + '</div>' : '';
+  }
+  function actionsHtml(item) {
+    var slug = slugOf(item), h = '<div class="row-actions">';
+    (DISPLAY.actions || []).forEach(function (a) {
+      if (a.kind === 'open')
+        h += '<a href="' + tabRoute + '/' + encodeURIComponent(slug) + '" class="' + (a.class || 'btn-apri') + '">' + esc(a.label) + '</a>';
+      else if (a.kind === 'cross' && item[a.slug_field])
+        h += '<a href="' + basePath + a.route + '/' + encodeURIComponent(item[a.slug_field]) + '" class="' + (a.class || '') + '">' + esc(a.label) + '</a>';
+      else if (a.kind === 'external' && item[a.field])
+        h += '<a href="' + esc(item[a.field]) + '" target="_blank" rel="noopener" class="' + (a.class || 'row-zeri-link') + '">' + (a.icon ? '<i class="' + a.icon + '"></i> ' : '') + esc(a.label) + '</a>';
+    });
+    return h + '</div>';
   }
 
-  function buildListRow(item, slug, title) {
-    var href = tabRoute + '/' + encodeURIComponent(slug);
-    var meta;
-    if (isAste) {
-      meta = (item.house ? '<span class="row-meta-org">' + esc(item.house) + '</span>' : '')
-           + (item.year  ? '<span class="row-meta-date">' + esc(item.year)  + '</span>' : '');
-    } else {
-      meta = (item.house ? esc(item.house) : '')
-           + (item.year  ? ' · ' + esc(item.year) : '');
-    }
+  function buildListRow(item) {
+    var slug = slugOf(item), thumbUri = item[DISPLAY.thumb_field || 'uri'] || item.uri, body = '';
+    if (DISPLAY.title)    body += textHtml(item, DISPLAY.title, 'row-title');
+    if (DISPLAY.subtitle) body += textHtml(item, DISPLAY.subtitle, 'row-subtitle');
+    if (DISPLAY.meta)     body += metaHtml(item, DISPLAY.meta);
+    if (DISPLAY.badges)   body += badgesHtml(item, DISPLAY.badges);
+    if (DISPLAY.footer)   body += textHtml(item, DISPLAY.footer, 'row-footer');
     var row = document.createElement('div');
     row.className = 'result-row';
     row.innerHTML =
-        '<a href="' + href + '" class="row-link">'
-      +   '<div class="row-thumb" data-thumb-uri="' + esc(item.uri) + '">'
-      +     '<div class="thumb-placeholder"></div>'
-      +   '</div>'
-      +   '<div class="row-body">'
-      +     '<div class="row-title">' + esc(title) + '</div>'
-      +     '<div class="row-meta">' + meta + '</div>'
-      +     badgesHtml(item, 'row-badges')
-      +   '</div>'
+        '<a href="' + tabRoute + '/' + encodeURIComponent(slug) + '" class="row-link">'
+      +   '<div class="row-thumb" data-thumb-uri="' + esc(thumbUri) + '"><div class="thumb-placeholder"></div></div>'
+      +   '<div class="row-body">' + body + '</div>'
       + '</a>'
-      + '<div class="row-actions">'
-      +   '<a href="' + href + '" class="btn-apri">Apri →</a>'
-      +   '<a href="' + esc(item.zeri_url || '#') + '" target="_blank" rel="noopener" class="row-zeri-link">'
-      +     '<i class="ph ph-link"></i> Scheda Zeri'
-      +   '</a>'
-      + '</div>';
+      + actionsHtml(item);
     return row;
   }
 
-  function buildGridCard(item, slug, title) {
-    var href = tabRoute + '/' + encodeURIComponent(slug);
-    var meta = (item.house ? esc(item.house) : '')
-             + (item.year  ? ', ' + esc(item.year) : '');
+  function buildGridCard(item) {
+    var slug = slugOf(item), thumbUri = item[DISPLAY.thumb_field || 'uri'] || item.uri, body = '';
+    if (DISPLAY.title) body += '<div class="card-title">' + esc(pickField(item, [DISPLAY.title.field].concat(DISPLAY.title.fallback || []))) + '</div>';
+    if (DISPLAY.subtitle && item[DISPLAY.subtitle.field]) body += '<div class="card-subtitle">' + esc(item[DISPLAY.subtitle.field]) + '</div>';
+    if (DISPLAY.meta)   body += metaHtml(item, DISPLAY.meta, 'card-meta');
+    if (DISPLAY.badges) body += badgesHtml(item, DISPLAY.badges, 'card-badges');
+    body += '<span class="btn-apri-mini">Apri <i class="ph ph-arrow-right"></i></span>';
     var card = document.createElement('a');
-    card.href = href;
+    card.href = tabRoute + '/' + encodeURIComponent(slug);
     card.className = 'result-card-grid';
     card.innerHTML =
-        '<div class="card-cover">'
-      +   '<div class="row-thumb" data-thumb-uri="' + esc(item.uri) + '">'
-      +     '<div class="thumb-placeholder"></div>'
-      +   '</div>'
-      + '</div>'
-      + '<div class="card-body">'
-      +   '<div class="card-title">' + esc(title) + '</div>'
-      +   '<div class="card-meta">' + meta + '</div>'
-      +   badgesHtml(item, 'card-badges')
-      +   '<span class="btn-apri-mini">Apri <i class="ph ph-arrow-right"></i></span>'
-      + '</div>';
+        '<div class="card-cover"><div class="row-thumb" data-thumb-uri="' + esc(thumbUri) + '"><div class="thumb-placeholder"></div></div></div>'
+      + '<div class="card-body">' + body + '</div>';
     return card;
   }
 
@@ -472,30 +485,20 @@ document.addEventListener('DOMContentLoaded', function () {
   function loadMore() {
     loading = true;
     sentinel.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
-    var url = apiBase + window.location.search
-              + (window.location.search ? '&' : '?')
-              + 'offset=' + offset + '&limit=' + limit;
-    fetch(url)
-      .then(function (r) { return r.json(); })
-      .then(function (data) {
-        (data.items || []).forEach(function (item) {
-          if (!item || !item.uri) return;
-          var slug  = item.slug || item.doc_id || item.uri.split('/').pop();
-          var title = item.title || item.label || item.doc_id || slug;
-          listEl.appendChild(buildListRow(item, slug, title));
-          gridEl.appendChild(buildGridCard(item, slug, title));
-        });
-
-        offset += (data.items || []).length;
-        if (offset >= total) observer.disconnect();
-        sentinel.innerHTML = '';
-        loading = false;
-        hydrateThumbs(resultsList);
-      })
-      .catch(function () {
-        sentinel.innerHTML = '<span class="text-muted small">Errore caricamento.</span>';
-        loading = false;
+    var url = apiBase + window.location.search + (window.location.search ? '&' : '?') + 'offset=' + offset + '&limit=' + limit;
+    fetch(url).then(function (r) { return r.json(); }).then(function (data) {
+      (data.items || []).forEach(function (item) {
+        if (!item || !item.uri) return;
+        listEl.appendChild(buildListRow(item));
+        gridEl.appendChild(buildGridCard(item));
       });
+      offset += (data.items || []).length;
+      if (offset >= total) observer.disconnect();
+      sentinel.innerHTML = ''; loading = false;
+      hydrateThumbs(resultsList);
+    }).catch(function () {
+      sentinel.innerHTML = '<span class="text-muted small">Errore caricamento.</span>'; loading = false;
+    });
   }
 
 });

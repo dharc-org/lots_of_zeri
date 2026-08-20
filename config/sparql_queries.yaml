@@ -382,13 +382,22 @@ filter_snippets:
       ?searchTitleNode rdfs:label ?searchLabel .
       FILTER(CONTAINS(LCASE(STR(?searchLabel)), LCASE("{text_value}")))
 
-  lotti__artista_scuola:
+  lotti__scuola:
     multiselect: |
       ?lot crm:P94i_was_created_by ?cr_as .
       ?cr_as crm:P14_carried_out_by ?agent_as ;
         crm:P2_has_type zac:validated . 
-      ?agent_as crm:P127_has_broader_term* ?sel_as .
+      ?agent_as a crm:E74_Group ;
+        crm:P127_has_broader_term* ?sel_as .
       VALUES ?sel_as { {values_clause} }
+  
+  lotti__artista:
+    multiselect: |
+      ?lot crm:P94i_was_created_by ?cr_as .
+      ?cr_as crm:P14_carried_out_by ?agent_as ;
+        crm:P2_has_type zac:validated . 
+      ?agent_as a crm:E21_Person .
+      VALUES ?agent_as { {values_clause} }
 
   lotti__tipologia:
     multiselect: |

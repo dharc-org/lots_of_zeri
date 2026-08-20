@@ -25,8 +25,6 @@ eventi_asta:
   route:
     path: "/aste"
     active_tab: "aste"
-    template: "eventi.html"
-    detail_template: "evento_detail.html"
     detail_query: "evento_item"
     results_query: "eventi_asta"
     count_query: "eventi_asta_count"
@@ -36,9 +34,18 @@ eventi_asta:
     # How to extract items from SPARQL result rows
     uri_var: "auction"
     slug_from_uri: true
+    display:
+      thumb_field: uri
+      title:    { field: title, fallback: [label, doc_id, slug], class: row-title }
+      meta:     { parts: [house, year], separator: " · ", class: row-meta }
+      actions:
+        - { kind: open,     label: "Apri →",      class: btn-apri }
+        - { kind: external, field: zeri_url, label: "Scheda Zeri", icon: "ph ph-link", class: row-zeri-link }
     result_fields:
       thumb: "thumb"
       label:  "auctionLabel"
+      language: "langLabel"
+      illustrated: "illustrated"
       house:  "houseLabel"
       year:   "yearLabel"
       place:  "placeLabel"
@@ -115,8 +122,6 @@ cataloghi:
   route:
     path: "/cataloghi"
     active_tab: "catalogo"
-    template: "catalogo.html"
-    detail_template: "catalogo_detail.html"
     detail_query: "catalogo_item"
     results_query: "catalogo"
     count_query: "catalogo_count"
@@ -125,6 +130,18 @@ cataloghi:
     entity_label: "cataloghi"
     uri_var: "doc"
     slug_from_uri: true
+    display:
+      thumb_field: uri
+      title:  { field: label, fallback: [title, slug], class: row-title }
+      meta:   { parts: [house, year], separator: " · ", class: row-meta }
+      badges:
+        class: row-badges
+        vals:
+          - { field: language, transform: lingua_estesa, class: badge-pill }
+          - { flag: illustrated, label: "Illustrato", class: "badge-pill badge-pill-accent" }
+      actions:
+        - { kind: open,     label: "Apri →", class: btn-apri }
+        - { kind: external, field: zeri_url, label: "Scheda Zeri", icon: "ph ph-link", class: row-zeri-link }
     result_fields:
       thumb:      "thumb"
       zeri_url:   "zeriUrl"
@@ -216,10 +233,24 @@ lotti:
     entity_label: "lotti"
     uri_var: "lot"
     slug_from_uri: true
+    display:
+      thumb_field: uri
+      title:    { field: title, fallback: [label, slug], class: row-title }
+      subtitle: { field: author_label, class: row-subtitle }        
+      badges:
+        class: row-badges
+        vals:
+          - { field: type_label, class: badge-pill }
+          - { field: author_label, class: badge-pill }  # generico, prede sia scuole che artisti
+      footer:   { field: auction_label, class: "row-footer row-meta-auction" }
+      actions:
+        - { kind: open,  label: "Apri →", class: btn-apri }
+        - { kind: cross, route: /aste, slug_field: auction_slug, label: "Sfoglia il catalogo →", class: row-catalog-link }
+        - { kind: external, field: zeri_url, label: "Scheda Zeri", icon: "ph ph-link", class: row-zeri-link }
     result_fields:
       title:         "title"
       label:         "label"
-      house:         "authorLabel"
+      author_label:  "authorLabel" # generico, prede sia scuole che artisti
       img:           "img"
       type_label:    "typeLabel"
       auction_label: "auctionLabel"
