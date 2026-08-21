@@ -563,7 +563,7 @@
 }
 .row-zeri-link {
   display: inline-flex; align-items: center; gap: 0.3rem;
-   padding-top: 0.6rem;
+  padding-top: 0.6rem;
   font-family: var(--ff-body); font-size: var(--fs-caption);
   color: var(--terra) !important; text-decoration: none !important;
   transition: color 0.2s ease;
@@ -571,14 +571,18 @@
 .row-zeri-link:hover { color: var(--terra-dark) !important; }
 
 .btn-apri {
-  background: var(--terra-light); color: var(--paper) !important;
+  background: var(--paper-light); color: var(--terra-light) !important;
+  border: var(--terra-light) 1px solid !important;
   padding: 0.4rem 0.9rem; border-radius: 2px;
   font-family: var(--ff-body); font-size: var(--fs-body-sm);
   font-weight: 700;
   white-space: nowrap;
   text-decoration: none !important;
 }
-.result-row:hover .btn-apri { background: var(--terra); }
+
+.result-row:hover .btn-apri { background: var(--terra); color: var(--paper-light) !important}
+
+.row-lots-link[hidden] { display: none !important; }
 
 .row-meta-org,
 .row-meta-date {

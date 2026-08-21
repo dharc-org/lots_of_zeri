@@ -329,6 +329,11 @@ filter_snippets:
       ?auction rdfs:label ?searchLabel .
       FILTER(CONTAINS(LCASE(STR(?searchLabel)), LCASE("{text_value}")))
 
+  lotti__da_asta:
+    multiselect: |
+      VALUES ?da_asta_ref { {values_clause} }
+      ?da_asta_ref crm:P16_used_specific_object/crm:P46_is_composed_of ?lot .
+
   cataloghi__anno_pubblicazione:
     year_range: |
       ?doc crm:P94i_was_created_by ?cr_yr .
@@ -382,6 +387,11 @@ filter_snippets:
       ?searchTitleNode rdfs:label ?searchLabel .
       FILTER(CONTAINS(LCASE(STR(?searchLabel)), LCASE("{text_value}")))
 
+  lotti__da_catalogo:
+    multiselect: |
+      VALUES ?da_cat_ref { {values_clause} }
+      ?da_cat_ref crm:P70_documents/crm:P16_used_specific_object/crm:P46_is_composed_of ?lot .
+
   lotti__scuola:
     multiselect: |
       ?lot crm:P94i_was_created_by ?cr_as .
@@ -420,6 +430,8 @@ results:
            (MIN(?houseLabel0)   AS ?houseLabel)
            (MIN(?yearLabel0)    AS ?yearLabel)
            (MIN(?placeLabel0)   AS ?placeLabel)
+           (SAMPLE(?lotCount0)  AS ?lotCount)
+
     WHERE {
       ?auction a crm:E7_Activity ;
         crm:P2_has_type aat:300054751 .
@@ -438,6 +450,16 @@ results:
         ?auction crm:P7_took_place_at ?place .
         ?place rdfs:label ?placeLabel0 .
       }
+
+      OPTIONAL {
+        SELECT ?auction (COUNT(DISTINCT ?lot) AS ?lc) WHERE {
+          ?auction crm:P16_used_specific_object ?lots_set .
+          ?lots_set a la:Set ;
+            crm:P2_has_type aat:300411307 ;
+            crm:P46_is_composed_of ?lot .
+        } GROUP BY ?auction
+      }
+      BIND(COALESCE(?lc, 0) AS ?lotCount0)
       {FILTERS}
     }
     GROUP BY ?auction
@@ -452,6 +474,16 @@ results:
         crm:P2_has_type aat:300054751 .
       {FILTERS}
     }
+
+  lotti_count_by_asta: |
+    SELECT ?ref (COUNT(DISTINCT ?lot) AS ?n) WHERE {
+      VALUES ?ref { {URIS} }
+      ?ref crm:P16_used_specific_object ?lots_set .
+      ?lots_set a la:Set; 
+        crm:P2_has_type aat:300411307;
+        crm:P46_is_composed_of ?lot .
+    }
+    GROUP BY ?ref
 
   catalogo: |
     SELECT ?doc ?year ?docId ?zeriUrl
@@ -513,6 +545,18 @@ results:
         crm:P2_has_type aat:300026068 .
       {FILTERS}
     }
+
+  lotti_count_by_catalogo: |
+    SELECT ?ref (COUNT(DISTINCT ?lot) AS ?n) 
+    WHERE {
+      VALUES ?ref { {URIS} }
+      ?ref crm:P70_documents ?auction . 
+      ?auction crm:P16_used_specific_object ?lots_set .
+      ?lots_set a la:Set; 
+        crm:P2_has_type aat:300411307;
+        crm:P46_is_composed_of ?lot .
+    }
+    GROUP BY ?ref
 
   lotto: |
     SELECT ?lot
@@ -596,6 +640,13 @@ detail:
           <{uri}> crm:P48_has_preferred_identifier ?idNode .
           ?idNode crm:P2_has_type aat:300312355 ;
                   crm:P190_has_symbolic_content ?docId .
+        }
+
+        # asta collegata
+        OPTIONAL {
+          <{uri}> crm:P70_documents ?auction .
+          ?auction rdfs:label ?auctionLabel.
+          BIND(REPLACE(STR(?auction), "^.*/", "") AS ?auctionSlug)
         }
 
         OPTIONAL { <{uri}> crm:P138i_has_representation ?manifest }
@@ -743,7 +794,9 @@ detail:
         # catalogo collegato
         OPTIONAL {
           ?doc crm:P70_documents <{uri}> .
-          ?doc crm:P48_has_preferred_identifier ?idNode .
+          BIND(REPLACE(STR(?doc), "^.*/", "") AS ?docSlug)
+          ?doc rdfs:label ?docLabel ;  
+            crm:P48_has_preferred_identifier ?idNode .
           ?idNode crm:P2_has_type aat:300312355 ;
                   crm:P190_has_symbolic_content ?docId .
         }

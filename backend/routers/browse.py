@@ -95,7 +95,6 @@ def _build_engine(cfg, tab_id: str, params: dict, *, skip_facet: str = None) -> 
 
     return engine
 
-
 def _resolve_sort(request: Request, route_cfg: dict) -> tuple[str, str]:
     """Read the 'sort' query param, validate it against route.sort_fields,
     and return (sort_key, order_by_sparql_fragment)."""
@@ -104,7 +103,7 @@ def _resolve_sort(request: Request, route_cfg: dict) -> tuple[str, str]:
     sort        = request.query_params.get("sort") or default
     if sort not in sort_fields:
         sort = default
-    return sort, sort_fields.get(sort, "")
+    return sort, sort_fields.get(sort, {}).get("order", "")
 
 def _build_tree(flat: list) -> list:
     """Flat list {uri,value,count,parent} → albero annidato (profondità arbitraria).
@@ -335,6 +334,8 @@ def _register_list_route(tab_id, tab_cfg, route_cfg, cfg):
         all_facets = list(facets.keys())
 
         sort, order_by = _resolve_sort(request, route_cfg)
+        sort_options = [{"key": k, "label": v.get("label", k)}
+                        for k, v in route_cfg.get("sort_fields", {}).items()]
 
         engine  = _build_engine(cfg, tab_id, params)
         pfx     = cfg.get_prefixes()
@@ -437,6 +438,7 @@ def _register_list_route(tab_id, tab_cfg, route_cfg, cfg):
             "tab_label":      tab_cfg.get("label_it", tab_id),
             "icon": route_cfg.get("icon", "ph ph-magnifying-glass"),
             "entity_label":   route_cfg.get("entity_label", "risultati"),
+            "sort_options": sort_options,
             "display":        route_cfg.get("display", {}),
             "facet_defs":     facet_defs,
             "active_filters": active_filters,
@@ -685,7 +687,7 @@ def _register_detail_route(tab_id, tab_cfg, route_cfg, cfg):
                 log.warning(f"related thumbs: {e}")
 
         # ── Merge config + dati → view ──────────────────────────────
-        view = build_view(_kind, cfg_view, scalars=scalars,
+        view = build_view(_kind, cfg_view,  uri=uri, scalars=scalars,
                            multis=multis, related=related_rows,manifest_url=manifest_url,
                            base_path=tmpl.env.globals.get("base_path", ""))
 
@@ -703,3 +705,34 @@ async def api_thumbs(request: Request, uris: list[str] = Query([])):
     return {u: {"thumb": iiif_sized(b, 160),    # lista
                 "cover": iiif_sized(b, 480)}    # griglia
             for u, b in bases.items()}
+
+@router.get("/api/lotti/counts")
+async def lotti_counts(request: Request):
+    sparql = request.app.state.sparql
+    cfg    = request.app.state.config
+    qp     = request.query_params
+    pfx    = cfg.get_prefixes()
+    out    = {}
+
+    async def run(query_key, uris):
+        if not uris:
+            return
+        body = cfg.get_results_query(query_key)
+        if not body:
+            return
+        values = " ".join(f"<{u}>" for u in uris)
+        try:
+            rows = await sparql.select(pfx + body.replace("{URIS}", values))
+        except Exception as e:
+            log.warning(f"lotti_counts {query_key}: {e}")
+            return
+        for r in rows:
+            ref = r.get("ref")
+            if ref:
+                out[ref] = int(float(r.get("n", 0)))
+
+    await asyncio.gather(
+        run("lotti_count_by_asta",     qp.getlist("asta")),
+        run("lotti_count_by_catalogo", qp.getlist("catalogo")),
+    )
+    return JSONResponse(out)

@@ -41,6 +41,7 @@ eventi_asta:
       actions:
         - { kind: open,     label: "Apri →",      class: btn-apri }
         - { kind: external, field: zeri_url, label: "Scheda Zeri", icon: "ph ph-link", class: row-zeri-link }
+        - { kind: lots_link, target: asta, route: /lotti, param: da_asta, class: row-lots-link, label_suffix: " lotti"}
     result_fields:
       thumb: "thumb"
       label:  "auctionLabel"
@@ -52,11 +53,13 @@ eventi_asta:
 
     # Ordinamento — chiave param "sort" → frammento SPARQL ORDER BY
     sort_fields:
-      date_asc:  "ASC(?yearLabel) ASC(?auctionLabel)"
-      date_desc: "DESC(?yearLabel) DESC(?auctionLabel)"
-      name_asc:  "ASC(?auctionLabel)"
-      name_desc: "DESC(?auctionLabel)"
-    default_sort: "date_asc"
+      lots_asc:  { order: "ASC(?lotCount) ASC(?auctionLabel)",  label: "N. lotti ↑" }
+      lots_desc: { order: "DESC(?lotCount) DESC(?auctionLabel)", label: "N. lotti ↓" }
+      date_asc:  { order: "ASC(?yearLabel) ASC(?auctionLabel)",  label: "Data ↑ crescente" }
+      date_desc: { order: "DESC(?yearLabel) DESC(?auctionLabel)", label: "Data ↓ decrescente" }
+      name_asc:  { order: "ASC(?auctionLabel)",  label: "Nome A–Z" }
+      name_desc: { order: "DESC(?auctionLabel)", label: "Nome Z–A" }
+    default_sort: "lots_desc"
 
     # Export CSV/JSON
     export_filename: "zac_aste"
@@ -142,6 +145,7 @@ cataloghi:
       actions:
         - { kind: open,     label: "Apri →", class: btn-apri }
         - { kind: external, field: zeri_url, label: "Scheda Zeri", icon: "ph ph-link", class: row-zeri-link }
+        - { kind: lots_link, target: catalogo, route: /lotti, param: da_catalogo, class: row-lots-link, label_suffix: " lotti"}
     result_fields:
       thumb:      "thumb"
       zeri_url:   "zeriUrl"
@@ -154,10 +158,10 @@ cataloghi:
 
     # Ordinamento — chiave param "sort" → frammento SPARQL ORDER BY
     sort_fields:
-      date_asc:  "ASC(?year) ASC(?docId)"
-      date_desc: "DESC(?year) DESC(?docId)"
-      name_asc:  "ASC(?title) ASC(?docId)"
-      name_desc: "DESC(?title) DESC(?docId)"
+      date_asc:  { order: "ASC(?year) ASC(?docId)",   label: "Data ↑ crescente" }
+      date_desc: { order: "DESC(?year) DESC(?docId)",  label: "Data ↓ decrescente" }
+      name_asc:  { order: "ASC(?title) ASC(?docId)",   label: "Nome A–Z" }
+      name_desc: { order: "DESC(?title) DESC(?docId)", label: "Nome Z–A" }
     default_sort: "date_asc"
 
     # Export CSV/JSON
@@ -241,7 +245,6 @@ lotti:
         class: row-badges
         vals:
           - { field: type_label, class: badge-pill }
-          - { field: author_label, class: badge-pill }  # generico, prede sia scuole che artisti
       footer:   { field: auction_label, class: "row-footer row-meta-auction" }
       actions:
         - { kind: open,  label: "Apri →", class: btn-apri }
@@ -256,8 +259,8 @@ lotti:
       auction_label: "auctionLabel"
       auction_slug:  "auctionSlug"
     sort_fields:
-      name_asc:  "ASC(?title)"
-      name_desc: "DESC(?title)"
+      name_asc:  { order: "ASC(?title)",  label: "Nome A–Z" }
+      name_desc: { order: "DESC(?title)", label: "Nome Z–A" }
     default_sort: "name_asc"
     export_filename: "zac_lotti"
 
@@ -279,6 +282,16 @@ lotti:
       label_en: "Object type"
       type: "multiselect"
       ui_widget: "checkbox_list"
+
+    da_asta:
+      label_it: "Da asta"
+      type: "multiselect"
+      ui_widget: "hidden"     # sidebar salta i facet senza opzioni / ui_widget hidden
+
+    da_catalogo:
+      label_it: "Da catalogo"
+      type: "multiselect"
+      ui_widget: "hidden"     # sidebar salta i facet senza opzioni / ui_widget hidden
 
     # cronologia: BLOCCATA — nessun path data/periodo sul lotto TBD
     # cronologia:

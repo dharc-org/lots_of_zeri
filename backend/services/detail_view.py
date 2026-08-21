@@ -96,6 +96,7 @@ def build_view(
     kind: str,
     cfg_view: dict,
     *,
+    uri: str, 
     scalars: List[dict],
     multis: Dict[str, List[dict]],
     related: Dict[str, List[dict]],
@@ -118,11 +119,19 @@ def build_view(
         """Antepone il base_path a un URL interno (no-op se url è vuoto/None)."""
         return f"{base_path}{url}" if url else url
 
+    def _route(route, val):
+        """Sostituisce i placeholder di rotta ({slug}/{id} path, {me}/{uri} URI intero)
+        col valore url-encoded, poi antepone base_path."""
+        enc = quote(str(val), safe="")
+        for tok in ("{slug}", "{id}", "{me}", "{uri}"):
+            route = route.replace(tok, enc)
+        return _bp(route)
+
     # Slug/id per i link interni — ricavati dagli scalars
     auction_slug = _scalar(sc, "auctionSlug")
     doc_id       = _scalar(sc, "docId")
     doc_slug     = _scalar(sc, "docSlug")
-    link_vals    = {"auctionSlug": auction_slug, "docId": doc_id, "docSlug": doc_slug}
+    link_vals    = {"auctionSlug": auction_slug, "docId": doc_id, "docSlug": doc_slug, "uri": uri}
 
     # ── Switch "Vai a:" ──────────────────────────────────────────────
     switch = []
@@ -131,7 +140,7 @@ def build_view(
         if not entry["disabled"] and "link_key" in b:
             val = link_vals.get(b["link_key"])
             if val:
-                entry["url"] = _bp(b["route"].replace("{slug}", val).replace("{id}", val))
+                entry["url"] = _route(b["route"], val)
         switch.append(entry)
 
     # ── Campi della scheda ───────────────────────────────────────────
@@ -201,7 +210,7 @@ def build_view(
             if out["has_value"] and "link_route" in f and "link_key" in f:
                 lv = link_vals.get(f["link_key"])
                 if lv:
-                    out["link"] = _bp(f["link_route"].replace("{slug}", lv).replace("{id}", lv))
+                    out["link"] = _route(f["link_route"], lv)
 
             fl = f.get("facet_link")
             if out["has_value"] and fl:

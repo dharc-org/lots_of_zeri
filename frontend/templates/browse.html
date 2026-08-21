@@ -65,7 +65,7 @@
           </span>
         {% endif %}
 
-      {% elif facet.type == 'multiselect' %}
+      {% elif facet.type == 'multiselect' and facet.ui_widget != 'hidden'  %}
         {% for v in active_filters.get(facet.id, []) %}
           {% set ns.has_any_active = true %}
           {% set pill_label = (facet.options | selectattr('uri', 'equalto', v) | map(attribute='value') | first) or v %}
@@ -106,10 +106,9 @@
   <div class="action-right">
     <label class="sort-label" for="sort-select">Ordina per</label>
     <select class="sort-select" id="sort-select" name="sort" form="facet-form">
-      <option value="date_asc"  {% if active_filters.get('sort') == 'date_asc'  %}selected{% endif %}>Data ↑ crescente</option>
-      <option value="date_desc" {% if active_filters.get('sort') == 'date_desc' %}selected{% endif %}>Data ↓ decrescente</option>
-      <option value="name_asc"  {% if active_filters.get('sort') == 'name_asc'  %}selected{% endif %}>Nome A–Z</option>
-      <option value="name_desc" {% if active_filters.get('sort') == 'name_desc' %}selected{% endif %}>Nome Z–A</option>
+      {% for opt in sort_options %}
+      <option value="{{ opt.key }}" {% if active_filters.get('sort') == opt.key %}selected{% endif %}>{{ opt.label }}</option>
+      {% endfor %}
     </select>
 
     <div class="dropdown">
@@ -198,6 +197,14 @@
     {%- elif a.kind == 'external' and item.get(a.field) -%}
       <a href="{{ item.get(a.field) }}" target="_blank" rel="noopener" class="{{ a.class or 'row-zeri-link' }}">
         {%- if a.icon %}<i class="{{ a.icon }}"></i> {% endif -%}{{ a.label }}</a>
+    {%- elif a.kind == 'lots_link' -%}
+      <a class="{{ a.class or 'row-lots-link' }}"
+         data-lots-uri="{{ item.uri }}"
+         data-lots-target="{{ a.target }}"
+         href="{{ base_path }}{{ a.route }}?{{ a.param }}={{ item.uri | urlencode }}"
+         hidden>
+        <span class="lots-n">…</span>{{ a.label_suffix or ' lotti' }}
+      </a>
     {%- endif -%}
   {%- endfor -%}
   </div>
@@ -329,7 +336,31 @@ async function hydrateChunk(nodes) {
     }
   }
 }
-document.addEventListener('DOMContentLoaded', () => hydrateThumbs());
+
+async function hydrateLotCounts(scope = document) {
+  const nodes = [...scope.querySelectorAll('[data-lots-uri]:not([data-lots-done])')];
+  if (!nodes.length) return;
+  const params = new URLSearchParams();
+  const byUri  = {};
+  for (const n of nodes) {
+    n.dataset.lotsDone = '1';
+    const target = n.dataset.lotsTarget === 'catalogo' ? 'catalogo' : 'asta';
+    params.append(target, n.dataset.lotsUri);
+    (byUri[n.dataset.lotsUri] = byUri[n.dataset.lotsUri] || []).push(n);
+  }
+  let map = {};
+  try { map = await (await fetch((window.BASE_PATH || '') + '/api/lotti/counts?' + params.toString())).json(); }
+  catch (e) { return; }
+  for (const [uri, els] of Object.entries(byUri)) {
+    const n = map[uri];
+    if (!(n > 0)) continue;                    // niente link se 0 lotti
+    for (const el of els) { el.querySelector('.lots-n').textContent = n; el.hidden = false; }
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => { hydrateThumbs(); hydrateLotCounts(); });
+
+
 
 /* Helpers condivisi */
 function esc(s) {
@@ -439,6 +470,12 @@ document.addEventListener('DOMContentLoaded', function () {
         h += '<a href="' + basePath + a.route + '/' + encodeURIComponent(item[a.slug_field]) + '" class="' + (a.class || '') + '">' + esc(a.label) + '</a>';
       else if (a.kind === 'external' && item[a.field])
         h += '<a href="' + esc(item[a.field]) + '" target="_blank" rel="noopener" class="' + (a.class || 'row-zeri-link') + '">' + (a.icon ? '<i class="' + a.icon + '"></i> ' : '') + esc(a.label) + '</a>';
+      else if (a.kind === 'lots_link')
+        h += '<a class="' + (a.class || 'row-lots-link') + '"'
+           + ' data-lots-uri="' + esc(item.uri) + '"'
+           + ' data-lots-target="' + esc(a.target) + '"'
+           + ' href="' + basePath + a.route + '?' + a.param + '=' + encodeURIComponent(item.uri) + '"'
+           + ' hidden><span class="lots-n">…</span>' + esc(a.label_suffix || ' lotti') + '</a>';
     });
     return h + '</div>';
   }
@@ -496,6 +533,7 @@ document.addEventListener('DOMContentLoaded', function () {
       if (offset >= total) observer.disconnect();
       sentinel.innerHTML = ''; loading = false;
       hydrateThumbs(resultsList);
+      hydrateLotCounts(resultsList);
     }).catch(function () {
       sentinel.innerHTML = '<span class="text-muted small">Errore caricamento.</span>'; loading = false;
     });

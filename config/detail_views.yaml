@@ -44,7 +44,7 @@ catalogo:
   has_viewer: true
   switch:
     - { label_it: "Asta",        link_key: "auctionSlug", route: "/aste/{slug}" }
-    - { label_it: "lista Lotti", disabled: true }
+    - { label_it: "lista Lotti", link_key: "uri", route: "/lotti?da_catalogo={me}" }
 
   sections:
     - { anchor: "viewer",  label_it: "Sfoglia il catalogo" }
@@ -108,7 +108,7 @@ evento:
   has_viewer: false
   switch:
     - { label_it: "Catalogo",    link_key: "docSlug", route: "/cataloghi/{slug}" }
-    - { label_it: "lista Lotti", disabled: true }
+    - { label_it: "lista Lotti", link_key: "uri", route: "/lotti?da_asta={me}" }
  
   sections:
     - { anchor: "scheda",  label_it: "Scheda catalografica" }
