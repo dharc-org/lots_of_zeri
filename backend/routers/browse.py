@@ -222,7 +222,7 @@ def _parse_params(request: Request, facets: dict) -> dict:
     return params
 
 
-def _build_facet_defs(facets: dict, facet_values: dict, params: dict, dynamic_ranges=None) -> list:
+def _build_facet_defs(facets: dict, facet_values: dict, params: dict, dynamic_ranges=None, distributions=None) -> list:    
     defs = []
     for fid, fcfg in facets.items():
         ftype = fcfg.get("type", "multiselect")
@@ -233,6 +233,7 @@ def _build_facet_defs(facets: dict, facet_values: dict, params: dict, dynamic_ra
             "ui_widget": fcfg.get("ui_widget", "checkbox_list"),
             "options":   [],
             "range":     dynamic_ranges[fid] if (dynamic_ranges and fid in dynamic_ranges) else fcfg.get("range", {}),
+            "distribution": (distributions or {}).get(fid)
         }
 
         if ftype == "multiselect":
@@ -284,6 +285,32 @@ async def _facet_range(sparql, cfg, tab_id, facet_id, filter_block=""):
         return {"min": int(float(rows[0].get("minYear", 1860))),
                 "max": int(float(rows[0].get("maxYear", 1940)))}
     return None
+
+async def _facet_distribution(sparql, cfg, tab_id, facet_id, rng, filter_block=""):
+    """Conteggio per anno → lista densa allineata a rng (min..max) per
+    l'istogramma dietro lo slider. None se query assente / dati vuoti."""
+    key  = f"{tab_id}__{facet_id}__dist"
+    body = cfg.get_facet_query_by_key(key)
+    if not body or not rng:
+        return None
+    body = body.replace("{FILTERS}", filter_block.strip())
+    try:
+        rows = await sparql.select(cfg.get_prefixes() + body)
+    except Exception as e:
+        log.warning(f"Distribution {tab_id}/{facet_id}: {e}")
+        return None
+    counts = {}
+    for r in rows:
+        y = r.get("year")
+        if not y:
+            continue
+        try:
+            counts[int(float(y))] = int(float(r.get("count", 0)))
+        except (ValueError, TypeError):
+            continue
+    lo, hi = int(rng["min"]), int(rng["max"])
+    dist = [counts.get(y, 0) for y in range(lo, hi + 1)]
+    return dist if any(dist) else None
 
 # ── Register routes for each enabled tab ──────────────────────
 def register_tab_routes(cfg):
@@ -384,6 +411,7 @@ def _register_list_route(tab_id, tab_cfg, route_cfg, cfg):
 
         # ── 2b. Range dinamici per slider ────────────────────────────────
         dynamic_ranges = {}
+        facet_distributions = {}
         for fid, fcfg in facets.items():
             if fcfg.get("type") != "range":
                 continue
@@ -391,7 +419,10 @@ def _register_list_route(tab_id, tab_cfg, route_cfg, cfg):
             rng = await _facet_range(sparql, cfg, tab_id, fid, range_filter)
             if rng:
                 dynamic_ranges[fid] = rng
-
+                dist = await _facet_distribution(
+                                sparql, cfg, tab_id, fid, rng or fcfg.get("range"), range_filter)
+                if dist:
+                    facet_distributions[fid] = dist
         count_res = results[len(all_facets)]
         data_res  = results[len(all_facets) + 1]
         if isinstance(count_res, Exception):
@@ -429,8 +460,10 @@ def _register_list_route(tab_id, tab_cfg, route_cfg, cfg):
         active_filters["q"]    = params.get("q", "")
         active_filters["sort"] = sort
 
-        facet_defs = _build_facet_defs(facets, facet_values, params, dynamic_ranges)
+
+        facet_defs = _build_facet_defs(facets, facet_values, params, dynamic_ranges, facet_distributions)
         log.warning(f"ACTIVE_FILTERS: {active_filters}")
+
         return tmpl.TemplateResponse("browse.html", {
             "request":        request,
             "active_tab":     route_cfg.get("active_tab", tab_id),

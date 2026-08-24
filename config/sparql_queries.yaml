@@ -88,6 +88,19 @@ facet_queries:
       {FILTERS}
     }
 
+  eventi_asta__periodo__dist: |
+    SELECT ?year (COUNT(DISTINCT ?auction) AS ?count)
+    WHERE {
+      ?auction a crm:E7_Activity ;
+        crm:P2_has_type aat:300054751 ;
+        crm:P4_has_time-span ?ts .
+      ?ts crm:P82a_begin_of_the_begin ?dateStart .
+      BIND(YEAR(?dateStart) AS ?year)
+      {FILTERS}
+    }
+    GROUP BY ?year
+    ORDER BY ?year
+
   eventi_asta__luogo: |
     SELECT ?facetURI ?facetValue (COUNT(DISTINCT ?auction) AS ?count)
     WHERE {
@@ -154,6 +167,19 @@ facet_queries:
       ?cr crm:P82_at_some_time_within ?y .
       {FILTERS}
     }
+
+  cataloghi__anno_pubblicazione__dist: |
+    SELECT ?year (COUNT(DISTINCT ?doc) AS ?count)
+    WHERE {
+      ?doc a crm:E31_Document ;
+           crm:P2_has_type aat:300026068 ;
+           crm:P94i_was_created_by ?cr .
+      ?cr crm:P82_at_some_time_within ?y .
+      BIND(YEAR(?y) AS ?year)
+      {FILTERS}
+    }
+    GROUP BY ?year
+    ORDER BY ?year
 
   cataloghi__lingua: |
     SELECT ?facetURI ?facetValue (COUNT(DISTINCT ?doc) AS ?count)
