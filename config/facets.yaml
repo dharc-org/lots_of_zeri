@@ -283,6 +283,12 @@ lotti:
       type: "multiselect"
       ui_widget: "checkbox_list"
 
+    # cronologia: BLOCCATA — nessun path data/periodo sul lotto TBD
+    # cronologia:
+    #   label_it: "Cronologia"
+    #   type: "multiselect"
+    #   ui_widget: "checkbox_list"
+
     da_asta:
       label_it: "Da asta"
       type: "multiselect"
@@ -292,13 +298,6 @@ lotti:
       label_it: "Da catalogo"
       type: "multiselect"
       ui_widget: "hidden"     # sidebar salta i facet senza opzioni / ui_widget hidden
-
-    # cronologia: BLOCCATA — nessun path data/periodo sul lotto TBD
-    # cronologia:
-    #   label_it: "Cronologia"
-    #   type: "range"
-    #   ui_widget: "range_slider"
-    #   range: { min: 1860, max: 1940, step: 1 }
 
 # ─────────────────────────────────────────
 # UI Configuration
