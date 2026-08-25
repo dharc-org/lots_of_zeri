@@ -451,7 +451,7 @@ filter_snippets:
 results:
 
   eventi_asta: |
-    SELECT ?auction
+    SELECT ?auction ?reviewed
            (MIN(?auctionLabel0) AS ?auctionLabel)
            (MIN(?houseLabel0)   AS ?houseLabel)
            (MIN(?yearLabel0)    AS ?yearLabel)
@@ -486,9 +486,15 @@ results:
         } GROUP BY ?auction
       }
       BIND(COALESCE(?lc, 0) AS ?lotCount0)
+
+      BIND(IF(EXISTS {
+        ?doc crm:P70_documents ?auction ;  
+          crm:P2_has_type zac:reviewed 
+      }, "true", "false") AS ?reviewed)
+
       {FILTERS}
     }
-    GROUP BY ?auction
+    GROUP BY ?auction ?reviewed
     ORDER BY {ORDER}
     LIMIT {limit}
     OFFSET {offset}
@@ -512,7 +518,7 @@ results:
     GROUP BY ?ref
 
   catalogo: |
-    SELECT ?doc ?year ?docId ?zeriUrl
+    SELECT ?doc ?year ?docId ?zeriUrl ?reviewed
            (SAMPLE(?title0)       AS ?title)
            (SAMPLE(?houseLabel0)  AS ?houseLabel)
            (SAMPLE(?langLabel0)   AS ?langLabel)
@@ -560,8 +566,12 @@ results:
           ?zrec crm:P1_is_identified_by ?zid .
           ?zid crm:P190_has_symbolic_content ?zeriUrl .
         }
+
+        BIND(IF(EXISTS {
+          ?doc crm:P2_has_type zac:reviewed 
+        }, "true", "false") AS ?reviewed)
     }
-    GROUP BY ?doc ?year ?docId ?zeriUrl
+    GROUP BY ?doc ?year ?docId ?zeriUrl ?reviewed
     ORDER BY {ORDER}
 
   catalogo_count: |

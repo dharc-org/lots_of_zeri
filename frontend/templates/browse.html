@@ -203,6 +203,7 @@
          data-lots-target="{{ a.target }}"
          href="{{ base_path }}{{ a.route }}?{{ a.param }}={{ item.uri | urlencode }}"
          hidden>
+        {%- if a.icon and item.reviewed == 'true' %}<i class="{{ a.icon }} row-verified" title="Dati revisionati"></i> {% endif -%}
         <span class="lots-n">…</span>{{ a.label_suffix or ' lotti' }}
       </a>
     {%- endif -%}
@@ -470,12 +471,14 @@ document.addEventListener('DOMContentLoaded', function () {
         h += '<a href="' + basePath + a.route + '/' + encodeURIComponent(item[a.slug_field]) + '" class="' + (a.class || '') + '">' + esc(a.label) + '</a>';
       else if (a.kind === 'external' && item[a.field])
         h += '<a href="' + esc(item[a.field]) + '" target="_blank" rel="noopener" class="' + (a.class || 'row-zeri-link') + '">' + (a.icon ? '<i class="' + a.icon + '"></i> ' : '') + esc(a.label) + '</a>';
-      else if (a.kind === 'lots_link')
+           else if (a.kind === 'lots_link')
         h += '<a class="' + (a.class || 'row-lots-link') + '"'
            + ' data-lots-uri="' + esc(item.uri) + '"'
            + ' data-lots-target="' + esc(a.target) + '"'
            + ' href="' + basePath + a.route + '?' + a.param + '=' + encodeURIComponent(item.uri) + '"'
-           + ' hidden><span class="lots-n">…</span>' + esc(a.label_suffix || ' lotti') + '</a>';
+           + ' hidden>'
+           + (a.icon && isTrue(item.reviewed) ? '<i class="' + a.icon + ' row-verified" title="Dati revisionati"></i> ' : '')
+           + '<span class="lots-n">…</span>' + esc(a.label_suffix || ' lotti') + '</a>';
     });
     return h + '</div>';
   }

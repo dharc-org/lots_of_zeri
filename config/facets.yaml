@@ -41,7 +41,7 @@ eventi_asta:
       actions:
         - { kind: open,     label: "Apri →",      class: btn-apri }
         - { kind: external, field: zeri_url, label: "Scheda Zeri", icon: "ph ph-link", class: row-zeri-link }
-        - { kind: lots_link, target: asta, route: /lotti, param: da_asta, class: row-lots-link, label_suffix: " lotti"}
+        - { kind: lots_link, target: asta, route: /lotti, param: da_asta, class: row-lots-link, label_suffix: " lotti", icon: "bi-patch-check-fill"}
     result_fields:
       thumb: "thumb"
       label:  "auctionLabel"
@@ -50,6 +50,7 @@ eventi_asta:
       house:  "houseLabel"
       year:   "yearLabel"
       place:  "placeLabel"
+      reviewed: "reviewed"
 
     # Ordinamento — chiave param "sort" → frammento SPARQL ORDER BY
     sort_fields:
@@ -145,7 +146,7 @@ cataloghi:
       actions:
         - { kind: open,     label: "Apri →", class: btn-apri }
         - { kind: external, field: zeri_url, label: "Scheda Zeri", icon: "ph ph-link", class: row-zeri-link }
-        - { kind: lots_link, target: catalogo, route: /lotti, param: da_catalogo, class: row-lots-link, label_suffix: " lotti"}
+        - { kind: lots_link, target: catalogo, route: /lotti, param: da_catalogo, class: row-lots-link, label_suffix: " lotti",  icon: "bi-patch-check-fill"}
     result_fields:
       thumb:      "thumb"
       zeri_url:   "zeriUrl"
@@ -155,6 +156,7 @@ cataloghi:
       house:      "houseLabel"
       language:   "langLabel"
       illustrated: "illustrated"   
+      reviewed: "reviewed"
 
     # Ordinamento — chiave param "sort" → frammento SPARQL ORDER BY
     sort_fields:
