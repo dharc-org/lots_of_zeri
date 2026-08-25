@@ -1,295 +1,167 @@
-# ZAC Platform — Zeri Auction Catalogues
-**Digital Research Platform for Historical Art Auction Markets, 1860–1940**
+# ZAC — Zeri Auction Catalogues
 
-*Fondazione Federico Zeri — Università di Bologna*
+Piattaforma di ricerca per i cataloghi d'asta storici (1860–1940) della Fondazione Federico Zeri, sviluppata dal centro DHarc dell'Università di Bologna. La piattaforma pubblica i dati d'asta — cataloghi, eventi e lotti — come Linked Open Data secondo il modello CIDOC-CRM con application profile Linked Art, e li rende interrogabili tramite tre ricerche a faccette.
 
----
+Il deploy di riferimento è disponibile all'indirizzo `http://137.204.64.39/lots_of_zeri/`, servito dietro reverse proxy con base path `/lots_of_zeri`.
 
-## Architecture Overview
+## Architettura
 
-```
-┌────────────────────────────────────────────────────────────┐
-│                     BROWSER (Bootstrap 5)                  │
-│         Tab 1: Eventi Asta  │  Tab 2: Catalogo             │
-│         (Faceted SPARQL Search over CIDOC-CRM RDF)         │
-└─────────────────────┬──────────────────────────────────────┘
-                      │ HTTP REST
-┌─────────────────────▼──────────────────────────────────────┐
-│               FastAPI Backend (Python 3.11)                │
-│  /api/facets/{tab}     → facet values (cached 1h)          │
-│  /api/eventi           → auction event search              │
-│  /api/catalogo         → catalogue search                  │
-│  /api/health           → health check                      │
-└─────────────────────┬──────────────────────────────────────┘
-                      │ SPARQL HTTP
-┌─────────────────────▼──────────────────────────────────────┐
-│          QLever Triplestore (RDF/SPARQL 1.1)               │
-│          Named graph: http://w3id.org/zac/catalogues       │
-│          Data model: CIDOC-CRM + Linked Art                │
-└────────────────────────────────────────────────────────────┘
-```
+Il sistema è composto da tre servizi orchestrati via Docker Compose.
 
-## Data Model
+| Servizio | Funzione | Porta |
+|---|---|---|
+| `qlever-indexer` | Costruzione dell'indice binario a partire dai file RDF. Esecuzione singola (one-shot). | — |
+| `qlever` | Server SPARQL 1.1 sull'indice generato. | 7001 |
+| `zac-api` | Backend FastAPI: API REST e rendering server-side delle interfacce. | 5432 |
 
-The ZAC dataset uses **CIDOC-CRM** and the **Linked Art application profile**.
+Il backend espone tre schede, ciascuna con una ricerca a faccette che interroga il triplestore via SPARQL:
 
-### Key Classes
+- **Aste** — eventi d'asta, modellati come `crm:E7_Activity`;
+- **Cataloghi** — documenti di catalogo, modellati come `crm:E31_Document`;
+- **Lotti** — insiemi di lotti, modellati come `la:Set`.
 
-| Class | Role in ZAC |
-|-------|-------------|
-| `crm:E31_Document` | Auction catalogue (physical/digital document) |
-| `crm:E7_Activity` | Auction event / organisational activity |
-| `crm:E13_Attribute_Assignment` | Contributor roles (typed via AAT) |
-| `crm:E52_Time-Span` | Auction date ranges |
-| `crm:E78_Curated_Holding` | Named collections |
-| `crm:E56_Language` | Catalogue language |
+## Configurazione
 
-### Named Graph
-
-All data lives in: `<http://w3id.org/zac/catalogues>`
-
-### Key Predicates
+La piattaforma è interamente guidata da configurazione. Faccette, query SPARQL e resa delle schede risultato sono definite in tre file YAML, montati nel container in sola lettura sotto `/app/config`. L'aggiunta di una faccetta o di una scheda richiede la sola modifica dei file YAML, senza interventi sul codice Python o sui template.
 
 ```
-E31_Document --P70_documents--> E7_Activity (auction event)
-E31_Document --P94i_was_created_by--> E65_Creation
-E65_Creation --P82_at_some_time_within--> xsd:gYear (year)
-E13_Attribute_Assignment --P141_assigned--> contributor (person/org)
-E7_Activity --P14_carried_out_by--> auction house
-E7_Activity --P46_is_composed_of--> E78_Curated_Holding (collection)
+config/
+├── settings.yaml          Parametri di server, connessione al triplestore e cache.
+├── facets.yaml            Definizione di schede, faccette, etichette d'interfaccia,
+│                          campi di risultato (result_fields) e descrittori di card (display).
+└── sparql_queries.yaml    Template delle query SPARQL (faccette, risultati, dettaglio).
 ```
 
----
+## Requisiti
 
-## Project Structure
+- Docker e Docker Compose.
+- I file di dati RDF in formato Turtle, collocati nella directory `./data`.
+
+I comandi riportati in questa guida usano `curl` e `grep`, disponibili nativamente su macOS e Linux. Su Windows, in PowerShell, sostituire `curl` con `curl.exe` e `grep` con `Select-String`.
+
+I file RDF caricati sono elencati nella direttiva `command` del servizio `qlever-indexer` in `docker-compose.yml`. La configurazione corrente indicizza:
 
 ```
-zac-platform/
-├── main.py                    # FastAPI application entry point
-├── Qleverfile                 # QLever index configuration
-├── docker-compose.yml         # Docker services (QLever + API)
-│
-├── config/
-│   ├── settings.yaml          # App settings (server, triplestore, cache)
-│   ├── facets.yaml            # Facet definitions + UI labels (EDIT THIS)
-│   └── sparql_queries.yaml    # SPARQL query templates
-│
-├── backend/
-│   ├── services/
-│   │   ├── sparql.py          # QLever HTTP client + filter builder
-│   │   ├── cache.py           # LRU in-memory cache
-│   │   └── config.py          # Typed config access
-│   ├── routers/
-│   │   ├── health.py          # GET /api/health
-│   │   ├── facets.py          # GET /api/facets/{tab}
-│   │   ├── events.py          # GET /api/eventi
-│   │   └── catalogue.py       # GET /api/catalogo
-│   └── models/
-│       └── schemas.py         # Pydantic request/response schemas
-│
-├── frontend/
-│   ├── templates/
-│   │   └── index.html         # Main SPA template (Bootstrap 5)
-│   └── static/
-│       ├── css/style.css
-│       └── js/app.js
-│
-├── data/                      # ← PUT YOUR .trig FILE HERE
-│   └── .gitkeep
-│
-├── docker/
-│   ├── Dockerfile
-│   └── requirements.txt
-│
-└── scripts/
-    ├── build_index.sh         # QLever index builder
-    └── validate_sparql.py     # SPARQL query validation
+data/
+├── zac_catalogues_metadata_8_7_2026.ttl
+└── zac_lot_descriptions_24_08_2026.ttl
 ```
 
----
+Per indicizzare file diversi è sufficiente aggiornare le direttive `-f <file> -F ttl` in `docker-compose.yml`, alla voce `qlever-indexer > command`.
 
-## Quick Start
+## Modello dati
 
-### 1. Prerequisites
+I dati seguono il modello CIDOC-CRM con application profile Linked Art. Le classi principali sono le seguenti.
 
-- Docker & Docker Compose
-- Python 3.11+ (for local development without Docker)
+| Classe | Ruolo |
+|---|---|
+| `crm:E7_Activity` | Evento d'asta. |
+| `crm:E31_Document` | Catalogo d'asta. |
+| `la:Set` | Insieme di lotti. |
+| `crm:E13_Attribute_Assignment` | Assegnazione di ruoli ai contributori (tipizzati via Getty AAT). |
+| `crm:E78_Curated_Holding` | Collezione posta in vendita. |
+| `crm:E52_Time-Span` | Intervallo temporale dell'asta. |
 
-### 2. Copy your data
+L'indirizzamento delle entità segue lo schema `http://w3id.org/zac/{slug}`.
 
-```bash
-cp /path/to/zac_catalogues_16_10_2025.trig ./data/
-```
+## Operazioni
 
-### 3. Start services
+### Primo avvio
+
+Con i file Turtle presenti in `./data`, avviare l'intero stack dalla radice del repository:
 
 ```bash
 docker compose up -d
 ```
 
-### 4. Build QLever index
+L'ordine di avvio è governato dalle dipendenze dichiarate nel compose:
+
+1. `qlever-indexer` verifica la presenza del file sentinella `/index/.build_done` sul volume `qlever-index`. In sua assenza costruisce l'indice in `/index/zac` e, al termine, crea il sentinella.
+2. `qlever` attende il completamento dell'indexer e avvia il server SPARQL sulla porta 7001.
+3. `zac-api` attende l'esito positivo dell'healthcheck di QLever e avvia l'applicazione sulla porta 5432.
+
+Ad avvio completato, l'interfaccia è raggiungibile su `http://localhost:5432/`. In ambiente locale il base path è vuoto; in produzione corrisponde a `/lots_of_zeri`. La verifica dello stato si effettua con:
 
 ```bash
-./scripts/build_index.sh
+docker compose ps
+curl "http://localhost:5432/api/aste/results?limit=3"
 ```
 
-This will:
-1. Index the TriG file into QLever's binary format
-2. Start the QLever server on port 7001
-3. Report when the SPARQL endpoint is ready
+Agli avvii successivi il comando è idempotente: l'indexer rileva il file sentinella e omette la ricostruzione, mentre QLever riparte sull'indice esistente.
 
-### 5. Validate data
+### Aggiornamento dei dati
+
+Da eseguire quando cambiano i file RDF. Comporta la ricostruzione dell'indice.
+
+1. Copiare i nuovi file in `./data` e, se i nomi sono variati, aggiornarli in `docker-compose.yml` alla voce `qlever-indexer > command`.
+2. Scartare l'indice esistente e ricostruire:
 
 ```bash
-python scripts/validate_sparql.py --host localhost --port 7001
+docker compose down -v
+docker compose up -d
 ```
 
-### 6. Access the platform
+`down -v` rimuove il volume dell'indice `qlever-index`; i file sorgente in `./data` non sono interessati, essendo montati in sola lettura. La stessa procedura si applica quando occorre ricostruire l'indice a parità di dati (corruzione, cambio di versione dell'immagine QLever).
 
-| Service | URL |
-|---------|-----|
-| ZAC Web Interface | http://localhost:8000 |
-| FastAPI Docs (Swagger) | http://localhost:8000/api/docs |
-| FastAPI Docs (ReDoc) | http://localhost:8000/api/redoc |
-| QLever SPARQL Endpoint | http://localhost:7001/api |
+### Aggiornamento della configurazione
 
----
+Da eseguire dopo una modifica ai file YAML in `./config`. Non richiede la ricostruzione dell'indice.
 
-## API Reference
-
-### Facets
-
-```http
-GET /api/facets/{tab}
+```bash
+docker compose up -d --force-recreate --no-deps zac-api
 ```
 
-Returns all facet definitions and their current values for a tab.
+I file YAML sono caricati una sola volta all'avvio del ciclo di vita dell'applicazione, per cui è necessaria la ricreazione del container. Il comando `docker compose restart zac-api` non è sufficiente.
 
-- `tab`: `eventi_asta` | `catalogo` | `lotti`
+Le modifiche a template HTML, JavaScript, CSS e moduli Python non richiedono alcun comando: il repository è montato in bind-mount e Uvicorn è avviato con `--reload`, che ricarica automaticamente il codice.
 
-**Response:**
-```json
-{
-  "tab": "catalogo",
-  "enabled": true,
-  "label_it": "Catalogo",
-  "facets": [
-    {
-      "id": "lingua",
-      "label_it": "Lingua",
-      "type": "multiselect",
-      "ui_widget": "checkbox_list",
-      "values": [
-        {"value": "de", "label": "de", "count": 312},
-        {"value": "fr", "label": "fr", "count": 187}
-      ]
-    }
-  ]
+## Comandi operativi
+
+Consultazione dei log:
+
+```bash
+docker compose logs -f --tail=50 zac-api
+docker compose logs -f qlever
+```
+
+Verifiche di stato:
+
+```bash
+curl "http://localhost:7001/api?query=ASK%7B%7D"
+curl "http://localhost:5432/api/aste/results?limit=1"
+```
+
+Esecuzione di query SPARQL dirette. Le query di lunghezza rilevante vanno inviate in POST: QLever impone un limite alla dimensione dell'header nelle richieste GET.
+
+```bash
+curl -s -X POST http://localhost:7001 \
+  -H "Content-Type: application/sparql-query" \
+  --data-binary "SELECT * WHERE { ?s ?p ?o } LIMIT 5"
+```
+
+## Note di deployment
+
+**Versione dell'immagine QLever.** L'uso del tag mobile `adfreiburg/qlever:latest` espone al rischio di incompatibilità del formato dell'indice tra indexer e server, con conseguente fallimento dell'avvio. Si raccomanda di fissare un tag specifico e identico su entrambi i servizi:
+
+```yaml
+image: adfreiburg/qlever:commit-XXXXXXX
+```
+
+Ogni cambio di tag comporta la ricostruzione dell'indice.
+
+**Reverse proxy e base path.** In produzione l'applicazione è servita sotto il prefisso `/lots_of_zeri`. Il valore va comunicato all'API tramite la variabile d'ambiente `ZAC_BASE_PATH` e instradato dal reverse proxy verso la porta 5432. Configurazione Nginx di esempio:
+
+```nginx
+location /lots_of_zeri/ {
+    proxy_pass http://127.0.0.1:5432/;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
 }
 ```
 
-### Search Catalogo
+**Separazione fra sviluppo e produzione.** La configurazione di produzione dovrebbe rimuovere l'opzione `--reload` e il bind-mount `.:/app` — mantenendo il solo montaggio in sola lettura di `./config` — a favore dell'immagine costruita, e non esporre la porta 7001 verso l'esterno, così che QLever resti raggiungibile unicamente sulla rete interna `zac-net` (l'API vi accede tramite `QLEVER_HOST=qlever`).
 
-```http
-GET /api/catalogo?year_from=1900&year_to=1930&lingua=de&page=1&page_size=20
-```
+**Allocazione delle risorse.** Il server QLever è avviato con i parametri `-m 2GB` (memoria totale), `-c 1GB` (cache), `-e 256MB` (dimensione dei risultati) e `-j 4` (thread), da rivedere al crescere del grafo o dell'onere delle query di aggregazione.
 
-Query parameters:
-- `tipologia_oggetti` (list): object type labels
-- `year_from`, `year_to` (int): year range filter
-- `nome_asta` (str): text search on auction name/title
-- `collezione` (list): collection names
-- `contributori` (list): contributor names
-- `lingua` (list): language codes
-- `page`, `page_size`: pagination
-
-### Search Eventi Asta
-
-```http
-GET /api/eventi?year_from=1910&year_to=1920&casa_asta=Galerie+Helbing
-```
-
-Query parameters:
-- `year_from`, `year_to` (int)
-- `casa_asta` (list): auction house names
-- `tipologia_oggetti` (list)
-- `esperti` (list)
-- `page`, `page_size`
-
----
-
-## Configuration
-
-### Adding/Modifying Facets
-
-Edit `config/facets.yaml` to:
-- Add new filter options
-- Change Italian/English labels
-- Adjust SPARQL patterns for new filters
-
-The file is loaded at startup. In development mode (`reload: true`), changes to YAML configs require a server restart.
-
-### Changing Triplestore Connection
-
-Edit `config/settings.yaml`:
-```yaml
-triplestore:
-  host: "qlever"     # Docker service name or hostname
-  port: 7001
-  endpoint: "/api"
-```
-
----
-
-## Development
-
-### Local development (no Docker)
-
-```bash
-# Install dependencies
-pip install -r docker/requirements.txt
-
-# Start QLever locally (or point to remote)
-# Edit config/settings.yaml → triplestore.host: "localhost"
-
-# Start Blazegraph
-java -server -Xmx4g -jar blazegraph.jar
-
-# Run FastAPI in development mode
-uvicorn main:app --reload --port 8000
-```
-
-### Running tests
-
-```bash
-# Validate SPARQL queries against live triplestore
-python scripts/validate_sparql.py
-
-# FastAPI interactive docs for manual testing
-open http://localhost:8000/api/docs
-```
-
----
-
-## Extending the Platform
-
-### Adding a new tab (e.g., Lotti)
-
-1. Enable `lotti` tab in `config/facets.yaml` (`enabled: true`)
-2. Add SPARQL queries to `config/sparql_queries.yaml`
-3. Create `backend/routers/lots.py`
-4. Register router in `main.py`
-
-### Adding an analytics/visualization tab
-
-The SPARQL service supports arbitrary queries. You can add new router endpoints that return aggregated data for Chart.js visualizations on the frontend.
-
----
-
-## Data Credits
-
-- Dataset: ZAC — Zeri Auction Catalogues
-- Ontology: CIDOC-CRM (ISO 21127)
-- Application Profile: Linked Art
-- Namespace: `http://w3id.org/zac/`
-- Vocabulary: Getty Art & Architecture Thesaurus (AAT)
+**Persistenza e backup.** L'indice risiede nel volume nominato `qlever-index`, i dati sorgente in `./data`. Il backup deve comprendere i file RDF in `./data` e i tre file di configurazione in `./config`. L'indice non richiede backup, essendo rigenerabile a partire da tali sorgenti.
