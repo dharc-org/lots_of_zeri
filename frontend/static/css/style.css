@@ -793,7 +793,6 @@ footer {
 }
 
 .detail-header-area .detail-topbar {
-  width:1200px;
   margin: 0 auto;
   padding: 0.75rem 1.5rem 1rem;
   display: flex;
@@ -952,7 +951,6 @@ footer {
 
 .detail-head {
   margin-bottom: 1.5rem;
-  margin-left: calc(260px + 2.5rem);
   text-align: right;
   padding-bottom: 0.5rem;
   border-bottom: 2px solid var(--gray-1);

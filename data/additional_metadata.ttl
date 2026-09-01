@@ -1,0 +1,23 @@
+@prefix aat: <http://vocab.getty.edu/aat/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+aat:300404493 rdfs:label "Sec. I" .
+aat:300404494 rdfs:label "Sec. II" .
+aat:300404495 rdfs:label "Sec. III" .
+aat:300404496 rdfs:label "Sec. IV" .
+aat:300404497 rdfs:label "Sec. V" .
+aat:300404498 rdfs:label "Sec. VI" .
+aat:300404499 rdfs:label "Sec. VII" .
+aat:300404500 rdfs:label "Sec. VIII" .
+aat:300404501 rdfs:label "Sec. IX" .
+aat:300404502 rdfs:label "Sec. X" .
+aat:300404503 rdfs:label "Sec. XI" .
+aat:300404504 rdfs:label "Sec. XII" .
+aat:300404505 rdfs:label "Sec. XIII" .
+aat:300404506 rdfs:label "Sec. XIV" .
+aat:300404465 rdfs:label "Sec. XV" .
+aat:300404510 rdfs:label "Sec. XVI" .
+aat:300404511 rdfs:label "Sec. XVII" .
+aat:300404512 rdfs:label "Sec. XVIII" .
+aat:300404513 rdfs:label "Sec. XIX" .
+aat:300404514 rdfs:label "Sec. XX" .

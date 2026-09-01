@@ -285,11 +285,10 @@ lotti:
       type: "multiselect"
       ui_widget: "checkbox_list"
 
-    # cronologia: BLOCCATA — nessun path data/periodo sul lotto TBD
-    # cronologia:
-    #   label_it: "Cronologia"
-    #   type: "multiselect"
-    #   ui_widget: "checkbox_list"
+    cronologia:
+      label_it: "Cronologia"
+      type: "multiselect"
+      ui_widget: "checkbox_list"
 
     da_asta:
       label_it: "Da asta"

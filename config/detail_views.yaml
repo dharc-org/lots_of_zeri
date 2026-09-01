@@ -186,33 +186,32 @@ lotto:
     - { anchor: "scheda", label_it: "Scheda del lotto" }
 
   fields:
-    - { key: "author",       label_it: "Autore / Scuola",   multi: true,
-        facet_link: { route: "/lotti", param: "artista_scuola" } }
-    - { key: "typeLabel",    label_it: "Tipologia",         multi: false }
-    - { key: "description",  label_it: "Descrizione",       multi: false }
     - { key: "lotId",        label_it: "Identificativo",    multi: false }
-    - { key: "auctionLabel", label_it: "Venduto nell'asta", multi: false,
+    - { key: "typeLabel",    label_it: "Tipologia",         multi: false }
+    - { key: "school",       label_it: "Scuola",   multi: true,
+        facet_link: { route: "/lotti", param: "scuola" } }
+    - { key: "artist",       label_it: "Artista",   multi: true,
+        facet_link: { route: "/lotti", param: "artista" } }
+    - { key: "period",       label_it: "Cronologia",   multi: true,
+        facet_link: { route: "/lotti", param: "cronologia" } }
+    - { key: "auctionLabel", label_it: "Asta", multi: false,
         link_route: "/aste/{slug}", link_key: "auctionSlug" }
+    - { key: "docTitle", label_it: "Catalogo", multi: false,
+        link_route: "/cataloghi/{id}", link_key: "docId" }
   
   related:
     - id: "set_di_lotti"
       title_it: "Lotti della stessa asta"
       card: "lotto"
       count_label_it: "lotti"
-    - id: "lotti_tipologie"
-      title_it: "Lotti della stessa tipologia"
-      card: "lotto"
-      count_label_it: "lotti"
 
   query_blocks:
     scalars: "lotto_scalars"
     multis:
-      author: "lotto_author"
+      school: "lotto_scuola"
+      artist: "lotto_artista"
+      period: "lotto_cronologia"
     related:
       set_di_lotti:
         query:      "set_di_lotti"
         depends_on: "label"      # la query usa {me}
-      lotti_tipologie:
-        query:      "lotti_tipologie"
-        depends_on: "label"
-      
