@@ -47,10 +47,10 @@ catalogo:
     - { label_it: "lista Lotti", link_key: "uri", route: "/lotti?da_catalogo={me}" }
 
   sections:
-    - { anchor: "viewer",  label_it: "Sfoglia il catalogo" }
-    - { anchor: "scheda",  label_it: "Scheda catalografica" }
-    - { anchor: "lotti",   label_it: "Lotti nel catalogo" }
-    - { anchor: "related", label_it: "Cataloghi correlati" }
+    - { anchor: "viewer",                 label_it: "Sfoglia il catalogo" }
+    - { anchor: "scheda",                 label_it: "Scheda catalografica" }
+    - { anchor: "catalogo_related_lotti", label_it: "Lotti nel catalogo" }
+    - { anchor: "catalogo_related_year",  label_it: "Cataloghi correlati" }
 
   fields:
     - { key: "title",      label_it: "Titolo",                multi: false }
@@ -111,9 +111,9 @@ evento:
     - { label_it: "lista Lotti", link_key: "uri", route: "/lotti?da_asta={me}" }
  
   sections:
-    - { anchor: "scheda",  label_it: "Scheda catalografica" }
-    - { anchor: "lotti",   label_it: "Lotti in vendita" }
-    - { anchor: "related", label_it: "Aste correlate" }
+    - { anchor: "scheda",               label_it: "Scheda catalografica" }
+    - { anchor: "evento_related_lotti", label_it: "Lotti in vendita" }
+    - { anchor: "evento_related_house", label_it: "Aste correlate" }
  
   fields:
     - { key: "label",           label_it: "Titolo",                    multi: false }
@@ -184,9 +184,12 @@ lotto:
   sections:
     - { anchor: "viewer", label_it: "Immagine del lotto" }
     - { anchor: "scheda", label_it: "Scheda del lotto" }
+    - { anchor: "set_di_lotti",     label_it: "Lotti della stessa asta" }
+    - { anchor: "lotti_precedenti", label_it: "Lotti precedenti" }
+    - { anchor: "lotti_successivi", label_it: "Lotti successivi" }
 
   fields:
-    - { key: "lotId",        label_it: "Identificativo",    multi: false }
+    - { key: "lotId",        label_it: "Numero",    multi: false }
     - { key: "typeLabel",    label_it: "Tipologia",         multi: false }
     - { key: "school",       label_it: "Scuola",   multi: true,
         facet_link: { route: "/lotti", param: "scuola" } }
@@ -204,6 +207,15 @@ lotto:
       title_it: "Lotti della stessa asta"
       card: "lotto"
       count_label_it: "lotti"
+    - id: "lotti_precedenti"
+      title_it: "Lotti precedenti"
+      card: "lotto"
+      count_label_it: "lotti"
+    - id: "lotti_successivi"
+      title_it: "Lotti successivi"
+      card: "lotto"
+      count_label_it: "lotti"
+
 
   query_blocks:
     scalars: "lotto_scalars"
@@ -214,4 +226,10 @@ lotto:
     related:
       set_di_lotti:
         query:      "set_di_lotti"
-        depends_on: "label"      # la query usa {me}
+        depends_on: "lotId"      # la query usa {me}
+      lotti_precedenti:
+        query:      "lotti_precedenti"
+        depends_on: "lotId"
+      lotti_successivi:
+        query:      "lotti_successivi"
+        depends_on: "lotId"

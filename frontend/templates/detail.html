@@ -144,6 +144,7 @@
 
     {# ── Sezioni correlati (caroselli) ─────────────────────────────── #}
     {% for block in view.related %}
+    {% if block.placeholder or block.vals %}
     <section id="sec-{{ 'lotti' if block.card == 'lotto' else 'related' }}"
              class="detail-section detail-related">
       <div class="detail-related-head">
@@ -214,11 +215,7 @@
           {% endfor %}
         </div>
 
-      {% else %}
-        <div class="carousel-placeholder">
-          <i class="bi bi-inbox"></i>
-          <span>Nessun elemento correlato</span>
-        </div>
+      {% endif %}
       {% endif %}
     </section>
     {% endfor %}

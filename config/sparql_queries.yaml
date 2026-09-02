@@ -985,13 +985,21 @@ detail:
     WHERE {
         <{uri}> a la:Set .
         OPTIONAL { <{uri}> rdfs:label ?label }
-        OPTIONAL { <{uri}> crm:P102_has_title ?tn . ?tn rdfs:label ?title }
+        OPTIONAL { 
+          <{uri}> crm:P102_has_title ?tn . 
+          ?tn rdfs:label ?title  
+          FILTER(STR(?title) != "")
+        }
         OPTIONAL {
           <{uri}> crm:P2_has_type ?otype .
           FILTER(STRSTARTS(STR(?otype), "http://w3id.org/zac/type/"))
           ?otype rdfs:label ?typeLabel .
         }
-        OPTIONAL { <{uri}> crm:P1_is_identified_by ?idn . ?idn rdfs:label ?lotId }
+        OPTIONAL { 
+          <{uri}> crm:P1_is_identified_by ?idn . 
+          ?idn crm:P2_has_type zac:lot_number ;
+             rdfs:label ?lotId .
+          }
         OPTIONAL { <{uri}> crm:P138i_has_representation ?lotImage }
 
         # lotto → set lotti → asta → catalogo → manifest 
@@ -1063,6 +1071,60 @@ detail:
         OPTIONAL { ?uri crm:P138i_has_representation ?img }
     }
     ORDER BY ?uri
+
+  lotti_precedenti: |
+    SELECT DISTINCT ?uri ?label ?img ?lotNum
+    WHERE {
+        ?set a la:Set ;
+             crm:P46_is_composed_of <{me}> , ?uri .
+        FILTER(?uri != <{me}>)
+
+        <{me}> crm:P1_is_identified_by ?men . 
+          ?men crm:P2_has_type zac:lot_number ;
+             rdfs:label ?meNumL .
+        # prova a lasciar solo il numero
+        BIND(xsd:integer(REPLACE(STR(?meNumL), "^(\\d+).*", "$1")) AS ?meNum)
+
+        ?uri crm:P1_is_identified_by ?idn . 
+          ?idn crm:P2_has_type zac:lot_number ;
+             rdfs:label ?lotNumL .
+
+        # prova a lasciar solo il numero
+        BIND(xsd:integer(REPLACE(STR(?lotNumL), "^(\\d+).*", "$1")) AS ?lotNum)
+
+        FILTER(?lotNum < ?meNum)
+
+        OPTIONAL { ?uri rdfs:label ?label }
+        OPTIONAL { ?uri crm:P138i_has_representation ?img }
+    }
+    ORDER BY DESC(?lotNum)
+
+  lotti_successivi: |
+    SELECT DISTINCT ?uri ?label ?img ?lotNum
+    WHERE {
+        ?set a la:Set ;
+             crm:P46_is_composed_of <{me}> , ?uri .
+        FILTER(?uri != <{me}>)
+
+        <{me}> crm:P1_is_identified_by ?men . 
+          ?men crm:P2_has_type zac:lot_number ;
+             rdfs:label ?meNumL .
+        # prova a lasciar solo il numero
+        BIND(xsd:integer(REPLACE(STR(?meNumL), "^(\\d+).*", "$1")) AS ?meNum)
+
+        ?uri crm:P1_is_identified_by ?idn . 
+          ?idn crm:P2_has_type zac:lot_number ;
+             rdfs:label ?lotNumL .
+
+        # prova a lasciar solo il numero
+        BIND(xsd:integer(REPLACE(STR(?lotNumL), "^(\\d+).*", "$1")) AS ?lotNum)
+
+        FILTER(?lotNum > ?meNum)
+
+        OPTIONAL { ?uri rdfs:label ?label }
+        OPTIONAL { ?uri crm:P138i_has_representation ?img }
+    }
+    ORDER BY ?lotNum
 
 # ══════════════════════════════════════════════════════════
 # ESPLORA — query di aggregazione piatta per /api/esplora/*

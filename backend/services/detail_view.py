@@ -285,6 +285,7 @@ def build_view(
                     })
 
         related_out.append({
+            "id":             block["id"],
             "title_it":       block["title_it"],
             "card":           block["card"],
             "count":          len(items),
@@ -294,7 +295,12 @@ def build_view(
         })
 
     # ── Sezioni (indice) ─────────────────────────────────────────────
-    sections = [dict(s) for s in cfg_view.get("sections", [])]
+    # anchor vivo = id di un related con contenuto (o placeholder); viewer/scheda sempre.
+    live = {"viewer", "scheda"}
+    for b in related_out:
+        if b["placeholder"] or b["count"] > 0:
+            live.add(b["id"])
+    sections = [dict(s) for s in cfg_view.get("sections", []) if s.get("anchor") in live]
 
     # ── Titolo / sottotitolo ─────────────────────────────────────────
     if kind == "catalogo":

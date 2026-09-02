@@ -734,7 +734,7 @@ def _register_detail_route(tab_id, tab_cfg, route_cfg, cfg):
 async def api_thumbs(request: Request, uris: list[str] = Query([])):
     sparql = request.app.state.sparql
     cache  = request.app.state.cache
-    bases  = await sparql.thumbnails_batch(uris[:100], cache=cache)
+    bases  = await sparql.thumbnails_batch(uris[:50], cache=cache)
     return {u: {"thumb": iiif_sized(b, 160),    # lista
                 "cover": iiif_sized(b, 480)}    # griglia
             for u, b in bases.items()}
