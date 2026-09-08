@@ -94,14 +94,21 @@ Agli avvii successivi il comando è idempotente: l'indexer rileva il file sentin
 Da eseguire quando cambiano i file RDF. Comporta la ricostruzione dell'indice.
 
 1. Copiare i nuovi file in `./data` e, se i nomi sono variati, aggiornarli in `docker-compose.yml` alla voce `qlever-indexer > command`.
-2. Scartare l'indice esistente e ricostruire:
+
+2. Se i dataset conservati in `./data/lot_chuncks/` sono cambiati, è necessario produrre un unico file attraverso il comando: 
+
+```powershell
+docker run --rm --user root --entrypoint bash -v "${PWD}:/data" adfreiburg/qlever:latest -c 'OUT=/data/data/zac_lot_merged.nt; rm -f $OUT; for f in /data/data/lots_chuncks/zac_lot_descriptions_part*.nt; do grep -E "[.][[:space:]]*$" $f >> $OUT; done; echo TOTALI:; wc -l $OUT; echo MALFORMATE:; grep -cvE "[.][[:space:]]*$" $OUT'
+```
+
+3. Scartare l'indice esistente e ricostruire:
 
 ```bash
 docker compose down -v
 docker compose up -d
 ```
 
-`down -v` rimuove il volume dell'indice `qlever-index`; i file sorgente in `./data` non sono interessati, essendo montati in sola lettura. La stessa procedura si applica quando occorre ricostruire l'indice a parità di dati (corruzione, cambio di versione dell'immagine QLever).
+`down -v` rimuove il volume dell'indice `qlever-index`; i file sorgente in `./data` non sono interessati, essendo montati in sola lettura. La stessa procedura si applica quando occorre ricostruire l'indice a parità di dati (corruzione, cambio di versione dell'immagine QLever). 
 
 ### Aggiornamento della configurazione
 

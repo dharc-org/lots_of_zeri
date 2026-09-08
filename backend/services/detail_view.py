@@ -206,6 +206,18 @@ def build_view(
             out["value"] = val
             out["has_value"] = val not in (None, "", "NaN")
 
+            # Link esterno (l'URL è il valore stesso)
+            if out["has_value"] and f.get("external"):
+                out["external"] = True
+                if "icon" in f:
+                    out["icon"] = f["icon"]
+                if "link_class" in f:
+                    out["link_class"] = f["link_class"]
+                if "link_text" in f:
+                    out["link_text"] = f["link_text"]
+                if "link_name" in f:
+                    out["link_name"] = f["link_name"]
+
             # Link interno classico (route + chiave slug/id)
             if out["has_value"] and "link_route" in f and "link_key" in f:
                 lv = link_vals.get(f["link_key"])
@@ -239,6 +251,7 @@ def build_view(
         bid  = block["id"]
         rows = related.get(bid, [])
         items = []
+        highlight = block.get("highlight_current", False)
 
         if not block.get("placeholder", False):
             if block["card"] == "catalogo":
@@ -282,6 +295,7 @@ def build_view(
                         "slug":  u.rstrip("/").split("/")[-1],
                         "label": r.get("label") or u.rstrip("/").split("/")[-1],
                         "thumb": thumb,
+                        "is_me": highlight and r.get("pos") == "me",
                     })
 
         related_out.append({
@@ -292,6 +306,7 @@ def build_view(
             "count_label_it": block["count_label_it"],
             "placeholder":    block.get("placeholder", False),
             "vals":           items,
+            "highlight_current": highlight,
         })
 
     # ── Sezioni (indice) ─────────────────────────────────────────────
@@ -320,6 +335,7 @@ def build_view(
     lot_image    = _scalar(sc, "lotImage")
 
     return {
+        "kind": kind,
         "title":      title,
         "subtitle":   subtitle,
 

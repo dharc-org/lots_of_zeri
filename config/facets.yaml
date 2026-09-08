@@ -54,8 +54,8 @@ eventi_asta:
 
     # Ordinamento — chiave param "sort" → frammento SPARQL ORDER BY
     sort_fields:
-      lots_asc:  { order: "ASC(?lotCount) ASC(?auctionLabel)",  label: "N. lotti ↑" }
-      lots_desc: { order: "DESC(?lotCount) DESC(?auctionLabel)", label: "N. lotti ↓" }
+      lots_asc:  { order: "ASC(?lotCount) ASC(?auctionLabel)",  label: "N. lotti ↑ (Revisionati)" }
+      lots_desc: { order: "DESC(?lotCount) DESC(?auctionLabel)", label: "N. lotti ↓ (Revisionati)" }
       date_asc:  { order: "ASC(?yearLabel) ASC(?auctionLabel)",  label: "Data ↑ crescente" }
       date_desc: { order: "DESC(?yearLabel) DESC(?auctionLabel)", label: "Data ↓ decrescente" }
       name_asc:  { order: "ASC(?auctionLabel)",  label: "Nome A–Z" }
@@ -261,8 +261,8 @@ lotti:
       auction_label: "auctionLabel"
       auction_slug:  "auctionSlug"
     sort_fields:
-      name_asc:  { order: "ASC(?title)",  label: "Nome A–Z" }
-      name_desc: { order: "DESC(?title)", label: "Nome Z–A" }
+      name_asc:  { order: "ASC(?title)",  label: "Nome A–Z (Revisionato)" }
+      name_desc: { order: "DESC(?title) ", label: "Nome Z–A (Revisionato)" }
     default_sort: "name_asc"
     export_filename: "zac_lotti"
 

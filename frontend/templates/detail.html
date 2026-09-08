@@ -20,6 +20,7 @@
 {% block title %}{{ view.title }} — ZAC{% endblock %}
 {% block styles %}
 <link href="{{ base_path }}/static/css/browse.css" rel="stylesheet">
+<link href="{{ base_path }}/static/css/style.css" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
@@ -130,16 +131,26 @@
               {% elif 'link' in f and f.link %}
                 <a href="{{ f.link }}" class="detail-link">{{ f.value }}</a>
 
+              {# Scalare link esterno (apre in nuova scheda) #}
+              {% elif 'external' in f and f.external %}
+                <a href="{{ f.value }}"
+                   class="detail-link detail-link--external {% if 'link_class' in f %}{{ f.link_class }}{% endif %}"
+                   target="_blank" rel="noopener noreferrer">
+                  {% if 'icon' in f %}<i class="{{ f.icon }}"></i> {% endif %}{{ f.link_name if 'link_name' in f else f.value }}
+                </a>
+
               {# Scalare testuale #}
               {% else %}
                 {{ f.value }}
               {% endif %}
-
             </dd>
           </div>
           {% endif %}
         {% endfor %}
       </dl>
+      {% if view.kind == "lotto" %}
+      <p class="small-note"><small>I dati presentati nella scheda sono frutto di un’estrazione semi-automatica e possono contenere imprecisioni.</small></p>
+      {% endif %}
     </section>
 
     {# ── Sezioni correlati (caroselli) ─────────────────────────────── #}
@@ -197,20 +208,31 @@
                   <span class="btn-apri-mini">Apri →</span>
                 </div>
               </a>
+
             {% elif block.card == "lotto" %}
+              {% if block.highlight_current and it.is_me %}
+              <div class="result-card-grid result-card-grid--current" id="entita-corrente">
+                <div class="card-cover">
+                  {% if it.thumb %}<img src="{{ it.thumb }}" alt="" loading="lazy">
+                  {% else %}<div class="thumb-placeholder"></div>{% endif %}
+                </div>
+                <div class="card-body">
+                  <div class="card-title">{{ it.label }}</div>
+                </div>
+              </div>
+              {% else %}
               <a href="{{ base_path }}/lotti/{{ it.slug }}" class="result-card-grid">
                 <div class="card-cover">
-                  {% if it.thumb %}
-                    <img src="{{ it.thumb }}" alt="" loading="lazy">
-                  {% else %}
-                    <div class="thumb-placeholder"></div>
-                  {% endif %}
+                  {% if it.thumb %}<img src="{{ it.thumb }}" alt="" loading="lazy">
+                  {% else %}<div class="thumb-placeholder"></div>{% endif %}
                 </div>
                 <div class="card-body">
                   <div class="card-title">{{ it.label }}</div>
                   <span class="btn-apri-mini">Apri →</span>
                 </div>
               </a>
+            {% endif %}
+
             {% endif %}
           {% endfor %}
         </div>
@@ -257,6 +279,9 @@
       const id = Object.keys(map)[i];
       obs.observe(document.getElementById(id));
     });
+
+    const cur = document.getElementById('entita-corrente');
+    if (cur) cur.scrollIntoView({ inline: 'center', block: 'nearest' });
   })();
 </script>
 

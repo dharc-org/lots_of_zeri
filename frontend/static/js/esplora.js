@@ -9,6 +9,13 @@
 /* ── Percorso base dei JSON statici ────────────────────── */
 const DATA_BASE = (window.BASE_PATH || '') + '/api/esplora/';
 
+const APP_BASE = (window.BASE_PATH || '');
+function browseUrl(path, params) {
+  const u = new URLSearchParams(params);
+  return `${APP_BASE}${path}?${u.toString()}`;
+}
+const asteUrl = params => browseUrl('/aste', params);
+
 /* ══════════════════════════════════════════════════════════
    1. SISTEMA TAB
    ══════════════════════════════════════════════════════════ */
@@ -181,7 +188,7 @@ async function loadAndRenderCase() {
 
     if (hasLink) {
       const totLink = document.createElement('a');
-      totLink.href  = '/aste?organizzatore=' + encodeURIComponent(h.uri);
+      totLink.href  = asteUrl({ organizzatore: h.uri });
       totLink.title = `Vedi le aste di ${h.n} in Cerca`;
       totLink.style.cssText =
         'display:flex;align-items:center;gap:3px;font:11px var(--ff-mono);color:var(--terra);' +
@@ -232,6 +239,13 @@ async function loadAndRenderGeografia() {
 
   const allCities = [...new Set(decades.flatMap(d => d.top.map(t => t.n)))];
   const maxVal = G.scale_max;
+
+  const cityUri = {};
+  G.decades.forEach(d => {
+    [...(d.top || []), ...(d.resto || [])].forEach(t => {
+      if (t.uri && !(t.n in cityUri)) cityUri[t.n] = t.uri;
+    });
+  });
 
   /* Colore fisso per città (identità, non posizione in classifica) —
      stessa città = stesso colore in ogni decennio, anche se cambia rango */
@@ -367,10 +381,13 @@ async function loadAndRenderGeografia() {
     const [startStr, endSuffix] = label.split('–');
     return parseInt(startStr.slice(0, 2) + endSuffix, 10);
   }
-  function buildAsteUrl(city, decadeLabel) {
+  
+  function buildAsteUrl(cityName, decadeLabel) {
+    const uri = cityUri[cityName];
+    if (!uri) return null;
     const startYear = parseInt(decadeLabel.split('–')[0], 10);
     const endYear = decadeEndYear(decadeLabel);
-    return `/aste?luogo=${encodeURIComponent(city)}&periodo_from=${startYear}&periodo_to=${endYear}`;
+    return asteUrl({ luogo: uri, periodo_from: startYear, periodo_to: endYear });
   }
 
   function render(pos) {
@@ -405,8 +422,9 @@ async function loadAndRenderGeografia() {
       row.querySelector('.geo-row-bar').style.background = cityColor[city];
       const valEl = row.querySelector('.geo-row-val');
       valEl.textContent = Math.round(ranked[idx][1]);
-      if (isExactPoint) {
-        valEl.href = buildAsteUrl(city, label);
+      const url = isExactPoint ? buildAsteUrl(city, label) : null;
+      if (url) {
+        valEl.href = url;
         valEl.classList.add('geo-row-val--link');
       } else {
         valEl.removeAttribute('href');
@@ -826,9 +844,11 @@ async function loadAndRenderTrend() {
           if (v > 0) { byYear.push(`${y}: ${v} event${v === 1 ? 'o' : 'i'}`); tot += v; }
         }
         const detail = byYear.length ? byYear.join('<br>') : 'nessun evento in questi anni';
-        const totUrl = `/aste?luogo=${encodeURIComponent(d.n)}&periodo_from=${yearFrom}&periodo_to=${yearTo}`;
+        const totTxt = `${tot} evento${tot === 1 ? '' : 'i'} tot${tot === 1 ? 'ale' : 'ali'}`;
         const totLine = tot > 0
-          ? `<a href="${totUrl}" style="color:var(--terra-muted) !important;text-decoration:underline;text-underline-offset:2px;">${tot} evento${tot === 1 ? '' : 'i'} tot${tot === 1 ? 'ale' : 'ali'} →</a><br>`
+          ? (d.uri
+              ? `<a href="${asteUrl({ luogo: d.uri, periodo_from: yearFrom, periodo_to: yearTo })}" style="color:var(--terra-muted) !important;text-decoration:underline;text-underline-offset:2px;">${totTxt} →</a><br>`
+              : `${totTxt}<br>`)
           : '';
         tooltip.style.pointerEvents = 'auto';
         tooltip.style.display = 'block';

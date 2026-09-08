@@ -102,11 +102,13 @@ async def ds_case_dasta(request):
         _rows(request, "case_anno"),
         _rows(request, "case_luogo"),
     )
-    py = defaultdict(dict)          # house → {year: count}
+    py = defaultdict(dict)
+    house_uri = {}
     for r in anno_rows:
         if not _has(r, "houseLabel", "year"):
             continue
         py[r["houseLabel"]][_int(r["year"])] = _int(r["count"])
+        house_uri.setdefault(r["houseLabel"], r.get("houseURI", ""))
 
     city_counts = defaultdict(Counter)   # house → Counter(place)
     for r in luogo_rows:
@@ -127,6 +129,7 @@ async def ds_case_dasta(request):
             "y1": max(years),
             "city": city,
             "py": {str(y): c for y, c in sorted(years.items())},
+            "uri": house_uri.get(name, ""),
         })
     houses.sort(key=lambda h: (-h["t"], h["n"]))
     return {"ymin": ymin, "ymax": ymax, "houses": houses}
@@ -177,10 +180,13 @@ _TIPO_MAIN = ["DIPINTI", "MOBILI", "DISEGNI", "ACQUERELLI", "PORCELLANE", "STAMP
 async def ds_tipologie_oggetti(request):
     rows = await _rows(request, "tipologie_anno")
     by = defaultdict(Counter)             # tipo (UPPER) → {year: count}
+    tipo_uri = {}                         # tipo (UPPER) → tipoURI
     for r in rows:
         if not _has(r, "tipoLabel", "year"):
             continue
-        by[r["tipoLabel"].strip().upper()][_int(r["year"])] += _int(r["count"])
+        key = r["tipoLabel"].strip().upper()
+        by[key][_int(r["year"])] += _int(r["count"])
+        tipo_uri.setdefault(key, r.get("tipoURI", ""))
 
     all_years = [y for c in by.values() for y in c]
     ymin, ymax = (min(all_years), max(all_years)) if all_years else (ANNO_MIN, ANNO_MAX)
@@ -209,6 +215,10 @@ async def ds_tipologie_oggetti(request):
         "ymin": ymin, "ymax": ymax,
         "cats": cats, "tot": tot, "m": m,
         "altre_voci": [[n, v] for n, v in altre_tot.most_common()],
+        # additivi: URI per le 6 categorie principali e per ogni voce di «altre».
+        # ALTRE è un aggregato → nessun URI singolo.
+        "cat_uris":   {c: tipo_uri.get(c, "") for c in _TIPO_MAIN},
+        "altre_uris": {n: tipo_uri.get(n, "") for n, _v in altre_tot.most_common()},
     }
 
 
@@ -223,12 +233,14 @@ _DECADI = [(1879, "1879–89"), (1890, "1890–99"), (1900, "1900–09"),
 async def ds_geografia_decenni(request):
     rows = await _rows(request, "luoghi_anno")
     per_dec = defaultdict(Counter)        # decade → Counter(place)
+    place_uri = {}                        # placeLabel → placeURI
     for r in rows:
         if not _has(r, "placeLabel", "year"):
             continue
         y = _int(r["year"])
         if ANNO_MIN <= y <= ANNO_MAX:
             per_dec[_decade_bucket(y)][r["placeLabel"]] += _int(r["count"])
+            place_uri.setdefault(r["placeLabel"], r.get("placeURI", ""))
 
     decades_out = []
     for dec, label in _DECADI:
@@ -238,14 +250,13 @@ async def ds_geografia_decenni(request):
         decades_out.append({
             "label": label,
             "tot": tot,
-            "top":   [{"n": n, "v": v} for n, v in top],
+            "top":   [{"n": n, "v": v, "uri": place_uri.get(n, "")} for n, v in top],
             "altre": tot - sum(v for _n, v in top),
-            "resto": [{"n": n, "v": v} for n, v in resto],
+            "resto": [{"n": n, "v": v, "uri": place_uri.get(n, "")} for n, v in resto],
         })
     scale_max = max((t["v"] for d in decades_out for t in d["top"]), default=0)
     return {"period": f"{ANNO_MIN}–{ANNO_MAX}", "scale_max": scale_max,
             "decades": decades_out}
-
 
 def _classifica_tag(years, houses_counter):
     n_years  = len(set(years))
@@ -261,6 +272,7 @@ async def ds_collezioni(request):
     rows = await _rows(request, "collezioni_eventi")
     # per (collezione) → lista di (year, house); dedup per evento
     per_coll = defaultdict(list)
+    coll_uri = {}                         # collLabel (originale) → coll URI
     seen = set()
     for r in rows:
         if not _has(r, "collLabel", "year"):
@@ -272,6 +284,7 @@ async def ds_collezioni(request):
         if key in seen:
             continue
         seen.add(key)
+        coll_uri.setdefault(r["collLabel"], r.get("coll", ""))
         per_coll[r["collLabel"]].append((y, r.get("houseLabel") or "non specificata"))
 
     totale     = len(per_coll)
@@ -292,6 +305,7 @@ async def ds_collezioni(request):
             "tag": _classifica_tag(years, oc),
             "anni": [y0, y1],
             "periodo": f"{y0}" if y0 == y1 else f"{y0}–{y1}",
+            "uri": coll_uri.get(name, ""),   # lookup con la chiave ORIGINALE, non .title()
             "case": [{"n": k, "v": v}
                      for k, v in sorted(oc.items(), key=lambda kv: -kv[1])],
         })
@@ -317,10 +331,12 @@ async def ds_trend_mercato(request):
     ymin, ymax = min(by_year), max(by_year)
 
     city_py = defaultdict(dict)           # città → {year: count}
+    place_uri = {}                        # placeLabel → placeURI
     for r in luoghi_rows:
         if not _has(r, "placeLabel", "year"):
             continue
         city_py[r["placeLabel"]][_int(r["year"])] = _int(r["count"])
+        place_uri.setdefault(r["placeLabel"], r.get("placeURI", ""))
 
     city_org = defaultdict(Counter)       # città → Counter(casa)
     for r in case_rows:
@@ -340,6 +356,7 @@ async def ds_trend_mercato(request):
         cities.append({
             "n": name, "lat": coords["lat"], "lon": coords["lon"],
             "t": t, "y0": min(years), "y1": max(years), "org": org,
+            "uri": place_uri.get(name, ""),
             "py": {str(y): c for y, c in sorted(years.items())},
         })
     cities.sort(key=lambda c: (-c["t"], c["n"]))

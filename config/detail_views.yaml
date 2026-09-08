@@ -70,6 +70,9 @@ catalogo:
     - { key: "docId",      label_it: "Numero di inventario",  multi: false }
     - { key: "auctionLabel",    label_it: "Vendita all'asta",      multi: false,
         link_route: "/aste/{slug}", link_key: "auctionSlug" }
+    - { key: "zeriUrl", label_it: "Collegamenti esterni", multi: false,
+        external: true, link_name: "Scheda Zeri", icon: "ph ph-link", link_class: "row-zeri-link" }
+
 
   related:
     - id: "catalogo_related_lotti"
@@ -190,6 +193,7 @@ lotto:
 
   fields:
     - { key: "lotId",        label_it: "Numero",    multi: false }
+    - { key: "title",        label_it: "Titolo",    multi: false }
     - { key: "typeLabel",    label_it: "Tipologia",         multi: false }
     - { key: "school",       label_it: "Scuola",   multi: true,
         facet_link: { route: "/lotti", param: "scuola" } }
@@ -207,15 +211,7 @@ lotto:
       title_it: "Lotti della stessa asta"
       card: "lotto"
       count_label_it: "lotti"
-    - id: "lotti_precedenti"
-      title_it: "Lotti precedenti"
-      card: "lotto"
-      count_label_it: "lotti"
-    - id: "lotti_successivi"
-      title_it: "Lotti successivi"
-      card: "lotto"
-      count_label_it: "lotti"
-
+      highlight_current: true
 
   query_blocks:
     scalars: "lotto_scalars"
@@ -226,10 +222,4 @@ lotto:
     related:
       set_di_lotti:
         query:      "set_di_lotti"
-        depends_on: "lotId"      # la query usa {me}
-      lotti_precedenti:
-        query:      "lotti_precedenti"
-        depends_on: "lotId"
-      lotti_successivi:
-        query:      "lotti_successivi"
-        depends_on: "lotId"
+        depends_on: "lotId"      # la query usa {me}  related:

@@ -1054,6 +1054,8 @@ footer {
 .detail-contrib { margin-bottom: .25rem; }
 .detail-role { color: var(--gray-3); font-size: .9em; }
 
+.small-note {color: var(--ink-light); text-align: right;}
+
 /* ── Caroselli correlati ──────────────────────────────────────── */
 .detail-related-head {
   display: flex;
@@ -1159,6 +1161,19 @@ footer {
   border-radius: 8px;
   color: var(--gray-3);
   font-size: var(--fs-body-sm);
+}
+
+.result-card-grid--current {
+    background: var(--paper-dark) !important;
+  border-color: var(--terra-muted) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(217, 64, 16, 0.25);
+  position: relative;
+}
+
+.btn-apri-mini--current {
+  color: #E86040;
+  font-weight: 600;
 }
 
 /* ── Torna ai cataloghi ───────────────────────────────────────────────── */
