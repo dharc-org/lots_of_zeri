@@ -21,21 +21,21 @@ prefixes: |
 facet_queries:
 
   eventi_asta__organizzatore: |
-    SELECT ?facetURI ?facetValue (COUNT(DISTINCT ?auction) AS ?count)
+    SELECT ?facetURI (MIN(?label) AS ?facetValue) (COUNT(DISTINCT ?auction) AS ?count)
     WHERE {
       ?auction a crm:E7_Activity ;
         crm:P2_has_type aat:300054751 ;
         crm:P9_consists_of ?sub_act .
       ?sub_act crm:P2_has_type zac:auction_organisation ;
         crm:P14_carried_out_by ?house .
-      ?house rdfs:label ?facetValue .
+      ?house rdfs:label ?label .
       BIND(?house AS ?facetURI)
       {FILTERS}
     }
     GROUP BY ?facetURI ?facetValue ORDER BY DESC(?count) LIMIT 200
 
   eventi_asta__banditore: |
-    SELECT ?facetURI ?facetValue (COUNT(DISTINCT ?auction) AS ?count)
+    SELECT ?facetURI (SAMPLE(?label) AS ?facetValue)  (COUNT(DISTINCT ?auction) AS ?count)
     WHERE {
       ?auction a crm:E7_Activity ;
         crm:P2_has_type aat:300054751 ;
@@ -43,7 +43,7 @@ facet_queries:
       ?sub_act a crm:E7_Activity ;
         crm:P2_has_type zac:auctioneering ;
         crm:P14_carried_out_by ?auctioneer .
-      ?auctioneer rdfs:label ?facetValue .
+      ?auctioneer rdfs:label ?label .
       BIND(?auctioneer AS ?facetURI)
       {FILTERS}
     }
@@ -195,7 +195,7 @@ facet_queries:
     GROUP BY ?facetURI ?facetValue ORDER BY DESC(?count)
 
   cataloghi__autori: |
-    SELECT ?facetURI ?facetValue (COUNT(DISTINCT ?doc) AS ?count)
+    SELECT ?facetURI (MIN(?label) AS ?facetValue) (COUNT(DISTINCT ?doc) AS ?count)
     WHERE {
       ?doc a crm:E31_Document ;
            crm:P2_has_type aat:300026068 ;
@@ -203,7 +203,7 @@ facet_queries:
       ?assign a crm:E13_Attribute_Assignment ;
         crm:P140_assigned_attribute_to ?creation ;
         crm:P141_assigned ?contrib .
-      ?contrib rdfs:label ?facetValue .
+      ?contrib rdfs:label ?label .
       BIND(?contrib AS ?facetURI)
       {FILTERS}
     }
@@ -224,7 +224,7 @@ facet_queries:
     GROUP BY ?facetURI ?facetValue ORDER BY DESC(?count)
 
   cataloghi__luogo: |
-    SELECT ?facetURI ?facetValue (COUNT(DISTINCT ?doc) AS ?count)
+    SELECT DISTINCT ?facetURI ?facetValue (COUNT(DISTINCT ?doc) AS ?count)
     WHERE {
       ?doc a crm:E31_Document ;
            crm:P2_has_type aat:300026068 ;
@@ -285,17 +285,23 @@ facet_queries:
     GROUP BY ?facetURI ORDER BY DESC(?count)
 
   lotti__tipologia: |
-    SELECT ?facetURI (SAMPLE(?lbl) AS ?facetValue) (COUNT(DISTINCT ?lot) AS ?count)
+    SELECT ?facetURI (MAX(?lbl) AS ?facetValue) (COUNT(DISTINCT ?lot) AS ?count)
     WHERE {
-      ?lot a la:Set ;
-           crm:P1_is_identified_by ?idN ;
-           crm:P2_has_type ?otype .
+      ?lot a la:Set .
+      ?assignment a crm:E13_Attribute_Assignment ;
+                  crm:P140_assigned_attribute_to ?lot ;
+                  crm:P141_assigned ?otype ;
+                  crm:P177_assigned_property_of_type crm:P2_has_type ;
+                  crm:P2_has_type zac:validated .
       ?otype rdfs:label ?lbl .
-      FILTER(STRSTARTS(STR(?otype), "http://w3id.org/zac/type/"))
+      FILTER(!CONTAINS(?lbl, ";"))
+      FILTER(UCASE(?lbl) = STR(?lbl))
       BIND(?otype AS ?facetURI)
       {FILTERS}
     }
-    GROUP BY ?facetURI ORDER BY DESC(?count)
+    GROUP BY ?facetURI 
+    HAVING(COUNT(DISTINCT ?lot) > 11)
+    ORDER BY DESC(?count)
 
   lotti__cronologia: |
     SELECT ?facetURI (SAMPLE(?lbl) AS ?facetValue)
@@ -1016,8 +1022,11 @@ detail:
           FILTER(STR(?title) != "")
         }
         OPTIONAL {
-          <{uri}> crm:P2_has_type ?otype .
-          # FILTER(STRSTARTS(STR(?otype), "http://w3id.org/zac/type/"))
+          ?typeAssignment a crm:E13_Attribute_Assignment ;
+                          crm:P140_assigned_attribute_to <{uri}> ;
+                          crm:P141_assigned ?otype ;
+                          crm:P177_assigned_property_of_type crm:P2_has_type ;
+                          crm:P2_has_type zac:validated .
           ?otype rdfs:label ?typeLabel .
         }
         OPTIONAL { 
@@ -1132,19 +1141,19 @@ esplora:
 
   # casa d'asta × anno (case_dasta.json → py)
   case_anno: |
-    SELECT ?houseLabel (SAMPLE(?house) AS ?houseURI) ?year (COUNT(DISTINCT ?auction) AS ?count)
+    SELECT DISTINCT ?houseURI (MIN(?house_lbl) AS ?houseLabel) ?year (COUNT(DISTINCT ?auction) AS ?count)
     WHERE {
       ?auction a crm:E7_Activity ;
         crm:P2_has_type aat:300054751 ;
         crm:P9_consists_of ?sub_act ;
         crm:P4_has_time-span ?ts .
       ?sub_act crm:P2_has_type zac:auction_organisation ;
-        crm:P14_carried_out_by ?house .
-      ?house rdfs:label ?houseLabel .
+        crm:P14_carried_out_by ?houseURI .
+      ?houseURI rdfs:label ?house_lbl .
       ?ts crm:P82a_begin_of_the_begin ?d .
       BIND(YEAR(?d) AS ?year)
     }
-    GROUP BY ?houseLabel ?year
+    GROUP BY ?houseURI ?houseLabel ?year
 
   # casa d'asta × luogo (case_dasta.json → city = luogo modale)
   case_luogo: |

@@ -1,6 +1,9 @@
 @prefix aat: <http://vocab.getty.edu/aat/> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 
+
+##################### SECOLI ############################ 
+
 aat:300404493 rdfs:label "Sec. I" .
 aat:300404494 rdfs:label "Sec. II" .
 aat:300404495 rdfs:label "Sec. III" .
