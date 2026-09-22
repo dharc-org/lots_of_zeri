@@ -63619,7 +63619,8 @@ zac:81776_auction a crm:E7_Activity ;
         zac:object_type_abiti,
         zac:object_type_dipinti,
         zac:object_type_gioielli,
-        zac:object_type_maioliche_argenti,
+        zac:object_type_argenti,
+        zac:object_type_maioliche,
         zac:object_type_oggetti_darte,
         zac:object_type_porcellane ;
     crm:P16_used_specific_object zac:81776,
@@ -63825,7 +63826,7 @@ zac:81779_auction a crm:E7_Activity ;
         zac:object_type_miniature,
         zac:object_type_mobili,
         zac:object_type_porcellane,
-        zac:object_type_tappetti,
+        zac:object_type_tappeti,
         zac:object_type_terrecotte,
         zac:object_type_tessuti ;
     crm:P16_used_specific_object zac:81779,
@@ -66947,7 +66948,7 @@ zac:81835_auction a crm:E7_Activity ;
         zac:object_type_miniature,
         zac:object_type_mobili,
         zac:object_type_oggetti_darte_orientale,
-        zac:object_type_porcellante,
+        zac:object_type_porcellane,
         zac:object_type_sculture,
         zac:object_type_smalti,
         zac:object_type_terrecotte,
@@ -72182,7 +72183,7 @@ zac:83633_auction a crm:E7_Activity ;
         zac:object_type_disegni,
         zac:object_type_mobili,
         zac:object_type_oggetti_darte,
-        zac:object_type_oggetti_darte_orientali,
+        zac:object_type_oggetti_darte_orientale,
         zac:object_type_porcellane,
         zac:object_type_smalti ;
     crm:P16_used_specific_object zac:83633,
@@ -76974,7 +76975,8 @@ zac:83741_auction a crm:E7_Activity ;
         aat:300047325,
         aat:300133005,
         zac:object_type_avori,
-        zac:object_type_bronzi_sculture,
+        zac:object_type_bronzi,
+        zac:object_type_sculture,
         zac:object_type_ceramiche,
         zac:object_type_dipinti,
         zac:object_type_mobili,
@@ -84987,7 +84989,7 @@ zac:83931_auction a crm:E7_Activity ;
         zac:object_type_ceramiche,
         zac:object_type_manoscritti,
         zac:object_type_oggetti_darte,
-        zac:object_type_oggetti_darte_orentale,
+        zac:object_type_oggetti_darte_orientale,
         zac:object_type_sculture ;
     crm:P16_used_specific_object zac:83931,
         zac:83931_lots,
@@ -90799,7 +90801,7 @@ zac:84068_auction a crm:E7_Activity ;
         aat:300033973,
         aat:300133005,
         zac:object_type_acquerelli,
-        zac:object_type_diesegni,
+        zac:object_type_disegni,
         zac:object_type_dipinti,
         zac:object_type_oggetti_darte,
         zac:object_type_pastelli ;
@@ -90986,7 +90988,7 @@ zac:84071_auction a crm:E7_Activity ;
         zac:object_period_sec_xviii,
         zac:object_type_dipinti,
         zac:object_type_oggetti_darte,
-        zac:object_type_scuture ;
+        zac:object_type_sculture ;
     crm:P16_used_specific_object zac:84071,
         zac:84071_lots ;
     crm:P2_has_type aat:300054751 ;
@@ -94538,7 +94540,8 @@ zac:84141_auction a crm:E7_Activity ;
         zac:object_type_bronzi,
         zac:object_type_dipinti,
         zac:object_type_disegni,
-        zac:object_type_pastelli_sculture,
+        zac:object_type_pastelli,
+        zac:object_type_sculture,
         zac:object_type_porcellane ;
     crm:P16_used_specific_object zac:84141,
         zac:84141_lots,
@@ -97342,7 +97345,8 @@ zac:84202_auction a crm:E7_Activity ;
         zac:object_type_bronzi,
         zac:object_type_disegni,
         zac:object_type_oggetti_darte,
-        zac:object_type_pastelli_sculture ;
+        zac:object_type_pastelli , 
+        zac:object_type_sculture ; 
     crm:P16_used_specific_object zac:84202,
         zac:84202_lots,
         zac:collezione_biron ;
@@ -97597,7 +97601,7 @@ zac:84206_auction a crm:E7_Activity ;
         zac:object_type_oggetti_darte,
         zac:object_type_oggetti_darte_orientale,
         zac:object_type_porcellane,
-        zac:object_type_rologi ;
+        zac:object_type_orologi ;
     crm:P16_used_specific_object zac:84206,
         zac:84206_lots,
         zac:collezione_m_bouree ;
@@ -138582,7 +138586,7 @@ zac:88239_auction a crm:E7_Activity ;
         aat:300033618,
         aat:300041273,
         aat:300133005,
-        zac:object_type_dipinit,
+        zac:object_type_dipinti,
         zac:object_type_libri,
         zac:object_type_oggetti_darte,
         zac:object_type_porcellane,
@@ -172455,9 +172459,6 @@ zac:object_type_binocoli_da_teatro rdfs:label "BINOCOLI DA TEATRO" ;
 zac:object_type_bomboniere rdfs:label "BOMBONIERE" ;
     crm:P2_has_type zac:object_type .
 
-zac:object_type_bronzi_sculture rdfs:label "BRONZI: SCULTURE" ;
-    crm:P2_has_type zac:object_type .
-
 zac:object_type_camei rdfs:label "CAMEI" ;
     crm:P2_has_type zac:object_type .
 
@@ -172473,24 +172474,21 @@ zac:object_type_corna_di_cervo rdfs:label "CORNA DI CERVO" ;
 zac:object_type_cuoi rdfs:label "CUOI" ;
     crm:P2_has_type zac:object_type .
 
-zac:object_type_diesegni rdfs:label "DIESEGNI" ;
+zac:object_type_disegni rdfs:label "DISEGNI" ;
     crm:P2_has_type zac:object_type ;
     rdfs:seeAlso aat:300033973 .
 
-zac:object_type_dipinit rdfs:label "DIPINIT" ;
+zac:object_type_dipinti rdfs:label "DIPINTI" ;
     crm:P2_has_type zac:object_type ;
     rdfs:seeAlso aat:300033618 .
 
 zac:object_type_dipinti_porcellane rdfs:label "DIPINTI: PORCELLANE" ;
     crm:P2_has_type zac:object_type .
 
-zac:object_type_maioliche_argenti rdfs:label "MAIOLICHE ARGENTI" ;
+zac:object_type_oggetti_darte_orientale rdfs:label "OGGETTI D'ARTE ORIENTALE" ;
     crm:P2_has_type zac:object_type .
 
-zac:object_type_oggetti_darte_orentale rdfs:label "OGGETTI D'ARTE ORENTALE" ;
-    crm:P2_has_type zac:object_type .
-
-zac:object_type_oggetti_darte_orientali rdfs:label "OGGETTI D'ARTE ORIENTALI" ;
+zac:object_type_oggetti_darte_orientale rdfs:label "OGGETTI D'ARTE ORIENTALE" ;
     crm:P2_has_type zac:object_type .
 
 zac:object_type_orientale_arazzi rdfs:label "ORIENTALE ARAZZI" ;
@@ -172502,20 +172500,20 @@ zac:object_type_ottoni rdfs:label "OTTONI" ;
 zac:object_type_peltri rdfs:label "PELTRI" ;
     crm:P2_has_type zac:object_type .
 
-zac:object_type_porcellante rdfs:label "PORCELLANTE" ;
+zac:object_type_porcellane rdfs:label "PORCELLANE" ;
     crm:P2_has_type zac:object_type .
 
-zac:object_type_rologi rdfs:label "ROLOGI" ;
+zac:object_type_orologi rdfs:label "OROLOGI" ;
     crm:P2_has_type zac:object_type .
 
 zac:object_type_scatole_per_mosche rdfs:label "SCATOLE PER MOSCHE" ;
     crm:P2_has_type zac:object_type .
 
-zac:object_type_scuture rdfs:label "SCUTURE" ;
+zac:object_type_sculture rdfs:label "SCULTURE" ;
     crm:P2_has_type zac:object_type ;
     rdfs:seeAlso aat:300047090 .
 
-zac:object_type_tappetti rdfs:label "TAPPETTI" ;
+zac:object_type_tappeti rdfs:label "TAPPETI" ;
     crm:P2_has_type zac:object_type .
 
 zac:object_type_vini rdfs:label "VINI" ;
@@ -208892,9 +208890,6 @@ zac:object_type_armature rdfs:label "ARMATURE" ;
 zac:object_type_lettere rdfs:label "LETTERE" ;
     crm:P2_has_type zac:object_type ;
     rdfs:seeAlso aat:300026879 .
-
-zac:object_type_pastelli_sculture rdfs:label "PASTELLI: SCULTURE" ;
-    crm:P2_has_type zac:object_type .
 
 zac:object_type_spartiti_musicali rdfs:label "SPARTITI MUSICALI" ;
     crm:P2_has_type zac:object_type .

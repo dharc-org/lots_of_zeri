@@ -52,7 +52,7 @@
   <aside class="detail-nav">
     <nav>
       {% for s in view.sections %}
-        {# il visore esiste solo se has_viewer; salto la sezione altrimenti #}
+        {# il visore esiste solo se has_viewer #}
         {% if s.anchor != "viewer" or view.has_viewer %}
         <a href="#sec-{{ s.anchor }}"
            class="detail-nav-item {% if 'active' in s and s.active %}active{% endif %}">
@@ -79,6 +79,16 @@
     {% if view.has_viewer and view.manifest_url %}
     <section id="sec-viewer" class="detail-section">
       <div id="mirador-viewer" style="height:500px;position:relative;min-width:324px;"></div>
+
+      {% if view.viewer_link %}
+      <div class="viewer-link-row">
+        <a href="{{ view.viewer_link.url }}"
+          class="detail-link detail-link--external"
+          target="_blank" rel="noopener noreferrer">
+          {% if view.viewer_link.icon %}<i class="{{ view.viewer_link.icon }}"></i> {% endif %}{{ view.viewer_link.label_it }}
+        </a>
+      </div>
+      {% endif %}
     </section>
     {% endif %}
 
@@ -95,9 +105,15 @@
           <div class="detail-row">
             <dt class="detail-dt">{{ f.label_it }}</dt>
             <dd class="detail-dd {% if f.label_it in ['Collezione in vendita', 'Tipologia oggetti'] %}detail-dd--sentence{% endif %}">
+              
+              {# Flag → solo badge (es. revisionato) #}
+              {% if 'kind' in f and f.kind == "flag" %}
+                <span class="badge-reviewed">
+                  {% if 'icon' in f %}<i class="{{ f.icon }}"></i> {% endif %}Revisionato manualmente
+                </span>
 
               {# Contributori: nome + ruolo (nome linkabile a browse se url presente) #}
-              {% if 'kind' in f and f.kind == "contributors" %}
+              {% elif 'kind' in f and f.kind == "contributors" %}
                 {% for c in f.vals %}
                   <div class="detail-contrib">
                     {% if c.url %}<a href="{{ c.url }}" class="detail-link"><strong>{{ c.name }}</strong></a>{% else %}<strong>{{ c.name }}</strong>{% endif %}{% if c.role %} · <span class="detail-role">{{ c.role }}</span>{% endif %}
@@ -156,8 +172,7 @@
     {# ── Sezioni correlati (caroselli) ─────────────────────────────── #}
     {% for block in view.related %}
     {% if block.placeholder or block.vals %}
-    <section id="sec-{{ 'lotti' if block.card == 'lotto' else 'related' }}"
-             class="detail-section detail-related">
+    <section id="sec-{{ block.id }}" class="detail-section detail-related">
       <div class="detail-related-head">
         <h2 class="detail-related-title">{{ block.title_it }}</h2>
         <span class="detail-related-count">
@@ -295,6 +310,7 @@ Mirador.viewer({
   windows: [{
     manifestId: {{ view.manifest_url|tojson }},
     {% if view.canvas_id %}canvasId: {{ view.canvas_id|tojson }},{% endif %}
+    view: 'book',
   }],
   selectedTheme: 'dark',
   themes: {

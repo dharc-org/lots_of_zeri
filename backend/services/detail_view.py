@@ -178,6 +178,14 @@ def build_view(
             out["vals"] = items
             out["has_value"] = bool(items)
 
+        # Flag booleano → badge icona + testo, mostrato SOLO se true (es. revisionato)
+        elif f.get("kind") == "flag":
+            raw = _scalar(sc, key)
+            out["kind"] = "flag"
+            out["has_value"] = str(raw).strip().lower() in ("true", "1")
+            if "icon" in f:
+                out["icon"] = f["icon"]
+
         # Multivalore generico (lingue, tipi oggetto, collezioni…)
         elif is_multi:
             rows = multis.get(key, [])
@@ -330,6 +338,18 @@ def build_view(
     else:
         title, subtitle = "Dettaglio", None
 
+    # ── Link sotto il visore (config-driven) ─────────────────────────
+    viewer_link = None
+    vl_cfg = cfg_view.get("viewer_link")
+    if vl_cfg:
+        url = vl_cfg.get("url") or (_scalar(sc, vl_cfg["url_key"]) if vl_cfg.get("url_key") else None)
+        if url not in (None, "", "NaN"):
+            viewer_link = {
+                "url":      url,
+                "label_it": vl_cfg.get("label_it", "Apri"),
+                "icon":     vl_cfg.get("icon"),
+            }
+
     # ── Manifest ─────────────────────────────────────────
     manifest_url = _scalar(sc, "manifest")
     lot_image    = _scalar(sc, "lotImage")
@@ -346,6 +366,7 @@ def build_view(
         },
 
         "has_viewer": cfg_view.get("has_viewer", False),
+        "viewer_link": viewer_link,
         "manifest_url": manifest_url,
         "canvas_id":    _iiif_canvas_id(manifest_url, lot_image),
         "switch":     switch,

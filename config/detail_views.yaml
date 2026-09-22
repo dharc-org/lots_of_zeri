@@ -42,6 +42,10 @@ catalogo:
     breadcrumb_it: "Cataloghi"
 
   has_viewer: true
+  viewer_link:
+    url_key: "historicaUrl"        
+    label_it: "AMS historica"
+    icon: "ph ph-link"
   switch:
     - { label_it: "Asta",        link_key: "auctionSlug", route: "/aste/{slug}" }
     - { label_it: "lista Lotti", link_key: "uri", route: "/lotti?da_catalogo={me}" }
@@ -179,6 +183,10 @@ lotto:
     breadcrumb_it: "Lotti"
 
   has_viewer: true
+  viewer_link:
+    url_key: "historicaUrl"        
+    label_it: "AMS historica"
+    icon: "ph ph-link"
 
   switch:
     - { label_it: "Catalogo", link_key: "docId",      route: "/cataloghi/{id}" }
@@ -188,8 +196,6 @@ lotto:
     - { anchor: "viewer", label_it: "Immagine del lotto" }
     - { anchor: "scheda", label_it: "Scheda del lotto" }
     - { anchor: "set_di_lotti",     label_it: "Lotti della stessa asta" }
-    - { anchor: "lotti_precedenti", label_it: "Lotti precedenti" }
-    - { anchor: "lotti_successivi", label_it: "Lotti successivi" }
 
   fields:
     - { key: "lotId",        label_it: "Numero",    multi: false }
@@ -205,6 +211,8 @@ lotto:
         link_route: "/aste/{slug}", link_key: "auctionSlug" }
     - { key: "docTitle", label_it: "Catalogo", multi: false,
         link_route: "/cataloghi/{id}", link_key: "docId" }
+    - { key: "reviewed", label_it: "Revisione",
+        kind: "flag", icon: "ph ph-seal-check" }
   
   related:
     - id: "set_di_lotti"
