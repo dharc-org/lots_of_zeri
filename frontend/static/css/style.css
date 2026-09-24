@@ -26,7 +26,7 @@
   --ff-mono: 'IBM Plex Mono', monospace;
 
   /* Scala "Titoli" — Playfair Display, 20–48px (studio tipografico) */
-  --fs-hero: 5.5rem;   /* hero homepage — eccezione dichiarata, sopra il range documentato */
+  --fs-hero: clamp(5.5rem, min(11vh, 6vw), 15rem);   /* hero homepage — eccezione dichiarata, sopra il range documentato */
   --fs-h1:   2.5rem;   /* titolo di pagina */
   --fs-h2:   2rem;     /* titolo di sezione */
   --fs-h3:   1.5rem;   /* sotto-sezione */
@@ -110,9 +110,11 @@ body.zac-loading .zac-catalogue-content {
   color: var(--gray-4) !important;
   font-family: var(--ff-body) !important;
   font-weight: 500;
+  font-size: clamp(1rem, min(1.6vh, 0.9vw), 1.6rem);
 }
 
 .navbar-brand { margin-left: 1rem; }
+.navbar-brand img { height: clamp(35px, min(4.4vh, 2.4vw), 70px); width: auto; }
 
 .navbar-nav {
   margin-right: 2rem;
@@ -276,7 +278,9 @@ footer {
 }
 
 .hero-left {
-  padding: 0rem 3rem 5rem 5rem;
+  /* dimensioni del hero proporzionate alla griglia copertine: invariate fino a 800px di altezza */
+  --fs-hero-nav: clamp(1.5rem, min(3vh, 1.64vw), 4rem);
+  padding: 0rem 3rem 5rem clamp(5rem, min(10vh, 5.5vw), 12rem);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -286,33 +290,33 @@ footer {
   font-family: var(--ff-head);
   font-size: var(--fs-hero);
   line-height: 1;
-  margin-bottom: 1.75rem;
+  margin-bottom: max(1.75rem, 0.32em);
   letter-spacing: -0.02em;
 }
 .hero-title .t-lots { font-style: italic; font-weight: 700; color: var(--ink); }
-.hero-title .t-of   { font-style: italic; font-weight: 400; color: var(--terra); font-size: 3.5rem; }
+.hero-title .t-of   { font-style: italic; font-weight: 400; color: var(--terra); font-size: clamp(3.5rem, min(7vh, 3.82vw), 9.5rem); }
 .hero-title .t-zeri { font-style: normal; font-weight: 700; color: var(--ink); }
 
 .hero-subtitle {
   font-family: var(--ff-head);
-  font-size: 2rem;
+  font-size: clamp(2rem, min(4vh, 2.18vw), 5.5rem);
   font-weight: 300;
   line-height: 1.4;
   color: var(--ink-light);
-  max-width: 26rem;
-  margin-bottom: 3rem;
+  max-width: 13em;
+  margin-bottom: max(3rem, 1.5em);
 }
 
-.hero-nav { list-style: none; padding: 0; margin: 0; }
+.hero-nav { list-style: none; padding: 0; margin: 0; max-width: calc(var(--fs-hero-nav) * 26.67); }
 .hero-nav li { border-top: 1px solid var(--gray-1); }
 .hero-nav li:last-child { border-bottom: 1px solid var(--gray-1); }
 .hero-nav a {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 1rem 0;
+  padding: max(1rem, 0.67em) 0;
   font-family: var(--ff-body);
-  font-size: 1.5rem;
+  font-size: var(--fs-hero-nav);
   font-weight: 400;
   color: var(--ink-light) !important;
   text-decoration: none !important;
@@ -360,7 +364,7 @@ footer {
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
   width: 100%;
-  max-width: 480px;  
+  max-width: calc((100vh - 90px - 4rem - 24px) * 0.75 + 24px);
 }
 
 .grid-cell { aspect-ratio: 3/4; perspective: 900px; background: var(--paper-dark); border-radius: 2px; overflow: hidden; }
