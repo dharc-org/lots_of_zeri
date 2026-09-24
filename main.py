@@ -9,7 +9,7 @@ from pathlib import Path
 
 import yaml
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
@@ -112,13 +112,16 @@ async def esplora(request: Request):
         "active_page": "esplora",
     })
 
+# Esplora2 (versione narrativa) nascosta: chi arriva al vecchio indirizzo va su /esplora.
+# Template, CSS e JS restano nel progetto; per riattivarla ripristinare il return commentato.
 @app.get("/esplora-racconto", response_class=HTMLResponse)
 async def esplora_racconto(request: Request):
-    return templates.TemplateResponse("esplora_racconto.html", {
-        "request": request,
-        "active_tab": None,
-        "active_page": "esplora",
-    })
+    return RedirectResponse(url=f"{BASE_PATH}/esplora", status_code=302)
+    # return templates.TemplateResponse("esplora_racconto.html", {
+    #     "request": request,
+    #     "active_tab": None,
+    #     "active_page": "esplora",
+    # })
 
 @app.get("/approfondisci", response_class=HTMLResponse)
 async def approfondisci(request: Request):

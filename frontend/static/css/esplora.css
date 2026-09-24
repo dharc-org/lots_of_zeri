@@ -79,11 +79,19 @@
 }
 
 /* Tab */
+/* Larghezza massima di schede, note e grafici: oltre questa misura i grafici
+   non si allargano più (restano centrati, lo sfondo scuro continua a tutta
+   pagina). Sotto i ~1560px di finestra non cambia nulla. */
+:root { --expl-max-w: 1400px; }
+
 .expl-tabs {
   display: flex;
   flex: 1;
   gap: 0;
   justify-content: center;
+  max-width: var(--expl-max-w);   /* allineate ai grafici sugli schermi grandi */
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .expl-tab {
@@ -131,7 +139,18 @@
   background: var(--ink-light);
 }
 
-.expl-panel { display: none; }
+.expl-panel {
+  display: none;
+  max-width: var(--expl-max-w);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Grafici disegnati in scala (viewBox fisso): oltre questa larghezza il testo
+   crescerebbe troppo rispetto agli altri grafici. Restano centrati nel riquadro.
+   Stagioni: testo 12–15px · Tipologie: testo circa 14px. */
+#stag-svg { max-width: 900px;  margin-left: auto; margin-right: auto; }
+#tip-svg  { max-width: 1000px; margin-left: auto; margin-right: auto; }
 .expl-panel.active { display: block; }
 
 /* ── Nota metodologica ─────────────────────────────────── */
@@ -321,6 +340,83 @@
 /* ══════════════════════════════════════════════════════════
    RESPONSIVE
    ══════════════════════════════════════════════════════════ */
+/* ── Schermi stretti (tablet, finestre piccole) ─────────────────── */
+@media (max-width: 1100px) {
+  /* schede su due righe invece di etichette spezzate su 4-5 righe */
+  .expl-tabs { flex-wrap: wrap; }
+  .expl-tab  { white-space: nowrap; }
+}
+@media (max-width: 900px) {
+  .expl-metanote { columns: 1; }
+}
+
+/* Case d'asta: colonne della tabella (prima scritte nel JS) */
+.case-grid {
+  display: grid;
+  grid-template-columns: 180px 86px 1fr 80px;
+  gap: 10px;
+  align-items: center;
+}
+.case-axis { position: relative; height: 14px; }
+.case-axis span {
+  position: absolute;
+  top: 0;
+  font: 10.5px var(--ff-mono);
+  color: var(--ink);
+  white-space: nowrap;
+}
+@media (max-width: 1000px) {
+  /* senza la colonna Sede la barra degli anni resta leggibile */
+  .case-grid { grid-template-columns: 140px 1fr 56px; }
+  .case-sede { display: none; }
+}
+
+/* Banditori: sotto i 900px lista sopra e grafo sotto, a tutta larghezza */
+@media (max-width: 900px) {
+  .band2-grid { grid-template-columns: 1fr !important; }
+  .band2-grid > div { border-right: 0 !important; }
+  .band2-list {
+    height: 240px !important;
+    max-height: 240px !important;
+    border-bottom: 1px solid var(--gray-1);
+  }
+}
+
+/* Schermi stretti (sotto i 700px): ogni grafico resta visibile come
+   anteprima oscurata e non interattiva, con l'avviso sovrapposto (stesso
+   testo del toast di Esplora2). Schede e note restano utilizzabili. */
+@media (max-width: 700px) {
+  .expl-panel .expl-chart-wrap,
+  #band-wrap2 {
+    position: relative;
+    min-height: 11rem;              /* spazio per l'avviso anche se il grafico è basso */
+    pointer-events: none;           /* niente clic, trascinamenti o scorrimenti interni */
+    user-select: none;
+  }
+  .expl-panel .expl-chart-wrap > *,
+  #band-wrap2 > * {
+    opacity: .3;                    /* oscura il grafico, non l'avviso */
+  }
+  .expl-panel .expl-chart-wrap::after,
+  #band-wrap2::after {
+    content: "Questo grafico non è leggibile su schermi di queste dimensioni: tratta una quantità di dati che non è possibile ottimizzare per il mobile senza comprometterne la leggibilità. Consultalo da tablet o computer.";
+    position: absolute;
+    top: 1.5rem;
+    left: 1rem;
+    right: 1rem;
+    z-index: 30;
+    padding: .85rem 1rem .85rem 2.6rem;
+    background: var(--ink) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23EB7055' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='9.5'/%3E%3Cpath d='M12 7.5v5.5'/%3E%3Ccircle cx='12' cy='16.5' r='.6' fill='%23EB7055'/%3E%3C/svg%3E") no-repeat .9rem .95rem / 1.15rem;
+    border: 1px solid var(--terra-muted);
+    border-radius: 4px;
+    box-shadow: 0 8px 24px rgba(26,20,16,.35);
+    font-family: var(--ff-body);
+    font-size: .85rem;
+    line-height: 1.5;
+    color: var(--paper-light);
+  }
+}
+
 @media (max-width: 768px) {
   .expl-toolbar-top { padding: 0 1rem; gap: .75rem; }
   .expl-eyebrow     { display: none; }
@@ -402,7 +498,7 @@
   grid-template-columns: 150px 1fr 36px;
   align-items: center;
   gap: 8px;
-  transition: top .15s linear, opacity .3s ease;
+  will-change: transform, opacity;   /* posizione e dissolvenza animate dal JS a ogni frame */
 }
 .geo-row-name {
   font-family: var(--ff-body);
@@ -466,19 +562,24 @@
 .geo-scrub {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 14px;
   margin-top: 16px;
+  padding-bottom: 18px;           /* spazio per le etichette dei decenni sotto la traccia */
 }
 .geo-play-btn {
-  width: 24px; height: 24px;
-  border-radius: 50%;
+  height: 26px;
+  border-radius: 13px;
   border: 1px solid var(--terra);
   background: none;
   color: var(--terra);
   display: flex; align-items: center; justify-content: center;
+  gap: .35rem;
   cursor: pointer;
-  padding: 0;
+  padding: 0 .75rem 0 .6rem;
   flex-shrink: 0;
+  font-family: var(--ff-mono);
+  font-size: var(--fs-caption);
+  min-width: 7.5rem;              /* "Pausa" / "Riproduci" senza far saltare la timeline */
 }
 .geo-track {
   position: relative;
@@ -518,19 +619,26 @@
   background: var(--terra);
   transform: translateX(-6px);
 }
-.geo-ticklabels {
-  position: relative;
-  height: 12px;
-  margin-top: 4px;
-  padding-left: 34px;
+.geo-track:focus-visible { outline: 2px solid var(--terra); outline-offset: 4px; border-radius: 2px; }
+.geo-ticklabels {                /* dentro .geo-track: allineate ai tick qualunque sia la larghezza del bottone */
+  position: absolute;
+  left: 0; right: 0;
+  top: 100%;
+  height: 14px;
+  margin-top: 2px;
 }
 .geo-ticklabels span {
   position: absolute;
   font-family: var(--ff-mono);
-  font-size: 9px;
+  font-size: 10px;
   color: var(--gray-2);
   transform: translateX(-50%);
   white-space: nowrap;
+  transition: color .2s;
+}
+.geo-ticklabels span.is-active {    /* decennio mostrato */
+  color: var(--terra);
+  font-weight: 500;
 }
 
 /* ══════════════════════════════════════════════════════════

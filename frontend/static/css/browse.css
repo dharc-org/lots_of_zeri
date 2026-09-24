@@ -296,6 +296,71 @@
   font-weight: 500;
 }
 
+/* Suggerimento tastiera sotto il bottone */
+.sidebar-cta .cta-hint {
+  font-family: var(--ff-body);
+  font-size: var(--fs-caption);
+  color: var(--gray-3);
+  text-align: center;
+  margin-top: 0.4rem;
+}
+.sidebar-cta kbd {
+  background: var(--paper-dark);
+  color: var(--ink-light);
+  border: 1px solid var(--gray-1);
+  border-radius: 3px;
+  box-shadow: none;
+  font-family: var(--ff-mono);
+  font-size: 0.7rem;
+  padding: 0.05rem 0.35rem;
+}
+
+/* Modifiche in sospeso: bottone terracotta "Applica filtri (n)" */
+.sidebar-cta.has-changes .btn-dark {
+  background-color: var(--terra);
+  border-color: var(--terra);
+}
+.sidebar-cta.has-changes .btn-dark:hover {
+  background-color: var(--terra-dark);
+  border-color: var(--terra-dark);
+}
+.sidebar-cta.has-changes .cta-hint { color: var(--terra-dark); }
+.sidebar-cta.nudge .btn-dark { animation: cta-nudge 0.45s ease, cta-halo 1.1s ease-out 2; }
+.sidebar-cta.bump  .btn-dark { animation: cta-bump 0.3s ease; }
+@keyframes cta-nudge {
+  0%, 100% { transform: translateY(0); }
+  40%      { transform: translateY(-3px); }
+}
+@keyframes cta-halo {
+  0%   { box-shadow: 0 0 0 0    color-mix(in srgb, var(--terra) 55%, transparent); }
+  100% { box-shadow: 0 0 0 12px color-mix(in srgb, var(--terra) 0%,  transparent); }
+}
+@keyframes cta-bump {
+  0%, 100% { transform: scale(1); }
+  45%      { transform: scale(1.04); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-cta.nudge .btn-dark,
+  .sidebar-cta.bump  .btn-dark { animation: none; }
+}
+
+/* Liste dei filtri: prime voci + "Mostra tutte", senza scorrimento interno */
+.facet-list.is-collapsed:not(.is-searching) .is-extra { display: none; }
+.facet-list.is-searching + .facet-more { display: none; }
+.facet-more {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 0.35rem;
+  padding: 0;
+  background: none;
+  border: 0;
+  font-family: var(--ff-body);
+  font-size: var(--fs-body-sm);
+  color: var(--terra);
+  cursor: pointer;
+}
+.facet-more:hover { text-decoration: underline; }
+
 /* Stato chiuso */
 .zac-catalogue-sidebar.is-collapsed .zac-sidebar-panel {
   width: 0;

@@ -1,8 +1,8 @@
 <nav class="navbar navbar-expand-xl px-3 sticky-top">
 
-  <!-- Brand -->
-  <a class="navbar-brand" href="{{ base_path }}/">
-    <img src="{{ base_path }}/static/img/loghi/logo_zeri.png" alt="Logo Zeri" height="35">
+  <!-- Brand: il nome del sito riporta alla home (stessa scritta del footer) -->
+  <a class="navbar-brand nav-wordmark" href="{{ base_path }}/" aria-label="lots of Zeri — torna alla home">
+    <em>lots</em> <span class="of">of</span> <em>Zeri</em>
   </a>
 
   <!-- Hamburger mobile -->
@@ -21,9 +21,11 @@
       <li class="nav-item">
         <a class="nav-link {% if active_page == 'esplora' %}active{% endif %}" href="{{ base_path }}/esplora">Esplora</a>
       </li>
+      {# Esplora2 (versione narrativa) nascosta: pagina conservata ma non raggiungibile
       <li class="nav-item">
         <a class="nav-link {% if active_page == 'esplora_racconto' %}active{% endif %}" href="{{ base_path }}/esplora-racconto">Esplora2</a>
       </li>
+      #}
       <li class="nav-item">
         <a class="nav-link {% if active_page == 'approfondisci' %}active{% endif %}" href="{{ base_path }}/approfondisci">Approfondisci</a>
       </li>
@@ -31,5 +33,11 @@
         <a class="nav-link {% if active_page == 'progetto' %}active{% endif %}" href="{{ base_path }}/progetto">Progetto</a>
       </li>
     </ul>
+
+    <!-- Logo della Fondazione: rimanda al sito esterno, separato dal menu -->
+    <a class="nav-zeri-logo" href="https://fondazionezeri.unibo.it" target="_blank" rel="noopener"
+       title="Fondazione Federico Zeri (si apre in una nuova scheda)">
+      <img src="{{ base_path }}/static/img/loghi/logo_zeri.png" alt="Fondazione Federico Zeri">
+    </a>
   </div>
 </nav>

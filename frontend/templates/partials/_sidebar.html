@@ -5,6 +5,8 @@
     - facet_defs:      list of dicts: {id, label_it, type, ui_widget, options, range}
     - active_filters:  dict {facet_id → active value}
 #}
+{# Liste dei filtri: prime FACET_VISIBLE voci visibili, le altre con "Mostra tutte" (niente scorrimento interno) #}
+{% set FACET_VISIBLE = 6 %}
 <div class="sidebar-header">Filtra</div>
 <form method="GET" action="{{ base_path }}{{ tab_route }}" class="h-100 pt-1 p-3" id="facet-form">
 
@@ -86,11 +88,12 @@
       {% if facet.options | length > 8 %}
       <input type="text" class="facet-search" placeholder="Cerca…" data-facet="{{ facet.id }}">
       {% endif %}
-      <div style="max-height:200px; overflow-y:auto; overflow-x:hidden; width:100%;">
+      {% set has_more = facet.options | length > FACET_VISIBLE %}
+      <div class="facet-list{% if has_more %} is-collapsed{% endif %}">
         {% set active_vals = active_filters[facet.id] if facet.id in active_filters else [] %}
         {% for item in facet.options %}
           {% set is_checked = item.uri in active_vals %}
-          <div class="form-check form-check-sm">
+          <div class="form-check form-check-sm{% if loop.index > FACET_VISIBLE and not is_checked %} is-extra{% endif %}">
             <input class="form-check-input" type="checkbox" name="{{ facet.id }}" value="{{ item.uri }}"
                    id="chk_{{ facet.id }}_{{ loop.index }}"
                    {% if is_checked %}checked{% endif %}>
@@ -102,6 +105,10 @@
           </div>
         {% endfor %}
       </div>
+      {% if has_more %}
+      <button type="button" class="facet-more"
+              data-more="Mostra tutte ({{ facet.options | length }})" data-less="Mostra meno">Mostra tutte ({{ facet.options | length }})</button>
+      {% endif %}
     </div>
     {% endif %}
 
@@ -111,10 +118,12 @@
     <div class="facet">
       <label class="facet-title mb-2">{{ facet.label_it }}</label>
       {% set active_vals = active_filters[facet.id] if facet.id in active_filters else [] %}
-      <div style="max-height:260px; overflow-y:auto; overflow-x:hidden; width:100%;">
+      {% set has_more = facet.tree | length > FACET_VISIBLE %}
+      <div class="facet-list{% if has_more %} is-collapsed{% endif %}">
         <ul class="facet-tree">
         {% for node in facet.tree recursive %}
-          <li>
+          {# solo il primo livello si accorcia; i rami con voci spuntate restano visibili (sidebar.js) #}
+          <li{% if loop.depth == 1 and loop.index > FACET_VISIBLE %} class="is-extra"{% endif %}>
             <label class="form-check-label facet-tree-row d-flex justify-content-between w-100">
               <span class="facet-tree-label">
                 <input class="form-check-input me-1" type="checkbox"
@@ -131,6 +140,10 @@
         {% endfor %}
         </ul>
       </div>
+      {% if has_more %}
+      <button type="button" class="facet-more"
+              data-more="Mostra tutte ({{ facet.tree | length }})" data-less="Mostra meno">Mostra tutte ({{ facet.tree | length }})</button>
+      {% endif %}
     </div>
     {% endif %}
 
@@ -140,8 +153,9 @@
   {# ── Bottone Cerca — sticky in fondo al pannello, sempre visibile ── #}
   <div class="sidebar-cta">
     <button type="submit" class="btn btn-dark btn-sm w-100">
-      Cerca<i class="ph ph-magnifying-glass ms-2"></i>
+      <span class="cta-label">Cerca</span><i class="ph ph-magnifying-glass ms-2"></i>
     </button>
+    <div class="cta-hint">oppure premi <kbd>Invio ↵</kbd></div>
   </div>
 
 </form>

@@ -47,6 +47,15 @@ const asteUrl = params => browseUrl('/aste', params);
   /* Prima tab attiva subito */
   initChart('case');
   tabs[0].dataset.loaded = '1';
+
+  /* Apertura diretta di una tab dall'indirizzo, es. /esplora#banditori2 (link del footer) */
+  const openFromHash = () => {
+    const id  = decodeURIComponent(location.hash.slice(1));
+    const tab = id && document.querySelector('.expl-tab[data-tab="' + id + '"]');
+    if (tab) tab.click();
+  };
+  setTimeout(openFromHash, 0);   // dopo che tutto il file è stato eseguito
+  window.addEventListener('hashchange', openFromHash);
 })();
 
 function initChart(id) {
@@ -91,14 +100,17 @@ async function loadAndRenderCase() {
 
   /* Intestazione fissa */
   const thead = document.createElement('div');
-  thead.style.cssText = 'display:grid;grid-template-columns:180px 86px 1fr 80px;gap:10px;align-items:center;padding:8px 1.5rem;background:var(--paper);border-bottom:1px solid var(--gray-1);box-shadow:0 3px 8px rgba(26,20,16,.08);';
+  /* colonne della griglia in CSS (.case-grid), per poterle adattare agli schermi stretti */
+  thead.className = 'case-grid';
+  thead.style.cssText = 'padding:8px 1.5rem;background:var(--paper);border-bottom:1px solid var(--gray-1);box-shadow:0 3px 8px rgba(26,20,16,.08);';
+  /* Asse degli anni in HTML: in SVG "stirato" (preserveAspectRatio none) il testo si deformava */
   const axisTicks = [1880,1890,1900,1910,1920,1930].map(y =>
-    `<text x="${(y - C.ymin) / N * 610}" y="11" fill="var(--ink)" style="font:10.5px var(--ff-mono)">${y}</text>`
+    `<span style="left:${(y - C.ymin) / N * 100}%">${y}</span>`
   ).join('');
   thead.innerHTML = `
     <div style="font:500 12px var(--ff-body);color:var(--ink);">Casa d'asta</div>
-    <div style="font:500 12px var(--ff-body);color:var(--ink);">Sede</div>
-    <svg viewBox="0 0 610 14" preserveAspectRatio="none" style="width:100%;height:14px;display:block;">${axisTicks}</svg>
+    <div class="case-sede" style="font:500 12px var(--ff-body);color:var(--ink);">Sede</div>
+    <div class="case-axis">${axisTicks}</div>
     <div style="font:500 12px var(--ff-body);color:var(--ink);text-align:right;">Aste totali</div>
   `;
   wrap.appendChild(thead);
@@ -130,7 +142,8 @@ async function loadAndRenderCase() {
     const hasLink = !!h.uri;   // ⚠️ verifica: il campo si chiama davvero "uri" nel JSON?
 
     const wrapper = document.createElement('div');
-    wrapper.style.cssText = 'display:grid;grid-template-columns:180px 86px 1fr 80px;gap:10px;align-items:center;padding:3px 0;border-top:1px solid rgba(192,175,152,.45);transition:background .1s;cursor:default;background:var(--paper);';
+    wrapper.className = 'case-grid';
+    wrapper.style.cssText = 'padding:3px 0;border-top:1px solid rgba(192,175,152,.45);transition:background .1s;cursor:default;background:var(--paper);';
     wrapper.addEventListener('mouseover', () => { wrapper.style.background = 'rgba(217,64,16,.05)'; });
     wrapper.addEventListener('mouseout',  () => { wrapper.style.background = 'var(--paper)'; });
 
@@ -179,6 +192,7 @@ async function loadAndRenderCase() {
     nameCell.textContent = name;
 
     const cityCell = document.createElement('div');
+    cityCell.className = 'case-sede';
     cityCell.style.cssText = 'font:10.5px var(--ff-mono);color:var(--gray-2);';
     cityCell.textContent = h.city;
 
@@ -232,7 +246,6 @@ async function loadAndRenderGeografia() {
     altre: d.altre,
     resto: d.resto || []
   }));
-  decades.push({ ...decades[decades.length - 1], year: 1929 });
 
   const restoByLabel = {};
   G.decades.forEach(d => { restoByLabel[d.label] = d.resto || []; });
@@ -351,142 +364,269 @@ async function loadAndRenderGeografia() {
     }
   });
 
-  function lerp(a, b, t) { return a + (b - a) * t; }
+  /* ── Timeline: movimento fluido, soste sui decenni reali ────────
+     Le barre scorrono in modo continuo da un decennio al successivo
+     (MOVE_MS) e si fermano su ogni decennio reale (HOLD_MS): durante il
+     movimento i numeri sono intermedi e grigi, alle soste sono i valori
+     veri. In pausa o dopo un trascinamento il cursore torna sempre sul
+     decennio più vicino, quindi da fermo si vedono solo dati reali e i
+     numeri diventano collegamenti alla ricerca.
+     Le posizioni si calcolano a ogni frame (requestAnimationFrame) e si
+     applicano con transform: niente transizioni CSS che rincorrono JS. */
+  const N = decades.length;
+  const MOVE_MS = 900;    // durata del passaggio tra due decenni
+  const HOLD_MS = 400;    // sosta su ogni decennio reale
+  const ROW_H = 27;
+  const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const playText = document.getElementById('geo-play-text');
+  const tickSpans = tickLabelsEl.querySelectorAll('span');
 
-  function stateAt(pos) {
-    pos = Math.max(0, Math.min(1, pos));
-    const scaled = pos * (decades.length - 1);
-    const i = Math.max(0, Math.min(Math.floor(scaled), decades.length - 2));
-    const t = scaled - i;
-    const a = decades[i], b = decades[i + 1];
-    const values = {};
-    allCities.forEach(city => {
-      const av = a.top.find(x => x.n === city);
-      const bv = b.top.find(x => x.n === city);
-      if (av && bv) values[city] = lerp(av.v, bv.v, t);
-      else if (av && !bv) values[city] = t < .5 ? av.v : null;
-      else if (bv && !av) values[city] = t > .5 ? bv.v : null;
-    });
-    const altre = lerp(a.altre, b.altre, t);
-    return { values, altre, label: t < .5 ? a.label : b.label };
-  }
-
-  /* Costruisce l'URL verso i risultati di ricerca filtrati per
-     luogo e per l'intervallo di anni del decennio esatto corrente.
-     Formato confermato leggendo backend/routers/browse.py
-     (_parse_params): i facet "range" come periodo si passano come
-     {facet}_from / {facet}_to, i facet "multiselect" come luogo si
-     passano come parametro semplice. */
+  /* "1890–99" → 1899 */
   function decadeEndYear(label) {
     const [startStr, endSuffix] = label.split('–');
     return parseInt(startStr.slice(0, 2) + endSuffix, 10);
   }
-  
+  /* "1890–99" → "1890–1899" */
+  function fullLabel(label) {
+    return label.split('–')[0] + '–' + decadeEndYear(label);
+  }
+  /* URL verso le aste filtrate per luogo e per gli anni del decennio */
   function buildAsteUrl(cityName, decadeLabel) {
     const uri = cityUri[cityName];
     if (!uri) return null;
     const startYear = parseInt(decadeLabel.split('–')[0], 10);
-    const endYear = decadeEndYear(decadeLabel);
-    return asteUrl({ luogo: uri, periodo_from: startYear, periodo_to: endYear });
+    return asteUrl({ luogo: uri, periodo_from: startYear, periodo_to: decadeEndYear(decadeLabel) });
   }
 
-  function render(pos) {
-    const { values, altre, label } = stateAt(pos);
-    yearEl.textContent = label;
-    fillEl.style.width = (pos * 100) + '%';
-    handleEl.style.left = (pos * 100) + '%';
+  /* Classifica (prime 10) di ogni decennio: city → {k: posizione, v: aste} */
+  const ranks = decades.map(d => {
+    const r = {};
+    d.top.slice().sort((a, b) => b.v - a.v).slice(0, 10).forEach((t, k) => { r[t.n] = { k, v: t.v }; });
+    return r;
+  });
+  const ease = t => (t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
 
-    if (label !== currentLabel) {
-      currentLabel = label;
-      if (altreOpen) renderAltrePanel(currentLabel);
+  allCities.forEach(city => { els[city].style.top = '0'; });
+  altreRow.style.top = '0';
+  altreRow.style.transform = `translateY(${10 * ROW_H}px)`;
+  altreRow.style.opacity = '1';
+
+  let pos = 0;             // posizione continua: 0 … N-1 (intero = decennio reale)
+  let playing = false, dragging = false;
+  let raf = null, holdTimer = null;
+  let lastIdx = -1;
+
+  /* Posizione mostrata di ogni riga: insegue la posizione "giusta" con
+     un'attenuazione esponenziale, così gli scambi di classifica sono
+     morbidi e le righe non si sovrappongono a lungo. */
+  const OUT_Y = 10.6 * ROW_H;                 // sotto la riga "altre città"
+  const disp = {};
+  allCities.forEach(c => { disp[c] = { y: OUT_Y, o: 0, ty: OUT_Y, to: 0 }; });
+  let rowRaf = null, lastT = 0, firstDraw = true;
+
+  function applyRow(city) {
+    const d = disp[city], row = els[city];
+    row.style.transform = `translateY(${d.y.toFixed(2)}px)`;
+    row.style.opacity = d.o.toFixed(3);
+    row.style.pointerEvents = d.to > .5 ? '' : 'none';
+  }
+  function stepRows(now) {
+    const dt = lastT ? Math.min(64, now - lastT) : 16;
+    lastT = now;
+    const k = 1 - Math.exp(-dt / 110);        // ~110 ms di "inseguimento"
+    let moving = false;
+    allCities.forEach(c => {
+      const d = disp[c];
+      d.y += (d.ty - d.y) * k;
+      d.o += (d.to - d.o) * k;
+      if (Math.abs(d.ty - d.y) > .3 || Math.abs(d.to - d.o) > .01) moving = true;
+      else { d.y = d.ty; d.o = d.to; }
+      applyRow(c);
+    });
+    if (moving) rowRaf = requestAnimationFrame(stepRows);
+    else { rowRaf = null; lastT = 0; }
+  }
+  function kickRows() {
+    if (reduceMotion || firstDraw) {
+      allCities.forEach(c => { const d = disp[c]; d.y = d.ty; d.o = d.to; applyRow(c); });
+      firstDraw = false;
+      return;
     }
+    if (!rowRaf) { lastT = 0; rowRaf = requestAnimationFrame(stepRows); }
+  }
 
-    /* Il numero è collegabile solo quando il cursore è fermo esattamente
-       su uno dei punti reali della timeline (non un valore interpolato
-       durante il trascinamento) e l'autoplay non sta girando. */
-    const scaled = pos * (decades.length - 1);
-    const isExactPoint = !timer && Math.abs(scaled - Math.round(scaled)) < 0.001;
+  function draw(p) {
+    p = Math.max(0, Math.min(N - 1, p));
+    const i = N > 1 ? Math.min(Math.floor(p), N - 2) : 0;
+    const t = N > 1 ? p - i : 0;
+    const e = ease(t);
+    const exact = Math.abs(p - Math.round(p)) < 1e-6;
+    const idx = Math.round(p);                 // decennio più vicino
+    const A = ranks[i], B = ranks[Math.min(i + 1, N - 1)];
+    const linkable = exact && !playing && !dragging;
+    const label = decades[idx].label;
 
-    const ranked = Object.entries(values)
-      .filter(([, v]) => v !== null && v !== undefined)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 10);
+    if (idx !== lastIdx) {
+      lastIdx = idx;
+      yearEl.textContent = fullLabel(label);
+      tickSpans.forEach((s, j) => s.classList.toggle('is-active', j === idx));
+      trackEl.setAttribute('aria-valuenow', idx);
+      trackEl.setAttribute('aria-valuetext', fullLabel(label));
+      if (label !== currentLabel) {
+        currentLabel = label;
+        if (altreOpen) renderAltrePanel(currentLabel);
+      }
+    }
+    const frac = N > 1 ? p / (N - 1) * 100 : 0;
+    fillEl.style.width = frac + '%';
+    handleEl.style.left = frac + '%';
+
+    /* valori interpolati e classifica del momento (a pari valore conta l'ordine reale) */
+    const vals = {};
+    allCities.forEach(c => {
+      const va = A[c] ? A[c].v : 0, vb = B[c] ? B[c].v : 0;
+      vals[c] = va + (vb - va) * e;
+    });
+    const tieKey = c => (ranks[idx][c] ? ranks[idx][c].k : 99);
+    const order = allCities.filter(c => vals[c] > .05)
+      .sort((x, y) => (vals[y] - vals[x]) || (tieKey(x) - tieKey(y)));
+    const rankOf = {};
+    order.forEach((c, r) => { rankOf[c] = r; });
 
     allCities.forEach(city => {
-      const idx = ranked.findIndex(r => r[0] === city);
       const row = els[city];
-      if (idx === -1) { row.style.opacity = '0'; return; }
-      row.style.opacity = '1';
-      row.style.top = (idx * 27) + 'px';
-      row.querySelector('.geo-row-bar').style.width = Math.round(ranked[idx][1] / maxVal * 100) + '%';
-      row.querySelector('.geo-row-bar').style.background = cityColor[city];
+      const r = rankOf[city];
+      const shown = r !== undefined && r < 10;
+      const d = disp[city];
+      d.ty = shown ? r * ROW_H : OUT_Y;
+      d.to = shown ? 1 : 0;
+      row.style.zIndex = shown ? 20 - r : 0;
       const valEl = row.querySelector('.geo-row-val');
-      valEl.textContent = Math.round(ranked[idx][1]);
-      const url = isExactPoint ? buildAsteUrl(city, label) : null;
+      const bar = row.querySelector('.geo-row-bar');
+      bar.style.width = (vals[city] / maxVal * 100) + '%';
+      bar.style.background = cityColor[city];
+      valEl.textContent = Math.round(vals[city]);
+      const url = shown && linkable && ranks[idx][city] ? buildAsteUrl(city, label) : null;
       if (url) {
         valEl.href = url;
+        valEl.title = `Vedi le ${ranks[idx][city].v} aste di ${city}, ${fullLabel(label)}`;
         valEl.classList.add('geo-row-val--link');
       } else {
         valEl.removeAttribute('href');
+        valEl.removeAttribute('title');
         valEl.classList.remove('geo-row-val--link');
       }
     });
+    kickRows();
 
-    altreRow.style.opacity = '1';
-    altreRow.style.top = (10 * 27) + 'px';
-    altreRow.querySelector('.geo-row-bar').style.width = Math.round(altre / maxVal * 100) + '%';
-    altreRow.querySelector('.geo-row-val').textContent = Math.round(altre);
+    const altA = decades[i].altre, altB = decades[Math.min(i + 1, N - 1)].altre;
+    const alt = altA + (altB - altA) * e;
+    altreRow.querySelector('.geo-row-bar').style.width = (alt / maxVal * 100) + '%';
+    altreRow.querySelector('.geo-row-val').textContent = Math.round(alt);
   }
 
-  let pos = 0, timer = null, dragging = false;
+  /* Porta pos da `from` a `to` in `ms` millisecondi, poi chiama done */
+  function tween(from, to, ms, done) {
+    cancelAnimationFrame(raf);
+    if (reduceMotion || ms <= 0 || from === to) {
+      pos = to; draw(pos); raf = null; if (done) done(); return;
+    }
+    const t0 = performance.now();
+    function frame(now) {
+      const u = Math.min(1, (now - t0) / ms);
+      pos = from + (to - from) * u;
+      draw(pos);
+      if (u < 1) raf = requestAnimationFrame(frame);
+      else { raf = null; if (done) done(); }
+    }
+    raf = requestAnimationFrame(frame);
+  }
 
-  function stop() {
-    cancelAnimationFrame(timer);
-    timer = null;
-    playIcon.className = 'ph ph-play';
+  function setPlayUI(on) {
+    playIcon.className = on ? 'ph ph-pause' : 'ph ph-play';
+    if (playText) playText.textContent = on ? 'Pausa' : 'Riproduci';
+    const lbl = on ? 'Metti in pausa la sequenza' : 'Riproduci la sequenza dei decenni';
+    playBtn.setAttribute('aria-label', lbl);
+    playBtn.title = lbl;
+  }
+
+  /* Sosta sul decennio corrente, poi movimento verso il successivo */
+  function holdThenMove() {
+    clearTimeout(holdTimer);
+    const cur = Math.round(pos);
+    holdTimer = setTimeout(() => {
+      if (!playing) return;
+      if (cur >= N - 1) { stop(); return; }
+      tween(cur, cur + 1, MOVE_MS, holdThenMove);
+    }, HOLD_MS);
   }
 
   function play() {
-    playIcon.className = 'ph ph-pause';
-    let last = performance.now();
-    function step(now) {
-      const dt = now - last; last = now;
-      pos = Math.min(1, pos + dt / 9000);
-      render(pos);
-      if (pos >= 1) { stop(); render(pos); return; }
-      timer = requestAnimationFrame(step);
-    }
-    timer = requestAnimationFrame(step);
+    playing = true;
+    setPlayUI(true);
+    if (pos >= N - 1) { pos = 0; }
+    draw(pos);
+    holdThenMove();
+  }
+
+  /* Ferma la sequenza; se era a metà strada torna sul decennio più vicino */
+  function stop() {
+    playing = false;
+    clearTimeout(holdTimer);
+    cancelAnimationFrame(raf); raf = null;
+    setPlayUI(false);
+    tween(pos, Math.round(pos), 250, () => draw(pos));
   }
 
   playBtn.addEventListener('click', e => {
     e.stopPropagation();
-    if (timer) { stop(); render(pos); return; }
-    if (pos >= 1) pos = 0;
-    play();
+    if (playing) stop(); else play();
   });
 
-  function setFromClientX(clientX) {
+  /* Trascinamento: il cursore segue il mouse, al rilascio si posa sul decennio più vicino */
+  function posFromClientX(clientX) {
     const rect = trackEl.getBoundingClientRect();
-    pos = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-    render(pos);
+    return Math.max(0, Math.min(1, (clientX - rect.left) / rect.width)) * (N - 1);
   }
-  trackEl.addEventListener('pointerdown', e => { e.stopPropagation(); stop(); dragging = true; setFromClientX(e.clientX); });
-  window.addEventListener('pointermove', e => { if (dragging) setFromClientX(e.clientX); });
+  trackEl.addEventListener('pointerdown', e => {
+    e.stopPropagation();
+    playing = false;
+    clearTimeout(holdTimer);
+    cancelAnimationFrame(raf); raf = null;
+    setPlayUI(false);
+    dragging = true;
+    pos = posFromClientX(e.clientX);
+    draw(pos);
+  });
+  window.addEventListener('pointermove', e => {
+    if (!dragging) return;
+    pos = posFromClientX(e.clientX);
+    draw(pos);
+  });
   window.addEventListener('pointerup', () => {
-    if (dragging) {
-      const N = decades.length - 1;
-      const nearestTick = Math.round(pos * N) / N;
-      if (Math.abs(pos - nearestTick) < 0.07) {
-        pos = nearestTick;
-        render(pos);
-      }
-    }
+    if (!dragging) return;
     dragging = false;
+    tween(pos, Math.round(pos), 250, () => draw(pos));
   });
 
-  render(0);
-  play();
+  /* Tastiera: frecce sinistra/destra, un decennio alla volta */
+  trackEl.tabIndex = 0;
+  trackEl.setAttribute('role', 'slider');
+  trackEl.setAttribute('aria-label', 'Decennio');
+  trackEl.setAttribute('aria-valuemin', 0);
+  trackEl.setAttribute('aria-valuemax', N - 1);
+  trackEl.addEventListener('keydown', e => {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    e.preventDefault();
+    playing = false;
+    clearTimeout(holdTimer);
+    setPlayUI(false);
+    const target = Math.max(0, Math.min(N - 1, Math.round(pos) + (e.key === 'ArrowRight' ? 1 : -1)));
+    tween(pos, target, 450, () => draw(pos));
+  });
+
+  draw(0);
+  if (reduceMotion) setPlayUI(false); else play();
 }
 
 
@@ -523,8 +663,11 @@ async function loadAndRenderTrend() {
     return chartWrap.clientWidth - padL - padR;
   }
 
+  /* Altezza mappa: proporzione 0,52 della larghezza, ma mai più alta dello
+     spazio visibile (portatili con finestra bassa); minimo 340px */
+  const mapHeight = w => Math.min(Math.round(w * 0.52), Math.max(340, window.innerHeight - 260));
   let W = contentWidth();
-  let H = Math.round(W * 0.52);
+  let H = mapHeight(W);
 
   mapEl.setAttribute('viewBox', `0 0 ${W} ${H}`);
   mapEl.style.height = H + 'px';
@@ -876,7 +1019,7 @@ async function loadAndRenderTrend() {
   /* ── Ridimensionamento finestra ─────────────────────────── */
   window.addEventListener('resize', () => {
     W = contentWidth();
-    H = Math.round(W * 0.52);
+    H = mapHeight(W);
     mapEl.setAttribute('viewBox', `0 0 ${W} ${H}`);
     mapEl.style.height = H + 'px';
     xScale.range([0, W]);
@@ -1073,6 +1216,7 @@ async function loadAndRenderBanditori2() {
 
   /* Intestazione fissa */
   const thead = document.createElement('div');
+  thead.className = 'band2-grid';
   thead.style.cssText = 'display:grid;grid-template-columns:260px 1fr;border-bottom:1px solid var(--gray-1);box-shadow:0 3px 8px rgba(26,20,16,.08);background:var(--paper);';
 
   const thLeft = document.createElement('div');
@@ -1120,12 +1264,16 @@ band2LegendToggle.addEventListener('click', e => {
 
   /* Corpo */
   const tbody = document.createElement('div');
+  tbody.className = 'band2-grid';
   tbody.style.cssText = 'display:grid;grid-template-columns:260px 1fr;';
   wrap.appendChild(tbody);
 
   /* Lista scrollabile */
   const listBody = document.createElement('div');
-  listBody.style.cssText = 'overflow-y:auto;height:900px;max-height:900px;border-right:1px solid var(--gray-1);scrollbar-width:thin;scrollbar-color:var(--gray-1) var(--paper-dark);';
+  listBody.className = 'band2-list';
+  /* altezza del riquadro: al massimo 900px, ma sempre dentro lo schermo */
+  const BAND_BOX_H = 'min(900px, calc(100vh - 160px))';
+  listBody.style.cssText = 'overflow-y:auto;height:' + BAND_BOX_H + ';max-height:' + BAND_BOX_H + ';border-right:1px solid var(--gray-1);scrollbar-width:thin;scrollbar-color:var(--gray-1) var(--paper-dark);';
   tbody.appendChild(listBody);
 
   let selBand = null;
@@ -1191,7 +1339,7 @@ band2LegendToggle.addEventListener('click', e => {
 
   /* Grafico — scrollabile, altezza SVG proporzionale al numero di nodi */
   const grafDiv = document.createElement('div');
-  grafDiv.style.cssText = 'padding:.75rem 1rem;background:var(--paper);overflow-y:auto;max-height:900px;scrollbar-width:thin;scrollbar-color:var(--gray-1) var(--paper-dark);';
+  grafDiv.style.cssText = 'padding:.75rem 1rem;background:var(--paper);overflow-y:auto;max-height:' + BAND_BOX_H + ';scrollbar-width:thin;scrollbar-color:var(--gray-1) var(--paper-dark);';
   tbody.appendChild(grafDiv);
 
   /* SVG bipartito */
@@ -1216,7 +1364,9 @@ band2LegendToggle.addEventListener('click', e => {
 
   const svg = document.createElementNS(NS, 'svg');
   svg.setAttribute('viewBox', `0 0 460 ${H}`);
-  svg.style.cssText = 'width:100%;display:block;';
+  /* Il disegno è in scala (viewBox 460 di larghezza): oltre 644px testo e nodi
+     diventerebbero enormi e il grafo altissimo. 644px = testo a circa 11px. */
+  svg.style.cssText = 'width:min(100%, 644px);display:block;margin:0 auto;';
   grafDiv.appendChild(svg);
   const eEls=[], lEls=[], rEls=[];
 

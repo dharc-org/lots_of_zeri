@@ -110,15 +110,51 @@ body.zac-loading .zac-catalogue-content {
   color: var(--gray-4) !important;
   font-family: var(--ff-body) !important;
   font-weight: 500;
-  font-size: clamp(1rem, min(1.6vh, 0.9vw), 1.6rem);
+  font-size: clamp(1rem, min(2vh, 1.1vw), 2.75rem);
 }
 
 .navbar-brand { margin-left: 1rem; }
-.navbar-brand img { height: clamp(35px, min(4.4vh, 2.4vw), 70px); width: auto; }
+
+/* Nome del sito a sinistra (link alla home): stessa scritta del footer */
+.navbar-brand.nav-wordmark {
+  font-size: clamp(1.45rem, min(2.8vh, 1.55vw), 3.6rem);
+  line-height: 1;
+  text-decoration: none !important;
+}
+.nav-wordmark em,
+.nav-wordmark .of {
+  font-family: var(--ff-head);
+  font-style: italic;
+}
+.nav-wordmark em  { font-weight: 700; color: var(--ink); }
+.nav-wordmark .of { font-weight: 400; color: var(--terra); font-size: .72em; }
+.nav-wordmark:hover .of { color: var(--terra-dark); }
+
+/* Logo della Fondazione a destra, dopo il menu, separato da un filetto:
+   rimanda al sito della Fondazione (esterno) */
+.nav-zeri-logo {
+  display: flex;
+  align-items: center;
+  padding-left: clamp(1.25rem, 1.6vw, 2.5rem);
+  margin-right: 1rem;
+  border-left: 1px solid var(--gray-1);
+}
+.nav-zeri-logo img { height: clamp(35px, min(4.4vh, 2.4vw), 100px); width: auto; display: block; }
+.nav-zeri-logo:hover img { opacity: .8; }
+
+/* Menu a tendina (sotto i 1200px): il logo va in fondo al menu, senza filetto */
+@media (max-width: 1199.98px) {
+  .nav-zeri-logo {
+    border-left: 0;
+    border-top: 1px solid var(--gray-1);
+    padding: .75rem 0 .25rem;
+    margin: .5rem 0 0;
+  }
+}
 
 .navbar-nav {
   margin-right: 2rem;
-  gap: 2rem !important;
+  gap: clamp(2rem, min(4vh, 2.2vw), 5rem) !important;
 }
 
 .nav-link { position: relative; }
@@ -280,7 +316,7 @@ footer {
 .hero-left {
   /* dimensioni del hero proporzionate alla griglia copertine: invariate fino a 800px di altezza */
   --fs-hero-nav: clamp(1.5rem, min(3vh, 1.64vw), 4rem);
-  padding: 0rem 3rem 5rem clamp(5rem, min(10vh, 5.5vw), 12rem);
+  padding: 2rem 3rem 5rem clamp(5rem, min(10vh, 5.5vw), 12rem);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -364,7 +400,7 @@ footer {
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
   width: 100%;
-  max-width: calc((100vh - 90px - 4rem - 24px) * 0.75 + 24px);
+  max-width: max(480px, calc((100vh - max(90px, 4.4vh + 25px) - 4rem - 24px) * 0.75 + 24px));
 }
 
 .grid-cell { aspect-ratio: 3/4; perspective: 900px; background: var(--paper-dark); border-radius: 2px; overflow: hidden; }
