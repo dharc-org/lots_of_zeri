@@ -1,7 +1,7 @@
 /*
  * cover_grid.js — Griglia flip 4×3 copertine cataloghi
  * ──────────────────────────────────────────────────────
- * Immagini: /static/img/covers/001.jpg … 068.jpg
+ * Immagini: /static/img/covers/001.webp … 067.webp (400px, WebP)
 
  */
 
@@ -10,7 +10,7 @@ const GRID_ROWS        = 3;
 const FLIP_INTERVAL_MS = 500;
 
 const COVERS = Array.from({length: 67}, (_, i) =>
-  `${window.BASE_PATH || ''}/static/img/covers/${String(i + 1).padStart(3, '0')}.jpg`
+  `${window.BASE_PATH || ''}/static/img/covers/${String(i + 1).padStart(3, '0')}.webp`
 );
 
 function shuffle(arr) {
@@ -57,8 +57,12 @@ setInterval(() => {
   const hiddenFace = isFlipped
     ? inner.querySelector('.card-face:not(.card-face-back)')
     : inner.querySelector('.card-face-back');
-  hiddenFace.querySelector('img').src = nextCover();
-  inner.classList.toggle('is-flipped');
-  flipped[pick] = !isFlipped;
-  setTimeout(() => { busy[pick] = false; }, 700);
+  const img = hiddenFace.querySelector('img');
+  img.src = nextCover();
+  // gira la carta solo quando la nuova copertina è pronta (niente faccia vuota)
+  img.decode().catch(() => {}).then(() => {
+    inner.classList.toggle('is-flipped');
+    flipped[pick] = !isFlipped;
+    setTimeout(() => { busy[pick] = false; }, 700);
+  });
 }, FLIP_INTERVAL_MS);
