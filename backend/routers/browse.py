@@ -25,6 +25,7 @@ router = APIRouter()
 tmpl: Jinja2Templates = None
 
 PAGE_SIZE = 50          # results per batch (SSR + infinite scroll)
+THUMB_MAX = 3   # URI max per richiesta /api/thumbs (allineato a THUMB_BATCH in JS)
 
 EXPORT_BATCH = 500      # SPARQL rows fetched per export batch (streaming)
 EXPORT_MAX   = 10000    # hard cap on rows exported in one request
@@ -386,7 +387,7 @@ def _register_list_route(tab_id, tab_cfg, route_cfg, cfg):
             if isinstance(val, Exception):
                 log.error(f"Facet {facet_id}: {val}")
 
-        # ── 2c. Label cache for active pills whose option disappeared due to 0-result cross-filter
+        # ── 2b. Label cache for active pills whose option disappeared due to 0-result cross-filter
         missing_uris = []
         for fid, fcfg in facets.items():
             if fcfg.get("type") == "multiselect":
@@ -409,7 +410,7 @@ def _register_list_route(tab_id, tab_cfg, route_cfg, cfg):
                     if o["uri"] == v and o["uri"] not in existing_uris:
                         facet_values[fid].append({**o, "count": 0})
 
-        # ── 2b. Range dinamici per slider ────────────────────────────────
+        # ── 2c. Range dinamici per slider ────────────────────────────────
         dynamic_ranges = {}
         facet_distributions = {}
         for fid, fcfg in facets.items():
@@ -432,6 +433,28 @@ def _register_list_route(tab_id, tab_cfg, route_cfg, cfg):
 
         total = int(float((count_res or [{}])[0].get("total", 0)))
         items = _extract_items(data_res, route_cfg)
+
+        # ── 2d. Label per facet nascosti (da_asta / da_catalogo) ──
+        for fid, fcfg in facets.items():
+            if fcfg.get("ui_widget") != "hidden":
+                continue
+            vals = params.get(fid, [])
+            body = cfg.get_facet_query_by_key(f"{tab_id}__{fid}__label")
+            if not vals or not body:
+                continue
+            uris = " ".join(f"<{v}>" for v in vals)
+            try:
+                rows = await sparql.select(pfx + body.replace("{URIS}", uris))
+            except Exception as e:
+                log.warning(f"Label {tab_id}/{fid}: {e}")
+                continue
+            known = {o["uri"] for o in facet_values.get(fid, [])}
+            for r in rows:
+                u = r.get("facetURI")
+                if u and u not in known and r.get("facetValue"):
+                    facet_values.setdefault(fid, []).append(
+                        {"uri": u, "value": r["facetValue"],
+                         "count": int(float(r.get("count", 0))), "parent": None})
 
         # ── 3. active_filters per sidebar ────────────────────────
         active_filters = {}
@@ -734,10 +757,15 @@ def _register_detail_route(tab_id, tab_cfg, route_cfg, cfg):
 async def api_thumbs(request: Request, uris: list[str] = Query([])):
     sparql = request.app.state.sparql
     cache  = request.app.state.cache
-    bases  = await sparql.thumbnails_batch(uris[:10], cache=cache)
-    return {u: {"thumb": iiif_sized(b, 160),    # lista
-                "cover": iiif_sized(b, 480)}    # griglia
-            for u, b in bases.items()}
+    # dedup + solo URI ZAC ben formati (finiscono dentro <…> nella query SPARQL)
+    clean = [u for u in dict.fromkeys(uris)
+             if u.startswith("http://w3id.org/zac/") and not any(c in u for c in '<>"{}|\\^` ')]
+    bases = await sparql.thumbnails_batch(clean[:THUMB_MAX], cache=cache)
+    out = {u: {"thumb": iiif_sized(b, 160), "cover": iiif_sized(b, 480)} for u, b in bases.items()}
+   
+    # cache browser solo se tutte risolte: non congela alcun null (anche transitorio)
+    headers = {"Cache-Control": "public, max-age=3600"} if all(bases.get(u) for u in out) else {}
+    return JSONResponse(out, headers=headers)
 
 @router.get("/api/lotti/counts")
 async def lotti_counts(request: Request):

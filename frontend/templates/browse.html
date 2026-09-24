@@ -46,11 +46,13 @@
     <span class="result-count"><strong>{{ total }}</strong> Risultati</span>
 
     {% set ns = namespace(has_any_active=false) %}
+    {% set PILL_WORDS = 6 %}
 
     {% if active_filters.get('q') %}
       {% set ns.has_any_active = true %}
       <span class="active-pill" data-facet="q" data-type="text">
-        “{{ active_filters['q'] }}”
+                {% set qw = active_filters['q'].split() %}
+        <span {% if qw | length > PILL_WORDS %}title="{{ active_filters['q'] }}"{% endif %}>“{{ qw[:PILL_WORDS] | join(' ') }}{{ '…' if qw | length > PILL_WORDS }}”</span>
         <button type="button" class="pill-remove" aria-label="Rimuovi">×</button>
       </span>
     {% endif %}
@@ -65,13 +67,17 @@
           </span>
         {% endif %}
 
-      {% elif facet.type == 'multiselect' and facet.ui_widget != 'hidden'  %}
+      {% elif facet.type == 'multiselect'  %}
         {% for v in active_filters.get(facet.id, []) %}
           {% set ns.has_any_active = true %}
           {% set pill_label = (facet.options | selectattr('uri', 'equalto', v) | map(attribute='value') | first) or v %}
           {% set pill_label = pill_label | lingua_estesa if facet.id == 'lingua' else pill_label %}
-          <span class="active-pill" data-facet="{{ facet.id }}" data-type="multi" data-value="{{ v }}">
-            {{ pill_label }}
+          {% set full_label = (facet.label_it ~ ': ' if facet.ui_widget == 'hidden' else '') ~ pill_label %}
+          {% set words = pill_label | string | trim | wordcount %}
+          {% set short_label = (pill_label | string).split()[:PILL_WORDS] | join(' ') ~ ('…' if words > PILL_WORDS else '') %}
+          <span class="active-pill" data-facet="{{ facet.id }}" data-type="multi" data-value="{{ v }}"
+                {% if words > PILL_WORDS or facet.ui_widget == 'hidden' %}title="{{ full_label }}"{% endif %}>
+            {% if facet.ui_widget == 'hidden' %}{{ facet.label_it }}: {% endif %}{{ short_label }}
             <button type="button" class="pill-remove" aria-label="Rimuovi">×</button>
           </span>
         {% endfor %}
@@ -312,30 +318,72 @@
 /* Descrittore card condiviso SSR ↔ infinite scroll */
 const DISPLAY = {{ display | tojson }};
 
-/* ── Idratazione thumbnail ── */
-async function hydrateThumbs(scope = document) {
-  const nodes = [...scope.querySelectorAll('[data-thumb-uri]:not([data-thumb-done])')];
-  if (!nodes.length) return;
-  const CHUNK = 10;
-  for (let i = 0; i < nodes.length; i += CHUNK) hydrateChunk(nodes.slice(i, i + CHUNK));
+/* ── Idratazione thumbnail: lazy (viewport), dedup per URI, coda a batch ── */
+const THUMB_BATCH       = 3;   // URI per richiesta /api/thumbs
+const THUMB_CONCURRENCY = 1;   // richieste in volo contemporaneamente
+const thumbResolved = new Map();   // uri → {thumb, cover} | null
+const thumbNodes    = new Map();   // uri → Set<node> (lista + griglia)
+const thumbQueue    = [];          // uri in attesa (FIFO)
+const thumbQueued   = new Set();   // uri in coda o in volo
+let   thumbInflight = 0;
+
+function applyThumb(n, t) {
+  n.dataset.thumbDone = '1';
+  if (!t) return;
+  const inCover = !!n.closest('.card-cover');
+  const src = inCover ? t.cover : t.thumb;
+  if (!src) return;
+  const img = document.createElement('img');
+  img.src = src; img.loading = 'lazy'; img.decoding = 'async';
+  img.className = inCover ? 'cover-img' : 'thumb-img';
+  n.replaceChildren(img);
 }
-async function hydrateChunk(nodes) {
-  const qs = nodes.map(n => 'uris=' + encodeURIComponent(n.dataset.thumbUri)).join('&');
-  let map = {};
-  try { map = await (await fetch((window.BASE_PATH || '') + '/api/thumbs?' + qs)).json(); } catch (e) { return; }
-  for (const n of nodes) {
-    n.dataset.thumbDone = '1';
-    const t = map[n.dataset.thumbUri];
-    if (!t) continue;
-    const inCover = !!n.closest('.card-cover');
-    const src = inCover ? t.cover : t.thumb;
-    if (src) {
-      const img = document.createElement('img');
-      img.src = src; img.loading = 'lazy';
-      img.className = inCover ? 'cover-img' : 'thumb-img';
-      n.replaceChildren(img);
-    }
+
+const thumbObserver = new IntersectionObserver((entries) => {
+  for (const e of entries) {
+    if (!e.isIntersecting) continue;
+    const n = e.target, uri = n.dataset.thumbUri;
+    thumbObserver.unobserve(n);
+    if (thumbResolved.has(uri)) { applyThumb(n, thumbResolved.get(uri)); continue; }
+    if (!thumbQueued.has(uri)) { thumbQueued.add(uri); thumbQueue.push(uri); }
   }
+  pumpThumbs();
+}, { rootMargin: '200px 0px' });
+
+function pumpThumbs() {
+  while (thumbInflight < THUMB_CONCURRENCY && thumbQueue.length) {
+    const batch = thumbQueue.splice(0, THUMB_BATCH);
+    thumbInflight++;
+    fetchThumbs(batch).finally(() => { thumbInflight--; pumpThumbs(); });
+  }
+}
+
+async function fetchThumbs(uris) {
+  const qs = uris.map(u => 'uris=' + encodeURIComponent(u)).join('&');
+  let map = {};
+  try {
+    const r = await fetch((window.BASE_PATH || '') + '/api/thumbs?' + qs);
+    if (!r.ok) throw new Error(r.status);
+    map = await r.json();
+  } catch (e) { /* placeholder resta; nessun retry automatico */ }
+  for (const u of uris) {
+    const t = map[u] || null;
+    thumbResolved.set(u, t);
+    thumbQueued.delete(u);
+    for (const n of (thumbNodes.get(u) || [])) { thumbObserver.unobserve(n); applyThumb(n, t); }
+  }
+}
+
+function hydrateThumbs(scope = document) {
+  scope.querySelectorAll('[data-thumb-uri]:not([data-thumb-obs])').forEach(n => {
+    n.dataset.thumbObs = '1';
+    const uri = n.dataset.thumbUri;
+    if (!uri) return;
+    if (!thumbNodes.has(uri)) thumbNodes.set(uri, new Set());
+    thumbNodes.get(uri).add(n);
+    if (thumbResolved.has(uri)) applyThumb(n, thumbResolved.get(uri));
+    else thumbObserver.observe(n);
+  });
 }
 
 async function hydrateLotCounts(scope = document) {
@@ -360,8 +408,6 @@ async function hydrateLotCounts(scope = document) {
 }
 
 document.addEventListener('DOMContentLoaded', () => { hydrateThumbs(); hydrateLotCounts(); });
-
-
 
 /* Helpers condivisi */
 function esc(s) {

@@ -310,7 +310,6 @@ Mirador.viewer({
   windows: [{
     manifestId: {{ view.manifest_url|tojson }},
     {% if view.canvas_id %}canvasId: {{ view.canvas_id|tojson }},{% endif %}
-    view: 'book',
   }],
   selectedTheme: 'dark',
   themes: {
@@ -347,16 +346,22 @@ Mirador.viewer({
       enabled: false,
     },
     window: {
+      views: [                 
+        { key: 'single' },
+        { key: 'book' },
+        { key: 'gallery' },
+      ],
+      defaultView: 'book',     
       panels: {
-        info: false,
-        attribution: false,
+        info: true,
+        attribution: true,
         canvas: false,
         annotations: false,
         search: false,
       },
       hideWindowTitle: true,
       allowClose: false,
-      allowMaximize: false,
+      allowMaximize: true,
       allowFullscreen: true,
     },
 });

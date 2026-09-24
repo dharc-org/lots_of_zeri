@@ -8,6 +8,13 @@
 <div class="sidebar-header">Filtra</div>
 <form method="GET" action="{{ base_path }}{{ tab_route }}" class="h-100 pt-1 p-3" id="facet-form">
 
+  {# ── Contesto nascosto (da_asta / da_catalogo): preservato tra i submit ── #}
+  {% for facet in facet_defs if facet.ui_widget == 'hidden' %}
+    {% for v in active_filters.get(facet.id, []) %}
+      <input type="hidden" name="{{ facet.id }}" value="{{ v }}">
+    {% endfor %}
+  {% endfor %}
+
   {% for facet in facet_defs %}
 
     {# ── RANGE SLIDER ─────────────────────────────────────── #}

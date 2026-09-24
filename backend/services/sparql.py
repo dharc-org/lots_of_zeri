@@ -9,6 +9,7 @@ import logging
 import json
 from typing import Any, Dict, List, Optional
 import re
+import asyncio
 
 logger = logging.getLogger("zac.sparql")
 
@@ -19,6 +20,8 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX aat: <http://vocab.getty.edu/aat/>
 PREFIX zac: <http://w3id.org/zac/>
 """
+
+_FETCH_ERR = object()   # sentinella: errore transitorio nel fetch del manifest (non cachare)
 
 ##################### HELPERS
 
@@ -39,6 +42,7 @@ class SparqlService:
         self.named_graph = named_graph
         self.timeout     = timeout
         self._client: Optional[httpx.AsyncClient] = None
+        self._manifest_sem = asyncio.Semaphore(5) 
 
     @property
     def client(self) -> httpx.AsyncClient:
@@ -117,16 +121,26 @@ class SparqlService:
         if "/full/" in manifest_url:
             return manifest_url
         
-        try:
-            r = await self.client.get(manifest_url, headers={"Accept": "application/json"})
-            r.raise_for_status()
-            m = r.json()
-        except (httpx.HTTPError, ValueError):
-            return None
+        m = None
+        for attempt in range(2):                      # 1 retry server-side
+            try:
+                async with self._manifest_sem:
+                    r = await self.client.get(manifest_url, headers={"Accept": "application/json"}, timeout=12.0)
+                r.raise_for_status()
+                m = r.json()
+                break
+            except (httpx.HTTPError, ValueError) as e:
+                logger.warning(f"THUMB fetch fallito ({attempt + 1}/2): {manifest_url} → {type(e).__name__} {e}")
+                if attempt == 0:
+                    await asyncio.sleep(0.5)
+        if m is None:
+            return _FETCH_ERR
+        
         try:
             canvas = m["sequences"][0]["canvases"][0]
         except (KeyError, IndexError, TypeError):
             return None
+        
         # Preferisci il service IIIF → size scelta in rendering
         try:
             svc = canvas["images"][0]["resource"]["service"]
@@ -137,6 +151,7 @@ class SparqlService:
                 return base.rstrip("/")
         except (KeyError, IndexError, TypeError, AttributeError):
             pass
+        
         # Fallback: thumbnail statica
         thumb = canvas.get("thumbnail")
         if isinstance(thumb, list):
@@ -164,6 +179,9 @@ class SparqlService:
                 for m in manifest_urls
             ))
             for u, t in zip(to_lookup, fetched):
+                if t is _FETCH_ERR:
+                    result[u] = None          # errore transitorio: niente cache
+                    continue
                 result[u] = t
                 if cache is not None:
                     cache.set(f"thumb:{u}", t if t is not None else "__none__", ttl=86400)
