@@ -261,9 +261,10 @@ lotti:
       auction_label: "auctionLabel"
       auction_slug:  "auctionSlug"
     sort_fields:
+      mix:       { order: "ASC(?lotNum) ASC(?lot)", label: "In evidenza (Revisionato)" }
       name_asc:  { order: "ASC(?title)",  label: "Nome A–Z (Revisionato)" }
       name_desc: { order: "DESC(?title) ", label: "Nome Z–A (Revisionato)" }
-    default_sort: "name_asc"
+    default_sort: "mix"
     export_filename: "zac_lotti"
 
   facets:

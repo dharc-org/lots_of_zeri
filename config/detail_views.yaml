@@ -156,10 +156,12 @@ evento:
       title_it: "Lotti in vendita nell'asta"
       card: "lotto"
       count_label_it: "lotti in vendita"
+      link: { route: "/lotti?da_asta={me}", link_key: "uri" }
     - id: "evento_related_house"
       title_it: "Aste correlate"
       card: "evento"
       count_label_it: "aste della stessa casa d'asta"
+      link: { route: "/aste?organizzatore={value}", link_key: "houseURI" }
  
   query_blocks:
     scalars: "evento_scalars"
@@ -217,7 +219,7 @@ lotto:
         link_route: "/aste/{slug}", link_key: "auctionSlug" }
     - { key: "docTitle", label_it: "Catalogo", multi: false,
         link_route: "/cataloghi/{id}", link_key: "docId" }
-    - { key: "reviewed", label_it: "Revisione",
+    - { key: "reviewed", label_it: "Status",
         kind: "flag", icon: "ph ph-seal-check" }
   
   related:
@@ -226,6 +228,7 @@ lotto:
       card: "lotto"
       count_label_it: "lotti"
       highlight_current: true
+      link: { route: "/lotti?da_asta={value}", link_key: "auction" } 
 
   query_blocks:
     scalars: "lotto_scalars"

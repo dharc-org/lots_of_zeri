@@ -496,8 +496,11 @@ filter_snippets:
 
   lotti__tipologia:
     multiselect: |
-      ?lot crm:P2_has_type ?otype_f .
       VALUES ?otype_f { {values_clause} }
+      ?lot crm:P2_has_type ?otype_f .
+      ?otype_fA crm:P140_assigned_attribute_to ?lot ;
+                crm:P141_assigned ?otype_f ;
+                crm:P2_has_type zac:validated .
 
   lotti___search:
     text_search: |
@@ -655,9 +658,8 @@ results:
     GROUP BY ?ref
 
   lotto: |
-    SELECT ?lot
+    SELECT ?lot ?title ?rev ?lotNum
            (SAMPLE(?label0)        AS ?label)
-           (SAMPLE(?title0)        AS ?title)
            (SAMPLE(?img0)          AS ?img)
            (SAMPLE(?authorLabel0)  AS ?authorLabel)
            (SAMPLE(?typeLabel0)    AS ?typeLabel)
@@ -665,16 +667,22 @@ results:
            (SAMPLE(?auctionSlug0)  AS ?auctionSlug)
     WHERE {
       {
-        SELECT ?lot (MIN(?titleSort) AS ?sortTitle)
+        SELECT ?lot (MIN(?titleSort) AS ?title)
+                    (MAX(COALESCE(?revFlag, 0)) AS ?rev)
+                    (MIN(?lotNum0) AS ?lotNum)
         WHERE {
           ?lot a la:Set ;
                crm:P1_is_identified_by ?idNode .
+
+          ?lot crm:P102_has_title ?tnS .
+          ?tnS rdfs:label ?titleSort .
+          FILTER(STRLEN(STR(?titleSort)) > 0)
+
+          BIND(COALESCE(xsd:integer(REPLACE(STR(?lot), "^.*_lot_", "")), 999999) AS ?lotNum0)
+
           OPTIONAL {
-            ?lot crm:P102_has_title ?tnS .
-            ?tnS rdfs:label ?titleSort .
-          }
-          OPTIONAL {
-            ?setR crm:P46_is_composed_of ?lot .
+            ?setR crm:P46_is_composed_of ?lot ;
+                  crm:P2_has_type aat:300411307 .
             ?auctionR crm:P16_used_specific_object ?setR ;
                       crm:P2_has_type aat:300054751 .
             ?docR crm:P70_documents ?auctionR ;
@@ -684,12 +692,11 @@ results:
           {FILTERS}
         }
         GROUP BY ?lot
-        ORDER BY {ORDER}
+        ORDER BY DESC(?rev) {ORDER}
         LIMIT {limit}
         OFFSET {offset}
       }
       OPTIONAL { ?lot rdfs:label ?label0 }
-      OPTIONAL { ?lot crm:P102_has_title ?tn . ?tn rdfs:label ?title0 }
       OPTIONAL { ?lot crm:P138i_has_representation ?img0 }
       OPTIONAL {
         ?lot crm:P94i_was_created_by ?cr .
@@ -700,18 +707,24 @@ results:
       OPTIONAL {
         ?lot crm:P2_has_type ?otype .
         FILTER(STRSTARTS(STR(?otype), "http://w3id.org/zac/type/"))
+        ?otypeA crm:P140_assigned_attribute_to ?lot ;
+                crm:P141_assigned ?otype ;
+                crm:P2_has_type zac:validated .
         ?otype rdfs:label ?typeLabel0 .
+        FILTER(!CONTAINS(?typeLabel0, ";"))
+        FILTER(UCASE(?typeLabel0) = STR(?typeLabel0))
       }
       OPTIONAL {
-        ?lots crm:P46_is_composed_of ?lot .
+        ?lots crm:P46_is_composed_of ?lot ;
+              crm:P2_has_type aat:300411307 .
         ?auction crm:P16_used_specific_object ?lots ;
                 crm:P2_has_type aat:300054751 ;
                 rdfs:label ?auctionLabel0 .
         BIND(REPLACE(STR(?auction), "^.*/", "") AS ?auctionSlug0)
       }
     }
-    GROUP BY ?lot
-    ORDER BY ASC(IF(?reviewed = "true", 0, 1)) {ORDER}
+    GROUP BY ?lot ?title ?rev ?lotNum
+    ORDER BY DESC(?rev) {ORDER}
 
   lotto_count: |
     SELECT (COUNT(DISTINCT ?lot) AS ?total)
@@ -1076,8 +1089,8 @@ detail:
   # ── LOTTO ──────────────────────────────────────────────────────
 
   lotto_scalars: |
-    SELECT DISTINCT ?label ?title ?typeLabel ?lotId ?lotImage ?historicaUrl
-                    ?manifest ?docId ?docTitle ?auctionSlug ?auctionLabel ?reviewed
+    SELECT DISTINCT ?label ?title ?typeLabel ?lotId ?lotImage ?historicaUrl 
+                    ?manifest ?docId ?docTitle ?auction ?auctionSlug ?auctionLabel ?reviewed
     WHERE {
         <{uri}> a la:Set .
         OPTIONAL { <{uri}> rdfs:label ?label }
@@ -1093,6 +1106,8 @@ detail:
                           crm:P177_assigned_property_of_type crm:P2_has_type ;
                           crm:P2_has_type zac:validated .
           ?otype rdfs:label ?typeLabel .
+          FILTER(!CONTAINS(?typeLabel, ";"))
+          FILTER(UCASE(?typeLabel) = STR(?typeLabel))
         }
 
         OPTIONAL { 
