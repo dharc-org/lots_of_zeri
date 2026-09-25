@@ -729,18 +729,22 @@ def _register_detail_route(tab_id, tab_cfg, route_cfg, cfg):
             except Exception as e:
                 log.warning(f"related {block_id}: {e}")
 
-        # ── Thumbnail per i correlati (stesso meccanismo di cerca NL) ──
-        rel_uris = [r["uri"] for rows in related_rows.values()
-                    for r in rows if r.get("uri")]
-        if rel_uris:
+        # ── Thumbnail per i correlati catalogo/evento (i lotti hanno già ?img) ──
+        cards = {b["id"]: b["card"] for b in cfg_view.get("related", [])}
+        thumb_rows = [r for bid, rows in related_rows.items()
+                      if cards.get(bid) in ("catalogo", "evento")
+                      for r in rows if r.get("uri")]
+        if thumb_rows:
             try:
-                thumbs = await sparql.thumbnails_batch(
-                    rel_uris, cache=request.app.state.cache)
-                for rows in related_rows.values():
-                    for r in rows:
-                        r["thumb"] = iiif_sized(thumbs.get(r.get("uri")), 480)
+                uris = list(dict.fromkeys(r["uri"] for r in thumb_rows))
+                thumbs = await sparql.thumbnails_batch(uris, cache=request.app.state.cache)
+                for r in thumb_rows:
+                    r["thumb"] = iiif_sized(thumbs.get(r["uri"]), 480)
             except Exception as e:
                 log.warning(f"related thumbs: {e}")
+                for r in thumb_rows:
+                    r["thumb"] = None      # mai un manifest nell'<img>
+        
 
         # ── Merge config + dati → view ──────────────────────────────
         view = build_view(_kind, cfg_view,  uri=uri, scalars=scalars,

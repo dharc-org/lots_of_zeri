@@ -1011,21 +1011,38 @@ detail:
     ORDER BY ?value
  
   # Correlati: altre aste della stessa casa d'asta (organizzatore), escluso il corrente
-  # {house} = label casa (passata dal router dopo gli scalari)
+  # {me} = URI dell'asta corrente
+  # thumb = manifest IIIF del catalogo che documenta l'asta (uno per asta)
   evento_related_house: |
-    SELECT DISTINCT ?uri ?label ?house ?yearLabel ?place
+    SELECT ?uri
+           (SAMPLE(?l)       AS ?label)
+           (SAMPLE(?hl)      AS ?house)
+           (SAMPLE(?yl)      AS ?yearLabel)
+           (SAMPLE(?placeL)  AS ?place)
+           (MIN(STR(?t))     AS ?thumb)
     WHERE {
-        ?uri a crm:E7_Activity ;
-             crm:P2_has_type aat:300054751 ;
-             crm:P9_consists_of ?org .
+        <{me}> crm:P9_consists_of ?meOrg .
+        ?meOrg crm:P2_has_type zac:auction_organisation ;
+               crm:P14_carried_out_by ?h .
+
         ?org crm:P2_has_type zac:auction_organisation ;
              crm:P14_carried_out_by ?h .
-        ?h rdfs:label ?house .
+        ?uri crm:P9_consists_of ?org ;
+             a crm:E7_Activity ;
+             crm:P2_has_type aat:300054751 .
         FILTER(?uri != <{me}>)
-        OPTIONAL { ?uri rdfs:label ?label }
-        OPTIONAL { ?uri crm:P4_has_time-span ?ts . ?ts rdfs:label ?yearLabel . }
-        OPTIONAL { ?uri crm:P7_took_place_at ?pl . ?pl rdfs:label ?place . }
+
+        ?h rdfs:label ?hl .
+        OPTIONAL { ?uri rdfs:label ?l }
+        OPTIONAL { ?uri crm:P4_has_time-span ?ts . ?ts rdfs:label ?yl . }
+        OPTIONAL { ?uri crm:P7_took_place_at ?plc . ?plc rdfs:label ?placeL . }
+
+        OPTIONAL {
+            ?doc crm:P70_documents ?uri ;
+                 crm:P138i_has_representation ?t .
+        }
     }
+    GROUP BY ?uri
     ORDER BY ?yearLabel
     
   evento_related_lotti: |
