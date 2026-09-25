@@ -101,6 +101,7 @@ def build_view(
     multis: Dict[str, List[dict]],
     related: Dict[str, List[dict]],
     manifest_url: Optional[str] = None,
+    related_counts: Optional[Dict[str, int]] = None,
     base_path: str = "",
 ) -> dict:
     """
@@ -110,10 +111,15 @@ def build_view(
     multis      : { field_key → righe della query multivalore }
                   per i contributori la chiave è "contributors" con righe {name, role}
     related     : { block_id → righe della query correlati }
+    related_counts : { block_id → totale reale dei correlati }, dal COUNT
+                     (auto o custom) lanciato dal router in parallelo alla query
+                     del carosello. Se manca il block_id, si usa len(items),
+                     cioè gli elementi mostrati, limitati dal LIMIT della query.
     base_path   : prefisso di deploy (es. "/zac"), anteposto a tutti gli URL interni
     """
     sc = scalars or [{}]
     row0 = sc[0] if sc else {}
+    related_counts = related_counts or {}
 
     def _bp(url):
         """Antepone il base_path a un URL interno (no-op se url è vuoto/None)."""
@@ -123,7 +129,7 @@ def build_view(
         """Sostituisce i placeholder di rotta ({slug}/{id} path, {me}/{uri} URI intero)
         col valore url-encoded, poi antepone base_path."""
         enc = quote(str(val), safe="")
-        for tok in ("{slug}", "{id}", "{me}", "{uri}"):
+        for tok in ("{slug}", "{id}", "{me}", "{uri}", "{value}"):
             route = route.replace(tok, enc)
         return _bp(route)
 
@@ -305,6 +311,17 @@ def build_view(
                         "thumb": thumb,
                         "is_me": highlight and r.get("pos") == "me",
                     })
+        
+        # Link del count → browse pre-filtrata (stesso schema link_key di switch/campi)
+        link = None
+        lc = block.get("link")
+        if lc and not block.get("placeholder", False):
+            lk = lc.get("link_key", "uri")
+            lv = link_vals.get(lk) or _scalar(sc, lk)
+            if lv and lc.get("transform") == "year4":
+                lv = _extract_year4(lv)
+            if lv:
+                link = _route(lc["route"], lv)
 
         related_out.append({
             "id":             block["id"],
@@ -315,6 +332,8 @@ def build_view(
             "placeholder":    block.get("placeholder", False),
             "vals":           items,
             "highlight_current": highlight,
+            "count":          related_counts.get(bid, len(items)),
+            "link":           link,
         })
 
     # ── Sezioni (indice) ─────────────────────────────────────────────

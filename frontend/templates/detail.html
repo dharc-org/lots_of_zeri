@@ -104,7 +104,7 @@
           {% if f.has_value %}
           <div class="detail-row">
             <dt class="detail-dt">{{ f.label_it }}</dt>
-            <dd class="detail-dd {% if f.label_it in ['Collezione in vendita', 'Tipologia oggetti'] %}detail-dd--sentence{% endif %}">
+            <dd class="detail-dd">
               
               {# Flag → solo badge (es. revisionato) #}
               {% if 'kind' in f and f.kind == "flag" %}
@@ -175,9 +175,15 @@
     <section id="sec-{{ block.id }}" class="detail-section detail-related">
       <div class="detail-related-head">
         <h2 class="detail-related-title">{{ block.title_it }}</h2>
-        <span class="detail-related-count">
-          {{ block.count }} {{ block.count_label_it }}
-        </span>
+        {% if block.link %}
+          <a href="{{ block.link }}" class="detail-related-count detail-link">
+            {{ block.count }} {{ block.count_label_it }} <i class="ph ph-arrow-right" aria-hidden="true"></i>
+          </a>
+        {% else %}
+          <span class="detail-related-count">
+            {{ block.count }} {{ block.count_label_it }}
+          </span>
+        {% endif %}
       </div>
 
       {% if block.placeholder %}

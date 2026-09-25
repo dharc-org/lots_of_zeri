@@ -54338,7 +54338,7 @@ zac:4513_auction a crm:E7_Activity ;
         zac:object_type_sculture ;
     crm:P16_used_specific_object zac:4513,
         zac:4513_lots,
-        zac:collezione_joachim_ferroni ;
+        zac:collezione_g_ferroni ;
     crm:P2_has_type aat:300054751 ;
     crm:P4_has_time-span zac:1909_04_14-1909_04_22 ;
     crm:P70i_is_documented_in zac:7638_record ;
@@ -170122,10 +170122,6 @@ zac:collezione_jean_baptiste_michiels a crm:E78_Curated_Holding ;
 zac:collezione_jean_dubois a crm:E78_Curated_Holding ;
     rdfs:label "COLLEZIONE JEAN DUBOIS" ;
     crm:P46_is_composed_of zac:84296_lots .
-
-zac:collezione_joachim_ferroni a crm:E78_Curated_Holding ;
-    rdfs:label "COLLEZIONE JOACHIM FERRONI" ;
-    crm:P46_is_composed_of zac:4513_lots .
 
 zac:collezione_johann_bosch a crm:E78_Curated_Holding ;
     rdfs:label "COLLEZIONE JOHANN BOSCH" ;

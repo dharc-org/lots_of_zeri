@@ -71,6 +71,8 @@ catalogo:
         facet_link: { route: "/cataloghi", param: "anno_pubblicazione", kind: "range_year" } }
     - { key: "languages", label_it: "Lingua", multi: true }    
     - { key: "illustrated", label_it: "Illustrato", multi: false }
+    - { key: "collections",  label_it: "Collezione", multi: true,
+        facet_link: { route: "/cataloghi", param: "collezione" } }
     - { key: "docId",      label_it: "Numero di inventario",  multi: false }
     - { key: "auctionLabel",    label_it: "Vendita all'asta",      multi: false,
         link_route: "/aste/{slug}", link_key: "auctionSlug" }
@@ -83,11 +85,14 @@ catalogo:
       title_it: "Lotti nel catalogo"
       card: "lotto"
       count_label_it: "lotti totali in vendita"
+      link: { route: "/lotti?da_catalogo={me}", link_key: "uri"  }
     - id: "catalogo_related_year"
       title_it: "Altri cataloghi dello stesso anno"
       card: "catalogo"
       count_label_it: "cataloghi"
-
+      link: { route: "/cataloghi?anno_pubblicazione_from={value}&anno_pubblicazione_to={value}",
+              link_key: "year", transform: "year4" }
+              
   # Quali query lanciare e come (lette dal router generico)
   query_blocks:
     scalars: "catalogo_scalars"
@@ -97,6 +102,7 @@ catalogo:
       secondary_author_person: "catalogo_secondary_author_person"
       auctioneer: "catalogo_auctioneer"
       languages:    "catalogo_languages"
+      collections: "catalogo_collections"
     related:
       catalogo_related_lotti:
         query:      "catalogo_related_lotti"
