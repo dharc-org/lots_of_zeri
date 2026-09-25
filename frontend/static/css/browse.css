@@ -346,6 +346,9 @@
 
 /* Liste dei filtri: prime voci + "Mostra tutte", senza scorrimento interno */
 .facet-list.is-collapsed:not(.is-searching) .is-extra { display: none; }
+/* rami dei filtri ad albero: ognuno si apre da solo */
+.facet-tree-children.is-collapsed > .is-extra-child { display: none; }
+.facet-more--child { margin: .1rem 0 .3rem 1.6rem; font-size: var(--fs-caption); }
 .facet-list.is-searching + .facet-more { display: none; }
 .facet-more {
   display: inline-flex;

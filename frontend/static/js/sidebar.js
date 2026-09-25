@@ -120,8 +120,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
   /* ── "Mostra tutte" / "Mostra meno" nelle liste dei filtri ── */
   // un ramo nascosto che contiene una voce spuntata resta visibile
-  document.querySelectorAll('.facet-list .is-extra').forEach(function (el) {
-    if (el.querySelector('input:checked')) el.classList.remove('is-extra');
+  document.querySelectorAll('.facet-list .is-extra, .facet-list .is-extra-child').forEach(function (el) {
+    if (el.querySelector('input:checked')) el.classList.remove('is-extra', 'is-extra-child');
   });
   document.querySelectorAll('.facet-more').forEach(function (btn) {
     btn.addEventListener('click', function () {

@@ -7,6 +7,8 @@
 #}
 {# Liste dei filtri: prime FACET_VISIBLE voci visibili, le altre con "Mostra tutte" (niente scorrimento interno) #}
 {% set FACET_VISIBLE = 6 %}
+{# Filtri ad albero (es. Scuola): 3 voci per livello, poi "Mostra tutte" #}
+{% set TREE_VISIBLE = 3 %}
 <div class="sidebar-header">Filtra</div>
 <form method="GET" action="{{ base_path }}{{ tab_route }}" class="h-100 pt-1 p-3" id="facet-form">
 
@@ -118,12 +120,13 @@
     <div class="facet">
       <label class="facet-title mb-2">{{ facet.label_it }}</label>
       {% set active_vals = active_filters[facet.id] if facet.id in active_filters else [] %}
-      {% set has_more = facet.tree | length > FACET_VISIBLE %}
+      {% set has_more = facet.tree | length > TREE_VISIBLE %}
       <div class="facet-list{% if has_more %} is-collapsed{% endif %}">
         <ul class="facet-tree">
         {% for node in facet.tree recursive %}
           {# solo il primo livello si accorcia; i rami con voci spuntate restano visibili (sidebar.js) #}
-          <li{% if loop.depth == 1 and loop.index > FACET_VISIBLE %} class="is-extra"{% endif %}>
+          {# primo livello: is-extra · sottolivelli: is-extra-child (ogni ramo ha il suo "Mostra tutte") #}
+          <li{% if loop.index > TREE_VISIBLE %} class="{{ 'is-extra' if loop.depth == 1 else 'is-extra-child' }}"{% endif %}>
             <label class="form-check-label facet-tree-row d-flex justify-content-between w-100">
               <span class="facet-tree-label">
                 <input class="form-check-input me-1" type="checkbox"
@@ -134,7 +137,11 @@
               <span class="text-muted ms-1 {% if node.count == 0 %}opacity-25{% endif %}">{{ node.count }}</span>
             </label>
             {% if node.children %}
-              <ul class="facet-tree-children">{{ loop(node.children) }}</ul>
+              <ul class="facet-tree-children{% if node.children | length > TREE_VISIBLE %} is-collapsed{% endif %}">{{ loop(node.children) }}</ul>
+              {% if node.children | length > TREE_VISIBLE %}
+              <button type="button" class="facet-more facet-more--child"
+                      data-more="Mostra tutte ({{ node.children | length }})" data-less="Mostra meno">Mostra tutte ({{ node.children | length }})</button>
+              {% endif %}
             {% endif %}
           </li>
         {% endfor %}

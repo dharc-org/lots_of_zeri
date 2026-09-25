@@ -1131,17 +1131,81 @@ footer {
   display: flex;
   gap: 1rem;
   overflow-x: auto;
-  padding-bottom: .75rem;
+  padding-bottom: .25rem;
   scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
   width: 100%;
   max-width: 100%;
   min-width: 0;
-  scrollbar-width: thin;
-  scrollbar-color: var(--gray-1) transparent;
+  scrollbar-width: none;            /* la barra del browser è sostituita da frecce e barra di posizione */
 }
-.detail-carousel::-webkit-scrollbar { height: 9px; }
-.detail-carousel::-webkit-scrollbar-track { background: var(--paper-dark); }
-.detail-carousel::-webkit-scrollbar-thumb { background: var(--gray-1); border-radius: 6px; }
+.detail-carousel::-webkit-scrollbar { display: none; }
+
+/* Contenitore con frecce e sfumature ai bordi */
+.carousel-shell { position: relative; }
+.carousel-shell::before,
+.carousel-shell::after {
+  content: "";
+  position: absolute;
+  top: 0; bottom: .25rem;
+  width: 64px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .2s;
+  z-index: 2;
+}
+.carousel-shell::before { left: 0;  background: linear-gradient(to right, var(--paper), transparent); }
+.carousel-shell::after  { right: 0; background: linear-gradient(to left,  var(--paper), transparent); }
+.carousel-shell.has-prev::before,
+.carousel-shell.has-next::after { opacity: 1; }
+
+.carousel-nav {
+  position: absolute;
+  top: 38%;                          /* all'altezza delle copertine */
+  transform: translateY(-50%);
+  z-index: 3;
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--terra);
+  background: var(--paper-light);
+  color: var(--terra);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.25rem;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(26,20,16,.18);
+  transition: opacity .2s, background .15s, color .15s;
+}
+.carousel-nav:hover { background: var(--terra); color: var(--paper-light); }
+.carousel-nav:disabled { opacity: 0; pointer-events: none; }
+.carousel-prev { left: -.75rem; }
+.carousel-next { right: -.75rem; }
+.carousel-shell.is-static .carousel-nav { display: none; }
+
+/* "1–4 di 19" + barra di posizione */
+.carousel-status {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: .6rem;
+  font-family: var(--ff-mono);
+  font-size: var(--fs-mono);
+  color: var(--gray-3);
+}
+.carousel-status[hidden] { display: none; }
+.carousel-progress {
+  position: relative;
+  flex: 1;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--paper-dark);
+}
+.carousel-progress span {
+  position: absolute;
+  top: 0; bottom: 0;
+  border-radius: 2px;
+  background: var(--terra);
+  transition: left .15s, width .15s;
+}
 
 .carousel-card {
   flex: 0 0 260px;
@@ -1350,3 +1414,134 @@ footer {
     margin-top: 1.5rem;
   }
 }
+
+
+/* ═══════════════════════════════════════════════════════
+   SCHEDA CATALOGO — ricerca nelle descrizioni dei lotti
+   (sopra il visore Mirador)
+   ═══════════════════════════════════════════════════════ */
+.cat-search { margin-bottom: 1rem; }
+.cat-search-bar {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  border: 1px solid var(--gray-1);
+  border-radius: 3px;
+  background: var(--paper-light);
+  padding: .35rem .35rem .35rem .75rem;
+}
+.cat-search-bar:focus-within { border-color: var(--terra); }
+.cat-search-bar i { color: var(--gray-2); }
+.cat-search-bar input {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  font-family: var(--ff-body);
+  font-size: var(--fs-body-sm);
+  color: var(--ink);
+  outline: none;
+  min-width: 0;
+}
+.cat-search-btn {
+  border: 0;
+  border-radius: 2px;
+  background: var(--ink-light);
+  color: var(--paper-light);
+  font-family: var(--ff-body);
+  font-size: var(--fs-body-sm);
+  padding: .35rem .9rem;
+  cursor: pointer;
+}
+.cat-search-btn:hover { background: var(--terra); }
+.cat-search-note {
+  font-family: var(--ff-body);
+  font-size: var(--fs-caption);
+  color: var(--gray-3);
+  margin: .35rem 0 0;
+}
+.cat-search-count,
+.cat-search-empty {
+  font-family: var(--ff-mono);
+  font-size: var(--fs-mono);
+  color: var(--gray-3);
+  margin: .75rem 0 .35rem;
+}
+.cat-search-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--gray-1); }
+.cat-search-list.is-collapsed .is-extra { display: none; }
+.cat-search-item {
+  display: flex;
+  align-items: baseline;
+  gap: .75rem;
+  border-bottom: 1px solid var(--paper-dark);
+}
+.cat-search-hit {
+  flex: 1;
+  display: flex;
+  gap: .75rem;
+  align-items: baseline;
+  text-align: left;
+  background: none;
+  border: 0;
+  padding: .45rem .25rem;
+  cursor: pointer;
+  font-family: var(--ff-body);
+  font-size: var(--fs-body-sm);
+  color: var(--ink-light);
+}
+.cat-search-hit:hover,
+.cat-search-hit.is-current { background: var(--terra-muted-12); }
+.cat-search-hit:disabled { cursor: default; opacity: .6; }
+.cat-search-num {
+  flex-shrink: 0;
+  min-width: 4.5rem;
+  font-family: var(--ff-mono);
+  font-size: var(--fs-mono);
+  color: var(--terra);
+}
+.cat-search-snippet mark { background: var(--terra-muted-12); color: var(--terra-dark); padding: 0 .1em; }
+.cat-search-lot {
+  flex-shrink: 0;
+  font-family: var(--ff-body);
+  font-size: var(--fs-caption);
+  text-decoration: none !important;
+}
+.cat-search-more {
+  margin-top: .4rem;
+  padding: 0;
+  background: none;
+  border: 0;
+  font-family: var(--ff-body);
+  font-size: var(--fs-body-sm);
+  color: var(--terra);
+  cursor: pointer;
+}
+.cat-search-more:hover { text-decoration: underline; }
+
+/* ═══════════════════════════════════════════════════════
+   LINK ESTERNI — azzurro brillante (palette "terracotta +
+   azzurro brillante"): richiama il sito "Il mercato antiquario
+   in Italia" e distingue a colpo d'occhio i collegamenti che
+   portano fuori dal sito. Vale per ogni <a> con indirizzo
+   assoluto (http/https); i link interni del sito sono relativi
+   e restano terracotta.
+   ═══════════════════════════════════════════════════════ */
+:root {
+  --link-ext:       #2A6FA8;   /* contrasto 4,6:1 su --paper (AA) */
+  --link-ext-dark:  #1A4F78;   /* hover — 7,4:1 */
+  --link-ext-light: #7AAFD4;   /* su fondi scuri — 7,7:1 su --ink */
+}
+a[href^="http://"],
+a[href^="https://"] {
+  color: var(--link-ext) !important;
+  text-decoration-color: color-mix(in srgb, var(--link-ext) 45%, transparent) !important;
+}
+a[href^="http://"]:hover,
+a[href^="https://"]:hover {
+  color: var(--link-ext-dark) !important;
+  text-decoration-color: var(--link-ext-dark) !important;
+}
+/* fondi scuri: fascia dei sostenitori nel footer e pannelli del visore Mirador */
+.zac-footer-sponsors a[href^="http"],
+#mirador-viewer a[href^="http"] { color: var(--link-ext-light) !important; }
+.zac-footer-sponsors a[href^="http"]:hover,
+#mirador-viewer a[href^="http"]:hover { color: var(--paper-light) !important; }

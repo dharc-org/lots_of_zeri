@@ -78,6 +78,23 @@
     {# ── Sezione 1 — Visore IIIF (solo se has_viewer) — PLACEHOLDER ── #}
     {% if view.has_viewer and view.manifest_url %}
     <section id="sec-viewer" class="detail-section">
+
+      {# ── Ricerca nel catalogo: cerca nelle descrizioni dei lotti e porta
+            il visore sulla pagina del lotto (API /api/cataloghi/{slug}/cerca) ── #}
+      {% if view.kind == 'catalogo' %}
+      <div class="cat-search" id="cat-search" data-slug="{{ request.path_params['slug'] }}">
+        <form class="cat-search-bar" id="cat-search-form" role="search">
+          <label for="cat-search-q" class="visually-hidden">Cerca nel catalogo</label>
+          <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+          <input type="search" id="cat-search-q" name="q" minlength="2" autocomplete="off"
+                 placeholder="Cerca nel catalogo: una parola nelle descrizioni dei lotti…">
+          <button type="submit" class="cat-search-btn">Cerca</button>
+        </form>
+        <p class="cat-search-note">La ricerca riguarda le descrizioni dei lotti trascritte, non l'intero testo delle pagine.</p>
+        <div class="cat-search-results" id="cat-search-results" aria-live="polite"></div>
+      </div>
+      {% endif %}
+
       <div id="mirador-viewer" style="height:500px;position:relative;min-width:324px;"></div>
 
       {% if view.viewer_link %}
@@ -356,15 +373,8 @@
       obs.observe(document.getElementById(id));
     });
 
-    /* Centra il lotto corrente nel suo carosello scorrendo SOLO il carosello:
-       scrollIntoView spostava anche la pagina fino al carosello (in fondo),
-       invece di lasciarla in alto sul visore. */
     const cur = document.getElementById('entita-corrente');
-    const curTrack = cur && cur.closest('.detail-carousel');
-    if (curTrack) {
-      const tr = curTrack.getBoundingClientRect(), cr = cur.getBoundingClientRect();
-      curTrack.scrollTo({ left: curTrack.scrollLeft + (cr.left - tr.left) - (tr.width - cr.width) / 2, behavior: 'instant' });
-    }
+    if (cur) cur.scrollIntoView({ inline: 'center', block: 'nearest' });
   })();
 </script>
 
@@ -373,7 +383,7 @@
 {% if view.has_viewer and view.manifest_url %}
 <script src="https://cdn.jsdelivr.net/npm/mirador@3.3.0/dist/mirador.min.js"></script>
 <script>
-Mirador.viewer({
+const zacMirador = Mirador.viewer({
   id: 'mirador-viewer',
   windows: [{
     manifestId: {{ view.manifest_url|tojson }},
@@ -435,5 +445,78 @@ Mirador.viewer({
 });
 
 </script>
+{% if view.kind == 'catalogo' %}
+<script>
+/* Ricerca nel catalogo — risultati dalle descrizioni dei lotti.
+   Clic su un risultato: il visore Mirador va alla pagina del lotto. */
+(function () {
+  const box = document.getElementById('cat-search');
+  if (!box) return;
+  const form  = document.getElementById('cat-search-form');
+  const input = document.getElementById('cat-search-q');
+  const out   = document.getElementById('cat-search-results');
+  const VISIBLE = 6;                      // come le liste dei filtri: prime 6 e "Mostra tutti"
+  const base  = window.BASE_PATH || '';
+  const esc = s => String(s).replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+  const mark = (text, q) => {
+    const t = esc(text), i = t.toLowerCase().indexOf(esc(q).toLowerCase());
+    return i < 0 ? t : t.slice(0, i) + '<mark>' + t.slice(i, i + esc(q).length) + '</mark>' + t.slice(i + esc(q).length);
+  };
+
+  function goToCanvas(canvasId) {
+    const state = zacMirador.store.getState();
+    const windowId = Object.keys(state.windows)[0];
+    if (!windowId || !canvasId) return;
+    zacMirador.store.dispatch(Mirador.actions.setCanvas(windowId, canvasId));
+    document.getElementById('mirador-viewer').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function render(data, q) {
+    const res = data.results || [];
+    if (!res.length) {
+      out.innerHTML = `<p class="cat-search-empty">Nessun lotto di questo catalogo contiene «${esc(q)}».</p>`;
+      return;
+    }
+    const items = res.map((r, i) => `
+      <li class="cat-search-item${i >= VISIBLE ? ' is-extra' : ''}">
+        <button type="button" class="cat-search-hit" ${r.canvas ? `data-canvas="${esc(r.canvas)}"` : 'disabled'}>
+          <span class="cat-search-num">Lotto ${esc(r.num || '—')}</span>
+          <span class="cat-search-snippet">${mark(r.snippet || r.title || '', q)}</span>
+        </button>
+        <a class="cat-search-lot" href="${base}/lotti/${esc(r.slug)}" title="Apri la scheda del lotto">Scheda <i class="ph ph-arrow-right"></i></a>
+      </li>`).join('');
+    const more = res.length > VISIBLE
+      ? `<button type="button" class="cat-search-more">Mostra tutti (${res.length})</button>` : '';
+    out.innerHTML = `<p class="cat-search-count">${res.length} ${res.length === 1 ? 'lotto contiene' : 'lotti contengono'} «${esc(q)}»</p>
+      <ul class="cat-search-list is-collapsed">${items}</ul>${more}`;
+    const moreBtn = out.querySelector('.cat-search-more');
+    if (moreBtn) moreBtn.addEventListener('click', () => {
+      const list = out.querySelector('.cat-search-list');
+      const open = !list.classList.toggle('is-collapsed');
+      moreBtn.textContent = open ? 'Mostra meno' : `Mostra tutti (${res.length})`;
+    });
+    out.querySelectorAll('.cat-search-hit[data-canvas]').forEach(b => b.addEventListener('click', () => {
+      out.querySelectorAll('.cat-search-hit.is-current').forEach(x => x.classList.remove('is-current'));
+      b.classList.add('is-current');
+      goToCanvas(b.dataset.canvas);
+    }));
+  }
+
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const q = input.value.trim();
+    if (q.length < 2) { out.innerHTML = '<p class="cat-search-empty">Scrivi almeno due lettere.</p>'; return; }
+    out.innerHTML = '<p class="cat-search-empty">Ricerca in corso…</p>';
+    try {
+      const r = await fetch(`${base}/api/cataloghi/${encodeURIComponent(box.dataset.slug)}/cerca?q=${encodeURIComponent(q)}`);
+      if (!r.ok) throw new Error(r.status);
+      render(await r.json(), q);
+    } catch (err) {
+      out.innerHTML = '<p class="cat-search-empty">La ricerca non è disponibile in questo momento.</p>';
+    }
+  });
+})();
+</script>
+{% endif %}
 {% endif %}
 {% endblock %}
