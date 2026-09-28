@@ -311,6 +311,7 @@ async function loadAndRenderCase() {
     const nameCell = document.createElement('div');
     nameCell.style.cssText = 'font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
     nameCell.textContent = name;
+    if (name !== h.n) nameCell.title = h.n;   // nome completo al mouseover se troncato
 
     const cityCell = document.createElement('div');
     cityCell.style.cssText = 'font:10.5px var(--ff-mono);color:var(--gray-2);';
