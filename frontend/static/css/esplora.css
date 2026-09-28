@@ -501,6 +501,7 @@
   will-change: transform, opacity;   /* posizione e dissolvenza animate dal JS a ogni frame */
 }
 .geo-row-name {
+  padding-right: 10px;               /* distanza dei nomi dall'asse verticale */
   font-family: var(--ff-body);
   font-size: 11.5px;
   color: var(--ink);

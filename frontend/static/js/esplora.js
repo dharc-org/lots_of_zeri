@@ -923,7 +923,7 @@ async function loadAndRenderTrend() {
     playIcon.className = 'ph ph-play';
     playBtn.setAttribute('title', 'Avvia autoplay');
     playBtn.setAttribute('aria-label', 'Avvia autoplay');
-    rangeLbl.textContent = 'trascina per filtrare';
+    rangeLbl.textContent = 'trascina gli estremi per restringere il periodo';
     cancelAnimationFrame(playTimer);
     playTimer = null;
   }
@@ -988,7 +988,7 @@ async function loadAndRenderTrend() {
           if (v > 0) { byYear.push(`${y}: ${v} event${v === 1 ? 'o' : 'i'}`); tot += v; }
         }
         const detail = byYear.length ? byYear.join('<br>') : 'nessun evento in questi anni';
-        const totTxt = `${tot} evento${tot === 1 ? '' : 'i'} tot${tot === 1 ? 'ale' : 'ali'}`;
+        const totTxt = `${tot} event${tot === 1 ? 'o' : 'i'} tot${tot === 1 ? 'ale' : 'ali'}`;
         const totLine = tot > 0
           ? (d.uri
               ? `<a href="${asteUrl({ luogo: d.uri, periodo_from: yearFrom, periodo_to: yearTo })}" style="color:var(--terra-muted) !important;text-decoration:underline;text-underline-offset:2px;">${totTxt} →</a><br>`

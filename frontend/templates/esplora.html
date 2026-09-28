@@ -104,7 +104,7 @@
             </button>
             <div style="display:flex;flex:1;justify-content:space-between;align-items:baseline;">
               <span id="tl-from" class="expl-tl-year">1879</span>
-              <span class="expl-tl-range-label" id="tl-range-label">trascina per filtrare</span>
+              <span class="expl-tl-range-label" id="tl-range-label">trascina gli estremi per restringere il periodo</span>
               <span id="tl-to" class="expl-tl-year">1929</span>
             </div>
           </div>
@@ -133,7 +133,8 @@
       <div class="expl-chart-wrap">
         <div class="stag-head">
           <div id="stag-legend"></div>
-          <button id="stag-info-btn" class="stag-info-btn" type="button" aria-label="Come si legge un punto del grafico" aria-describedby="stag-info-popover">i</button>
+          {# guida "i" nascosta temporaneamente: per ripristinarla togliere style="display:none" #}
+          <button id="stag-info-btn" class="stag-info-btn" style="display:none" type="button" aria-label="Come si legge un punto del grafico" aria-describedby="stag-info-popover">i</button>
           <div id="stag-info-popover" class="stag-info-popover" role="tooltip"></div>
         </div>
         <svg id="stag-svg" viewBox="0 0 600 250" style="width:100%;display:block;"></svg>
