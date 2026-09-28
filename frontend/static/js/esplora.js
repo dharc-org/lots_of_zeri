@@ -1225,7 +1225,8 @@ async function loadAndRenderBanditori2() {
   const nRel = B.all.filter(b => b.status === 'relazionato').length;
 thLeft.innerHTML = `
   <div style="font-family:var(--ff-body);font-size:.8rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--gray-3);">${B.all.length} banditori</div>
-  <div id="band2-legend-toggle" style="display:flex;align-items:center;gap:3px;cursor:pointer;font-family:var(--ff-mono);font-size:.78rem;color:var(--gray-2);margin-top:.15rem;">
+  <!-- legenda nascosta temporaneamente: per ripristinarla rimettere display:flex -->
+  <div id="band2-legend-toggle" style="display:none;align-items:center;gap:3px;cursor:pointer;font-family:var(--ff-mono);font-size:.78rem;color:var(--gray-2);margin-top:.15rem;">
     Legenda <i class="ph ph-caret-down" id="band2-legend-caret" style="font-size:.65rem;transition:transform .15s;"></i>
   </div>
   <div id="band2-legend-items" style="display:none;gap:9px;flex-wrap:wrap;margin-top:.4rem;font-family:var(--ff-mono);font-size:.62rem;color:var(--gray-2);">
@@ -1250,7 +1251,8 @@ band2LegendToggle.addEventListener('click', e => {
     <div>
       <div style="display:flex;align-items:center;gap:.4rem;">
         <div style="font-family:var(--ff-body);font-size:.8rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--gray-3);">Relazioni banditori — case d'asta</div>
-        <div id="band-info-btn2" style="width:15px;height:15px;border-radius:50%;border:1.5px solid var(--gray-2);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-family:var(--ff-mono);font-size:.62rem;color:var(--gray-2);position:relative;" title="Come funziona">i
+        <!-- guida "i" nascosta temporaneamente: per ripristinarla rimettere display:flex -->
+        <div id="band-info-btn2" style="width:15px;height:15px;border-radius:50%;border:1.5px solid var(--gray-2);display:none;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-family:var(--ff-mono);font-size:.62rem;color:var(--gray-2);position:relative;" title="Come funziona">i
           <div id="band-info-tooltip2" style="display:none;position:absolute;top:calc(100% + 6px);left:0;background:var(--ink);color:var(--paper-light);font-family:var(--ff-body);font-size:.75rem;line-height:1.55;padding:.6rem .85rem;border-radius:3px;width:260px;z-index:50;pointer-events:none;">Clicca un nome nella lista o un nodo nel grafico per isolare i legami. Clicca di nuovo per tornare alla vista completa. Di default nessun arco è visibile.</div>
         </div>
       </div>
