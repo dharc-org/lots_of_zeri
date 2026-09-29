@@ -860,14 +860,58 @@ async function loadAndRenderTrend() {
 
   brushG.call(brush.move, [xScale(YMIN), xScale(YMAX + 1)]);
 
-  /* Etichette dei decenni sotto la traccia */
+  /* Asse sotto la traccia: tacca per ogni anno (media ogni 5, lunga ogni 10),
+     etichette dei decenni e anno esatto sotto ciascuna maniglia */
   const tickLabelsEl = document.getElementById('tl-ticklabels');
-  tickLabelsEl.innerHTML = '';
-  for (let y = Math.ceil(YMIN / 10) * 10; y <= YMAX; y += 10) {
-    const lbl = document.createElement('span');
-    lbl.style.left = xScale(y) + 'px';
-    lbl.textContent = y;
-    tickLabelsEl.appendChild(lbl);
+  function drawTimeAxis() {
+    tickLabelsEl.innerHTML = '';
+    for (let y = YMIN; y <= YMAX + 1; y++) {
+      const t = document.createElement('span');
+      t.className = 'tl-tick' + (y % 10 === 0 ? ' tl-tick--10' : y % 5 === 0 ? ' tl-tick--5' : '');
+      t.style.left = xScale(y) + 'px';
+      tickLabelsEl.appendChild(t);
+    }
+    for (let y = Math.ceil(YMIN / 10) * 10; y <= YMAX; y += 10) {
+      const lbl = document.createElement('span');
+      lbl.className = 'tl-dec';
+      lbl.dataset.x = xScale(y);
+      lbl.style.left = xScale(y) + 'px';
+      lbl.textContent = y;
+      tickLabelsEl.appendChild(lbl);
+    }
+    ['from', 'to'].forEach(k => {
+      const b = document.createElement('span');
+      b.className = 'tl-handle-year tl-handle-year--' + k;
+      tickLabelsEl.appendChild(b);
+    });
+    updateHandleYears();
+  }
+  drawTimeAxis();
+
+  function updateHandleYears() {
+    const el = document.getElementById('tl-ticklabels');
+    const bFrom = el && el.querySelector('.tl-handle-year--from');
+    const bTo   = el && el.querySelector('.tl-handle-year--to');
+    if (!bFrom || !bTo) return;
+    const Wd = el.clientWidth || xScale.range()[1];
+    const clamp = x => Math.min(Math.max(x, 20), Wd - 20);
+    const xF = clamp(xScale(yearFrom)), xT = clamp(xScale(yearTo + 1));
+    bFrom.textContent = yearFrom;
+    bTo.textContent   = yearTo;
+    bFrom.style.left  = xF + 'px';
+    bTo.style.left    = xT + 'px';
+    /* maniglie vicine: un'unica etichetta "1879–1881" (o "1879") centrata sulla selezione */
+    const close = Math.abs(xT - xF) < 80;
+    bTo.style.visibility = close ? 'hidden' : 'visible';
+    if (close) {
+      bFrom.textContent = yearFrom === yearTo ? yearFrom : yearFrom + '–' + yearTo;
+      bFrom.style.left  = Math.min(Math.max((xF + xT) / 2, 40), Wd - 40) + 'px';
+    }
+    /* nasconde l'etichetta del decennio che finirebbe sotto un anno delle maniglie */
+    el.querySelectorAll('.tl-dec').forEach(d => {
+      const x = +d.dataset.x;
+      d.style.visibility = (Math.abs(x - xF) < 34 || Math.abs(x - xT) < 34) ? 'hidden' : 'visible';
+    });
   }
 
   function selectionToYears(sel) {
@@ -883,6 +927,7 @@ async function loadAndRenderTrend() {
     [yearFrom, yearTo] = selectionToYears(event.selection);
     lblFrom.textContent = yearFrom;
     lblTo.textContent   = yearTo;
+    updateHandleYears();
     const clipRect = document.getElementById('tl-sel-clip-rect');
     clipRect.setAttribute('x', event.selection[0]);
     clipRect.setAttribute('width', event.selection[1] - event.selection[0]);
@@ -1036,13 +1081,7 @@ async function loadAndRenderTrend() {
     brush.extent([[0, 0], [W, TRACK_H]]);
     brushG.call(brush);
     brushG.call(brush.move, [xScale(yearFrom), xScale(yearTo + 1)]);
-    tickLabelsEl.innerHTML = '';
-    for (let y = Math.ceil(YMIN / 10) * 10; y <= YMAX; y += 10) {
-      const lbl = document.createElement('span');
-      lbl.style.left = xScale(y) + 'px';
-      lbl.textContent = y;
-      tickLabelsEl.appendChild(lbl);
-    }
+    drawTimeAxis();
     /* la proiezione/zoom della mappa non viene ricalcolata al resize,
        per non perdere la posizione di navigazione dell'utente */
   });

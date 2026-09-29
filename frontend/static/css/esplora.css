@@ -268,8 +268,8 @@
 
 .tl-ticklabels {
   position: relative;
-  height: 12px;
-  margin-top: 3px;
+  height: 28px;
+  margin-top: 0;
 }
 .tl-ticklabels span {
   position: absolute;
@@ -278,6 +278,28 @@
   color: var(--gray-2);
   transform: translateX(-50%);
   white-space: nowrap;
+}
+/* tacche: una per anno, più lunghe ogni 5 e ogni 10 */
+.tl-ticklabels .tl-tick {
+  top: 0;
+  width: 1px;
+  height: 3px;
+  background: var(--gray-1);
+}
+.tl-ticklabels .tl-tick--5  { height: 5px; background: var(--gray-2); }
+.tl-ticklabels .tl-tick--10 { height: 7px; background: var(--gray-2); }
+.tl-ticklabels .tl-dec { top: 10px; }
+/* anno esatto sotto ciascuna maniglia: segue il trascinamento */
+.tl-ticklabels .tl-handle-year {
+  top: 8px;
+  z-index: 1;
+  padding: 1px 5px;
+  border-radius: 2px;
+  background: var(--terra);
+  color: var(--paper-light);
+  font-size: var(--fs-mono-sm);
+  font-weight: 500;
+  line-height: 1.4;
 }
 
 /* Il brush (selezione, maniglie) è disegnato da d3-brush via JS:
