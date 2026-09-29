@@ -1199,22 +1199,26 @@ const STYLE = {
        si accende, le altre sfumano — restano tutte nello stesso
        grafico (sempre confrontabili), ma senza competere insieme
        per l'attenzione. */
-    item.addEventListener('mouseenter', () => {
-      Object.entries(pathsByCountry).forEach(([name, g]) => {
-        const active = name === c.n;
-        g.path.style.opacity = active ? '1' : '0.12';
-        g.path.style.strokeWidth = active ? '2.5' : '1.5';
-        g.dots.forEach(d => { d.style.opacity = active ? '1' : '0.12'; });
-      });
-    });
-    item.addEventListener('mouseleave', () => {
-      Object.values(pathsByCountry).forEach(g => {
-        g.path.style.opacity = '1';
-        g.path.style.strokeWidth = '1.5';
-        g.dots.forEach(d => { d.style.opacity = '1'; });
-      });
-    });
+    item.addEventListener('mouseenter', () => highlightCountry(c.n));
+    item.addEventListener('mouseleave', resetCountries);
   });
+
+  /* Isola un paese (legenda, linea o punto): la sua linea si accende, le altre sfumano */
+  function highlightCountry(n) {
+    Object.entries(pathsByCountry).forEach(([name, g]) => {
+      const active = name === n;
+      g.path.style.opacity = active ? '1' : '0.12';
+      g.path.style.strokeWidth = active ? '2.5' : '1.5';
+      g.dots.forEach(d => { d.style.opacity = active ? '1' : '0.12'; });
+    });
+  }
+  function resetCountries() {
+    Object.values(pathsByCountry).forEach(g => {
+      g.path.style.opacity = '1';
+      g.path.style.strokeWidth = '1.5';
+      g.dots.forEach(d => { d.style.opacity = '1'; });
+    });
+  }
 
   const de = S.countries.find(c => c.n === 'Germania') || S.countries[0];
   const idxOtt = S.months.indexOf('ott');
@@ -1270,6 +1274,10 @@ const STYLE = {
     const pathAttrs = { d, fill: 'none', stroke: st.stroke, 'stroke-width': 1.5, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' };
     if (st.dash) pathAttrs['stroke-dasharray'] = st.dash;
     const path = mkEl('path', pathAttrs);
+    /* fascia trasparente sopra la linea: basta passarci vicino per isolarla */
+    const hitLine = mkEl('path', { d, fill: 'none', stroke: 'transparent', 'stroke-width': 10, style: 'cursor:pointer' });
+    hitLine.addEventListener('mouseenter', () => highlightCountry(c.n));
+    hitLine.addEventListener('mouseleave', resetCountries);
     const dots = [];
     pathsByCountry[c.n] = { path, dots };
 
@@ -1283,9 +1291,13 @@ const STYLE = {
         tip.style.top = (e.clientY - 28) + 'px';
         tip.textContent = `${c.n}, ${S.months[i]}: ${v} di ${c.tot} aste = ${pct.toFixed(1).replace('.', ',')}%`;
       });
-      dot.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
+      dot.addEventListener('mouseenter', () => highlightCountry(c.n));
+      dot.addEventListener('mouseleave', () => { tip.style.display = 'none'; resetCountries(); });
     });
   });
+
+  /* i punti sopra tutte le fasce delle linee, così i tooltip restano raggiungibili */
+  Object.values(pathsByCountry).forEach(g => g.dots.forEach(d => svg.appendChild(d)));
 
 S.months.forEach((m, i) => {
   const t = mkEl('text', { x: x(i), y: H - PB + 14, 'text-anchor': 'middle', fill: 'var(--gray-2)', style: 'font:10px var(--ff-mono)' });
@@ -1674,19 +1686,19 @@ async function loadAndRenderCollezioni() {
     const row = document.createElement('div');
     row.style.cssText = 'cursor:pointer;padding:3px 4px;border-radius:3px;';
     row.innerHTML = `
-      <div style="display:grid;grid-template-columns:150px 32px 1fr 20px;align-items:center;gap:8px;">
-        <span style="font-size:12px;color:var(--ink);">${item.n}</span>
+      <div style="display:grid;grid-template-columns:190px 32px 1fr 28px;align-items:center;gap:8px;">
+        <span style="font-size:var(--fs-body-sm);color:var(--ink);">${item.n}</span>
         <span style="display:flex;gap:3px;align-items:center;">
           <span style="width:9px;height:9px;border-radius:50%;background:${tc.bg};display:inline-block;" title="${DISPLAY_LABEL[item.tag]}"></span>
           ${showSecondary ? `<span style="width:9px;height:9px;border-radius:50%;background:${TAG_COLOR.diverse.bg};display:inline-block;" title="Coinvolte anche più case d'asta diverse"></span>` : ''}
         </span>
         <span style="height:12px;background:${barBg};border-radius:2px;width:${pct}%;"></span>
-        <span style="font-family:var(--ff-mono);font-size:11px;color:var(--ink);">${item.c}</span>
+        <span style="font-family:var(--ff-mono);font-size:var(--fs-caption);color:var(--ink);">${item.c}</span>
       </div>
     `;
 
     const detail = document.createElement('div');
-    detail.style.cssText = 'display:none;margin:4px 0;padding:6px 10px;background:var(--paper-dark);border-radius:3px;font-family:var(--ff-mono);font-size:10.5px;color:var(--ink);line-height:1.6;';
+    detail.style.cssText = 'display:none;margin:4px 0;padding:6px 10px;background:var(--paper-dark);border-radius:3px;font-family:var(--ff-mono);font-size:.8rem;color:var(--ink);line-height:1.6;';
     const houses = item.case.map(h => `${h.n} (${h.v})`).join(', ');
     /* Link alle aste specifiche in cui è comparsa questa collezione.
        Compare solo se il JSON ha un URI reale (item.uri) — finché non

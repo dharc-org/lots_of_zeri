@@ -772,14 +772,14 @@
 }
 .coll-list-title {
   font-family: var(--ff-body);
-  font-size: 12.5px;
+  font-size: var(--fs-body-sm);
   font-weight: 600;
   color: var(--ink);
 }
 .coll-list-hint {                  /* indicazione d'uso accanto al titolo */
   margin-left: .6rem;
   font-family: var(--ff-mono);
-  font-size: var(--fs-mono-sm);
+  font-size: var(--fs-caption);
   font-weight: 400;
   color: var(--gray-2);
 }
@@ -787,7 +787,7 @@
   display: flex;
   gap: 12px;
   font-family: var(--ff-mono);
-  font-size: 9.5px;
+  font-size: var(--fs-caption);
   color: var(--gray-3);
 }
 
