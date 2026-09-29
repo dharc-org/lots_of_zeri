@@ -61,6 +61,66 @@ const asteUrl = params => browseUrl('/aste', params);
   window.addEventListener('hashchange', openFromHash);
 })();
 
+/* ══════════════════════════════════════════════════════════
+   1b. INGRANDISCI — ogni scheda può andare a schermo intero
+   (nota + grafico). Esc o lo stesso pulsante per uscire.
+   ══════════════════════════════════════════════════════════ */
+(function initExpand() {
+  const fsEl = () => document.fullscreenElement || document.webkitFullscreenElement;
+  const buttons = [];
+
+  document.querySelectorAll('.expl-panel').forEach(panel => {
+    const row = document.createElement('div');
+    row.className = 'expl-expand-row';
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'expl-expand-btn';
+    row.appendChild(btn);
+    panel.insertBefore(row, panel.firstChild);
+    buttons.push({ btn, panel });
+
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      if (fsEl() === panel) {
+        (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+      } else {
+        const req = panel.requestFullscreen || panel.webkitRequestFullscreen;
+        if (req) req.call(panel);
+      }
+    });
+  });
+
+  /* I tooltip dei grafici sono agganciati al <body> con position:fixed:
+     a schermo intero il browser mostra solo la scheda, quindi li sposto
+     dentro la scheda e li rimetto nel <body> all'uscita. */
+  let moved = [];
+  function moveTooltips(cur) {
+    moved.forEach(el => document.body.appendChild(el));
+    moved = [];
+    if (!cur) return;
+    document.querySelectorAll('body > div').forEach(el => {
+      if (el.style.position === 'fixed') { cur.appendChild(el); moved.push(el); }
+    });
+  }
+
+  function update() {
+    const cur = fsEl();
+    moveTooltips(cur);
+    buttons.forEach(({ btn, panel }) => {
+      const on = cur === panel;
+      btn.innerHTML = on
+        ? '<i class="ph ph-arrows-in-simple"></i><span>Riduci</span>'
+        : '<i class="ph ph-arrows-out-simple"></i><span>Ingrandisci</span>';
+      btn.setAttribute('aria-label', on ? 'Esci dallo schermo intero' : 'Ingrandisci il grafico a schermo intero');
+    });
+    /* i grafici che si ridisegnano in base alla larghezza (mappa) */
+    setTimeout(() => window.dispatchEvent(new Event('resize')), 60);
+  }
+  document.addEventListener('fullscreenchange', update);
+  document.addEventListener('webkitfullscreenchange', update);
+  update();
+})();
+
 function initChart(id) {
   switch (id) {
     case 'case':      loadAndRenderCase();      break;
@@ -1573,7 +1633,7 @@ async function loadAndRenderCollezioni() {
     diverse: { bg: '#5C0A00' }
   };
   const DISPLAY_LABEL = {
-    anno:    'stesso anno',
+    anno:    'più aste nello stesso anno',
     casa:    "stessa casa d'asta",
     diverse: "case d'asta diverse"
   };
@@ -1633,7 +1693,7 @@ async function loadAndRenderCollezioni() {
        arriva la mappatura nome→URI dal backend, resta testo semplice
        invece di un link che porterebbe sempre a zero risultati. */
     const collLink = item.uri
-      ? `<br><a href="/aste?collezione=${encodeURIComponent(item.uri)}" style="color:var(--terra-muted) !important;text-decoration:underline;text-underline-offset:2px;">Vedi l'asta relativa <i class="ph ph-arrow-right"></i></a>`
+      ? `<br><a href="/aste?collezione=${encodeURIComponent(item.uri)}" style="color:var(--terra-muted) !important;text-decoration:underline;text-underline-offset:2px;">Vai alle aste relative <i class="ph ph-arrow-right"></i></a>`
       : '';
     detail.innerHTML = `<strong>Periodo:</strong> ${item.periodo}<br><strong>Case d'asta coinvolte:</strong> ${houses}` +
       (showSecondary ? `<br><span style="color:#5C0A00;">tutti gli eventi nello stesso anno, ma distribuiti su ${realHouses.length} case d'asta diverse</span>` : '') +
@@ -1704,7 +1764,7 @@ async function loadAndRenderTipologie() {
 
   const altreTitle = document.createElement('div');
   altreTitle.style.cssText = 'font-family:var(--ff-mono);font-size:.7rem;letter-spacing:.1em;color:var(--gray-3);text-transform:uppercase;margin-bottom:.75rem;padding-bottom:.4rem;border-bottom:1px solid var(--gray-1);';
-  altreTitle.textContent = 'Il resto degli oggetti all\'incanto';
+  altreTitle.textContent = 'Altre tipologie di oggetti';
   altrePanel.appendChild(altreTitle);
 
   const altreGrid = document.createElement('div');
@@ -1879,7 +1939,7 @@ async function loadAndRenderTipologieAste() {
   altrePanel.style.cssText = 'display:none;background:var(--paper);border:1px solid var(--gray-1);border-radius:4px;padding:1rem 1.25rem;margin-top:.5rem;';
   const altreTitle = document.createElement('div');
   altreTitle.style.cssText = 'font-family:var(--ff-mono);font-size:.7rem;letter-spacing:.1em;color:var(--gray-3);text-transform:uppercase;margin-bottom:.75rem;padding-bottom:.4rem;border-bottom:1px solid var(--gray-1);';
-  altreTitle.textContent = 'Il resto degli oggetti all\'incanto';
+  altreTitle.textContent = 'Altre tipologie di oggetti';
   altrePanel.appendChild(altreTitle);
   const altreGrid = document.createElement('div');
   altreGrid.style.cssText = 'display:grid;grid-template-columns:repeat(3,1fr);gap:4px 2rem;';

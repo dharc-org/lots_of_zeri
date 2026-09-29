@@ -152,11 +152,13 @@
       <p class="expl-metanote">Il grafico è dedicato alle collezioni di oggetti d'arte che furono vendute nel corso di più aste. La visualizzazione evidenzia il numero di vendite, gli anni in cui avvennero e la <strong>quantità di case d'asta coinvolte</strong>. Cliccando su una collezione è possibile consultare i dati di dettaglio e richiamare tutte le aste corrispondenti. Nel caso tutti gli eventi cadono nello stesso anno, è probabile si tratti di un'unica vendita effettuata in più sessioni. Se si estendono su più anni sono gestiti dalla stessa casa d'asta, è verosimile che si tratti di una liquidazione a <em>tranche</em> con un solo operatore. Quando per una stessa collezione cambiano sia gli anni che le case d'asta si ha una rappresentazione più tangibile della sua dispersione sul mercato.</p>
       <div class="expl-chart-wrap">
         <div class="coll-list-header">
-          <div class="coll-list-title">Tutte le collezioni ricomparse in più di un'asta, per numero di eventi d'asta</div>
+          <div class="coll-list-title">Collezioni vendute in più aste <span class="coll-list-hint">clicca sull'evento per visualizzare i dettagli</span></div>
           <div style="display:flex;align-items:center;gap:8px;position:relative;">
             <div id="coll-legend" class="coll-legend"></div>
+            {# guida "i" tolta: per ripristinarla togliere il commento Jinja qui sotto
             <button id="coll-info-btn" class="stag-info-btn" type="button" aria-label="Cosa significano i pallini" aria-describedby="coll-info-popover" style="position:static;">i</button>
             <div id="coll-info-popover" class="stag-info-popover" role="tooltip" style="top:calc(100% + 8px); right:0;"></div>
+            #}
           </div>
         </div>
         <div id="coll-list" style="max-height:65vh;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--gray-1) var(--paper-dark);"></div>

@@ -151,6 +151,39 @@
    Stagioni: testo 12–15px · Tipologie: testo circa 14px. */
 #stag-svg { max-width: 900px;  margin-left: auto; margin-right: auto; }
 #tip-svg  { max-width: 1000px; margin-left: auto; margin-right: auto; }
+/* ── Ingrandisci (schermo intero per scheda) ─────────────── */
+.expl-expand-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: .5rem;
+}
+.expl-expand-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .3rem .7rem;
+  background: none;
+  border: 1px solid var(--gray-2);
+  border-radius: 2px;
+  font-family: var(--ff-mono);
+  font-size: var(--fs-mono-sm);
+  letter-spacing: .06em;
+  color: var(--paper);
+  cursor: pointer;
+  transition: border-color .15s, color .15s;
+}
+.expl-expand-btn i { font-size: .9rem; }
+.expl-expand-btn:hover { border-color: var(--terra-on-dark); color: var(--terra-on-dark); }
+.expl-panel:fullscreen {
+  display: block;
+  overflow-y: auto;
+  padding: 1.5rem 3rem 3rem;
+  background: var(--ink-light);
+}
+/* a schermo intero i grafici in scala possono crescere, restando dentro l'altezza dello schermo */
+.expl-panel:fullscreen #stag-svg,
+.expl-panel:fullscreen #tip-svg { max-width: min(100%, 190vh); }
+
 .expl-panel.active { display: block; }
 
 /* ── Nota metodologica ─────────────────────────────────── */
@@ -408,6 +441,7 @@
    anteprima oscurata e non interattiva, con l'avviso sovrapposto (stesso
    testo del toast di Esplora2). Schede e note restano utilizzabili. */
 @media (max-width: 700px) {
+  .expl-expand-row { display: none; }
   .expl-panel .expl-chart-wrap,
   #band-wrap2 {
     position: relative;
@@ -741,6 +775,13 @@
   font-size: 12.5px;
   font-weight: 600;
   color: var(--ink);
+}
+.coll-list-hint {                  /* indicazione d'uso accanto al titolo */
+  margin-left: .6rem;
+  font-family: var(--ff-mono);
+  font-size: var(--fs-mono-sm);
+  font-weight: 400;
+  color: var(--gray-2);
 }
 .coll-legend {
   display: flex;
