@@ -34,6 +34,9 @@ const asteUrl = params => browseUrl('/aste', params);
       tab.classList.add('active');
       tab.setAttribute('aria-selected', 'true');
       document.getElementById('panel-' + id).classList.add('active');
+      /* Aggiorna l'indirizzo (es. /esplora#banditori2) così il grafico aperto si può copiare e condividere.
+         replaceState non aggiunge voci alla cronologia: il tasto Indietro esce da Esplora come prima. */
+      if (location.hash.slice(1) !== id) history.replaceState(null, '', '#' + id);
 
 
       /* Inizializza il grafico la prima volta che la tab viene aperta */

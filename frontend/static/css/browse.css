@@ -722,6 +722,8 @@
 }
 
 .result-card-grid .btn-apri-mini { align-self: flex-end; }
+/* card senza anno (es. lotti): il bottone segue subito il titolo, serve un po' di aria */
+.result-card-grid .card-title + .btn-apri-mini { margin-top: .75rem; }
 
 .result-card-grid .card-title {
   font-family: var(--ff-head); font-weight: 600;
