@@ -776,8 +776,9 @@
   font-weight: 600;
   color: var(--ink);
 }
-.coll-list-hint {                  /* indicazione d'uso accanto al titolo */
-  margin-left: .6rem;
+.coll-list-hint {                  /* indicazione d'uso, su una riga sotto il titolo */
+  display: block;
+  margin-top: .2rem;
   font-family: var(--ff-mono);
   font-size: var(--fs-caption);
   font-weight: 400;
@@ -785,7 +786,8 @@
 }
 .coll-legend {
   display: flex;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 4px 16px;
   font-family: var(--ff-mono);
   font-size: var(--fs-caption);
   color: var(--gray-3);
