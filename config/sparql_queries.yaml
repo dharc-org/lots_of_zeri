@@ -1314,6 +1314,21 @@ esplora:
     }
     GROUP BY ?placeLabel ?houseLabel
 
+  # asta × tipologia (tipologie_oggetti.json → conteggi per asta, senza doppioni:
+  # un'asta con più tipologie "altre" conta una volta sola)
+  tipologie_aste: |
+    SELECT DISTINCT ?auction ?tipoLabel ?year
+    WHERE {
+      ?auction a crm:E7_Activity ;
+        crm:P2_has_type aat:300054751 ;
+        crm:P125_used_objects_of_type ?obj_type ;
+        crm:P4_has_time-span ?ts .
+      ?obj_type crm:P2_has_type zac:object_type ;
+        rdfs:label ?tipoLabel .
+      ?ts crm:P82a_begin_of_the_begin ?d .
+      BIND(YEAR(?d) AS ?year)
+    }
+
   # tipologia oggetti × anno (tipologie_oggetti.json)
   tipologie_anno: |
     SELECT ?tipoLabel (SAMPLE(?obj_type) AS ?tipoURI) ?year (COUNT(DISTINCT ?auction) AS ?count)

@@ -178,7 +178,10 @@ async def ds_banditori(request):
 _TIPO_MAIN = ["DIPINTI", "MOBILI", "DISEGNI", "ACQUERELLI", "PORCELLANE", "STAMPE"]
 
 async def ds_tipologie_oggetti(request):
-    rows = await _rows(request, "tipologie_anno")
+    rows, rows_aste = await asyncio.gather(
+        _rows(request, "tipologie_anno"),
+        _rows(request, "tipologie_aste"),
+    )
     by = defaultdict(Counter)             # tipo (UPPER) → {year: count}
     tipo_uri = {}                         # tipo (UPPER) → tipoURI
     for r in rows:
@@ -211,9 +214,42 @@ async def ds_tipologie_oggetti(request):
         tot["ALTRE"] += altre_y
         m.append(row)
 
+    # ── Conteggi per ASTA (grafico a barre "aste per anno") ──────────
+    # Ogni asta conta una volta: in un anno, per "Tutte" e per ciascuna
+    # categoria. ALTRE = aste con almeno una tipologia fuori dalle sei
+    # principali (in "m" invece è la somma delle voci, con doppioni).
+    auc_tipi = defaultdict(set)           # asta → {tipologie}
+    auc_anno = {}                         # asta → anno (il più antico)
+    for r in rows_aste:
+        if not _has(r, "auction", "tipoLabel", "year"):
+            continue
+        a, yr = r["auction"], _int(r["year"])
+        auc_tipi[a].add(r["tipoLabel"].strip().upper())
+        auc_anno[a] = min(yr, auc_anno.get(a, yr))
+
+    main = set(_TIPO_MAIN)
+    aste_py = Counter()
+    m_aste_d = defaultdict(lambda: [0] * len(cats))
+    for a, tipi in auc_tipi.items():
+        yr = auc_anno[a]
+        aste_py[yr] += 1
+        for j, c in enumerate(_TIPO_MAIN):
+            if c in tipi:
+                m_aste_d[yr][j] += 1
+        if tipi - main:
+            m_aste_d[yr][-1] += 1
+    years = range(ymin, ymax + 1)
+    m_aste = [m_aste_d[yr] if yr in m_aste_d else [0] * len(cats) for yr in years]
+    tot_aste = {c: sum(r[j] for r in m_aste) for j, c in enumerate(cats)}
+
     return {
         "ymin": ymin, "ymax": ymax,
         "cats": cats, "tot": tot, "m": m,
+        # additivi, per il grafico ad aste (vedi esplora.js, TIPOLOGIE_VERSIONE)
+        "aste_py":  [aste_py.get(yr, 0) for yr in years],
+        "m_aste":   m_aste,
+        "tot_aste": tot_aste,
+        "aste_tot": len(auc_tipi),
         "altre_voci": [[n, v] for n, v in altre_tot.most_common()],
         # additivi: URI per le 6 categorie principali e per ogni voce di «altre».
         # ALTRE è un aggregato → nessun URI singolo.
