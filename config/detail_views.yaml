@@ -71,7 +71,7 @@ catalogo:
         facet_link: { route: "/cataloghi", param: "anno_pubblicazione", kind: "range_year" } }
     - { key: "languages", label_it: "Lingua", multi: true }    
     - { key: "illustrated", label_it: "Illustrato", multi: false }
-    - { key: "collections",  label_it: "Collezione", multi: true,
+    - { key: "collections",  label_it: "Collezioni", multi: true,
         facet_link: { route: "/cataloghi", param: "collezione" } }
     - { key: "docId",      label_it: "Numero di inventario",  multi: false }
     - { key: "auctionLabel",    label_it: "Vendita all'asta",      multi: false,
@@ -142,7 +142,7 @@ evento:
     - { key: "dateEnd",         label_it: "Data fine asta",            multi: false }
     - { key: "place",           label_it: "Luogo di vendita",          multi: false,
         facet_link: { route: "/aste", param: "luogo", uri_key: "placeURI" } }
-    - { key: "collezioni",      label_it: "Collezione in vendita",     multi: true,
+    - { key: "collezioni",      label_it: "Collezioni",                multi: true,
         facet_link: { route: "/cataloghi", param: "collezione" } }
     - { key: "auctionCode",     label_it: "Codice asta",               multi: false }
     - { key: "object_periods",  label_it: "Cronologia oggetti",        multi: true, pill: true }
