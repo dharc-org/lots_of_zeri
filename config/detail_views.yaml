@@ -77,7 +77,7 @@ catalogo:
     - { key: "auctionLabel",    label_it: "Vendita all'asta",      multi: false,
         link_route: "/aste/{slug}", link_key: "auctionSlug" }
     - { key: "zeriUrl", label_it: "Collegamenti esterni", multi: false,
-        external: true, link_name: "Scheda Zeri", icon: "ph ph-link", link_class: "row-zeri-link" }
+        external: true, link_name: "Scheda Zeri", icon: "ph ph-link" }
 
 
   related:

@@ -107,9 +107,9 @@
   transition: border-color .15s;
 }
 
-.expl-tab:hover .expl-tab-label { color: var(--terra-light); }
+.expl-tab:hover .expl-tab-label { color: var(--terra-on-dark); }
 
-.expl-tab.active { border-bottom-color: var(--terra-muted); }
+.expl-tab.active { border-bottom-color: var(--terra-on-dark); }
 
 .expl-tab-num {
   font-family: var(--ff-mono);
@@ -126,8 +126,8 @@
   transition: color .15s;
 }
 
-.expl-tab.active .expl-tab-label { color: var(--terra-muted); }
-.expl-tab.active .expl-tab-num   { color: var(--terra-muted); }
+.expl-tab.active .expl-tab-label { color: var(--terra-on-dark); }
+.expl-tab.active .expl-tab-num   { color: var(--terra-on-dark); }
 
 
 /* ══════════════════════════════════════════════════════════

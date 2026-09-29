@@ -19,6 +19,7 @@
   --terra-light:  #E86040;
   --terra-muted:  #EB7055;
   --terra-muted-12: rgba(235, 112, 85, 0.12);
+  --terra-on-dark: #EE8A4E;   /* terracotta per fondi scuri: più arancione, 5,5:1 su --ink-light (AA) */
 
   /* Font */
   --ff-head: 'Playfair Display', Georgia, serif;
@@ -830,6 +831,22 @@ footer {
 
 .detail-header-area .zac-breadcrumbs {
   padding: 1rem 2rem 0.25rem;
+}
+/* Breadcrumb dentro la topbar delle schede: a sinistra, lo switch "Vai a:" resta a destra */
+.detail-topbar .zac-breadcrumbs {
+  padding: 0;
+  background: none;
+  margin-right: auto;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 0;
+}
+.detail-topbar .zac-breadcrumbs .current {   /* titoli lunghi: accorciati con i puntini */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 45ch;
 }
 
 .detail-header-area .detail-topbar {
