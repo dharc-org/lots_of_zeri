@@ -25,20 +25,22 @@
 
 {% block content %}
 
+{# ── Breadcrumbs: fascia chiara a tutta larghezza, come in Cerca ── #}
+<nav class="zac-breadcrumbs zac-breadcrumbs--detail" aria-label="Percorso">
+  <a href="{{ base_path }}/">Homepage</a>
+  <span class="sep">›</span>
+  <a href="{{ base_path }}/cataloghi">Cerca</a>
+  <span class="sep">›</span>
+  <a href="{{ view.back.url }}">{{ view.back.breadcrumb_it }}</a>
+  <span class="sep">›</span>
+  <span class="current" title="{{ view.title }}">{{ view.title }}</span>
+</nav>
+
 {# ── Topbar e titolo: fuori dalla grid, a tutta larghezza ── #}
 <div class="detail-header-area w-100">
 
-  {# Breadcrumb + switch "Vai a:" #}
+  {# Switch "Vai a:" #}
   <div class="detail-topbar w-100">
-    <nav class="zac-breadcrumbs" aria-label="Percorso">
-      <a href="{{ base_path }}/">Homepage</a>
-      <span class="sep">›</span>
-      <a href="{{ base_path }}/cataloghi">Cerca</a>
-      <span class="sep">›</span>
-      <a href="{{ view.back.url }}">{{ view.back.breadcrumb_it }}</a>
-      <span class="sep">›</span>
-      <span class="current" title="{{ view.title }}">{{ view.title }}</span>
-    </nav>
     {% if view.switch %}
     <div class="detail-switch">
       <span class="detail-switch-label">Vai a:</span>
