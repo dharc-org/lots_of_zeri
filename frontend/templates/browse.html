@@ -185,7 +185,9 @@
         {%- if _is_true(item.get(b.flag)) -%}<span class="{{ b.class or 'badge-pill' }}">{{ b.label }}</span>{%- endif -%}
       {%- elif item.get(b.field) -%}
         {%- set v = item.get(b.field) -%}
-        <span class="{{ b.class or 'badge-pill' }}">{{ (v | lingua_estesa) if b.transform == 'lingua_estesa' else v }}</span>
+        {%- for part in (v | string).split(' | ') -%}
+        <span class="{{ b.class or 'badge-pill' }}">{{ (part | lingua_estesa) if b.transform == 'lingua_estesa' else part }}</span>
+        {%- endfor -%}
       {%- endif -%}
     {%- endfor -%}
     </div>
@@ -502,8 +504,10 @@ document.addEventListener('DOMContentLoaded', function () {
     (spec.vals || []).forEach(function (b) {
       if (b.flag) { if (isTrue(item[b.flag])) h += '<span class="' + (b.class || 'badge-pill') + '">' + esc(b.label) + '</span>'; }
       else if (item[b.field]) {
-        var v = item[b.field]; if (b.transform === 'lingua_estesa') v = linguaEstesa(v);
-        h += '<span class="' + (b.class || 'badge-pill') + '">' + esc(v) + '</span>';
+        String(item[b.field]).split(' | ').forEach(function (v) {
+          if (b.transform === 'lingua_estesa') v = linguaEstesa(v);
+          h += '<span class="' + (b.class || 'badge-pill') + '">' + esc(v) + '</span>';
+        });
       }
     });
     return h ? '<div class="' + (cls || spec.class || 'row-badges') + '">' + h + '</div>' : '';

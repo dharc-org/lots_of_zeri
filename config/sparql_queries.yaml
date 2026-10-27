@@ -658,11 +658,11 @@ results:
     GROUP BY ?ref
 
   lotto: |
-    SELECT ?lot ?title ?rev ?lotNum
+    SELECT ?lot ?title ?rev ?lotNum 
            (SAMPLE(?label0)        AS ?label)
            (SAMPLE(?img0)          AS ?img)
-           (SAMPLE(?authorLabel0)  AS ?authorLabel)
-           (SAMPLE(?typeLabel0)    AS ?typeLabel)
+           (GROUP_CONCAT(DISTINCT ?authorLabel0; separator=" , ") AS ?authorLabel) 
+           (GROUP_CONCAT(DISTINCT ?typeLabel0; separator=" | ") AS ?typeLabel)
            (SAMPLE(?auctionLabel0) AS ?auctionLabel)
            (SAMPLE(?auctionSlug0)  AS ?auctionSlug)
     WHERE {
@@ -711,7 +711,7 @@ results:
                 crm:P141_assigned ?otype ;
                 crm:P2_has_type zac:validated .
         ?otype rdfs:label ?typeLabel0 .
-        FILTER(!CONTAINS(?typeLabel0, ";"))
+        FILTER(!CONTAINS(?typeLabel0, ";"))                         # to be removed in future
         FILTER(UCASE(?typeLabel0) = STR(?typeLabel0))
       }
       OPTIONAL {
